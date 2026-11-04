@@ -4,10 +4,12 @@ These instructions apply to Codex, Claude Code, and other contributors throughou
 
 ## Project direction
 
-- Read `README.md` and `docs/REBUILD_PLAN.md` before implementing a feature.
+- Read `README.md`, `docs/REBUILD_PLAN.md`, and `docs/STORYLINE.md` before implementing a feature.
 - The project is an arena combat prototype undergoing a full redesign.
 - Confirmed creative rules: dark samurai/fantasy setting; the strongest lore fighter has a balanced playable PvP version.
-- The final name, roster size, fighter identities, strongest fighter, input design, and arena rules are not all settled. Distinguish proposals from decisions.
+- Confirmed targets: 26 fighters (five protagonists, twenty enemy followers, and the antagonist), with the antagonist encountered at campaign level 21 after twenty preliminary encounters.
+- The final name, fighter identities, strongest fighter's identity, input design, and arena rules are not all settled. Distinguish proposals from decisions.
+- Current work is storyline and character design before the implementation handoff. The opening cinematic treatment is a draft; do not treat proposed details as final canon.
 - Preserve stable internal identifiers and save compatibility when display names change.
 - Describe implemented behavior accurately. A room list is not a working online match.
 - Product copy should focus on the game and avoid code-generation attribution. Preserve applicable third-party license notices.

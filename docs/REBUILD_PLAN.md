@@ -2,7 +2,9 @@
 
 ## Confirmed direction
 
-The game is being redesigned across its characters, controls, abilities, strongest fighter, arenas, identity, and backend. The roster will expand, and players should be able to select and develop familiarity with a favorite fighter.
+The game is being redesigned across its characters, controls, abilities, strongest fighter, arenas, identity, and backend. The planned roster has 26 fighters: five selectable protagonists, twenty enemy followers, and the antagonist. Players choose a protagonist for a campaign spanning twenty preliminary encounters and a final confrontation at level 21.
+
+Current work is story and character development before the Claude implementation handoff. See [STORYLINE.md](STORYLINE.md) for the childhood village attack, revenge premise, opening cinematic treatment, campaign chapters, and unresolved relationship between the survivor and the other playable heroes.
 
 The setting remains dark samurai/fantasy. The strongest fighter will be strongest in the lore and have a balanced playable PvP version. These are confirmed design decisions.
 
@@ -15,7 +17,10 @@ The current roster and campaign are reference material. Existing names, art, num
 | Game name | Select a distinctive name after confirming the setting and signature mechanic | Open; GANRYŪ remains the working title |
 | Setting | Dark samurai/fantasy | Confirmed |
 | Strongest fighter | Strongest in the lore, with a balanced playable PvP version | Confirmed policy; identity and kit remain open |
-| Final roster size | Expand in tested batches; use two reference fighters for the first online milestone | No launch count committed |
+| Target roster size | 26 fighters: five protagonists, twenty enemy followers, and their leader | Confirmed target; implement and test in batches |
+| Campaign structure | Twenty preliminary encounters, then the antagonist at level 21 | Confirmed target; current implementation still has twelve levels |
+| Opening cinematic | Childhood village attack, the leader killing the parents, survival, and a vow to train for revenge | Confirmed events; treatment and survival details are draft |
+| Five protagonist origins | Preserve the sole-survivor premise while defining the other four heroes | Relationship still open |
 | Match size | Prove 1v1 first; specify co-op/team sizes before implementing them | Proposed implementation order |
 | Time folding | Retain only if its shared multiplayer rules are clear and enjoyable | Under review with the other abilities |
 | Target devices | Test keyboard/mouse and touch separately; decide controller support explicitly | Final input scope open |
@@ -28,7 +33,7 @@ Working recommendations support planning. They must not be presented as final cr
 Create one record for each proposed fighter before implementing its abilities:
 
 - Stable internal ID, display name, identity, and place in the world.
-- Silhouette, visual style, weapon, role, and intended player experience.
+- Silhouette, visual style, weapon, role, intended player experience, and a coherent 3D animation set.
 - Movement, attack reach, health, defense, and resource model.
 - Basic attack, defensive action, mobility action, and signature abilities.
 - Clear strengths, weaknesses, counters, and difficulty of mastery.

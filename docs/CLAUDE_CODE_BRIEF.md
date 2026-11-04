@@ -2,12 +2,14 @@
 
 Use this brief for small implementation tasks. The full game redesign is a roadmap, not one unattended rewrite.
 
+**Handoff on hold:** current work is the storyline, opening cinematic, and character design in [STORYLINE.md](STORYLINE.md). Keep this implementation brief as a reference until that design work is ready to hand over.
+
 ## First assignment: reproducible backend foundation
 
 Copy this prompt into Claude Code from the repository root:
 
 ```text
-Read AGENTS.md, README.md, and docs/REBUILD_PLAN.md first.
+Read AGENTS.md, README.md, docs/REBUILD_PLAN.md, and docs/STORYLINE.md first.
 
 We are rebuilding this arena combat game: its name, roster, fighter abilities,
 controls, strongest character, arenas, and multiplayer backend are being redesigned.
@@ -17,6 +19,12 @@ boss rules, or controls as finalized design decisions.
 Two design rules are confirmed: retain the dark samurai/fantasy setting, and make
 the strongest lore fighter balanced when played in PvP. Its identity and abilities
 are still open. Preserve these rules throughout the rebuild.
+
+The campaign target is 26 fighters: five selectable protagonists, twenty enemy
+followers, and the antagonist. Players keep a chosen protagonist for a campaign;
+levels 1–20 lead to the antagonist at level 21. The opening film shows the central
+survivor's childhood village attack and revenge vow. Proposed cinematic details
+and the relationship between the five protagonists remain subject to story design.
 
 Your first task is milestone 1: establish a reproducible foundation for a
 server-authoritative multiplayer backend. Work on a dedicated branch.
