@@ -20,11 +20,12 @@ Two design rules are confirmed: retain the dark samurai/fantasy setting, and mak
 the strongest lore fighter balanced when played in PvP. Its identity and abilities
 are still open. Preserve these rules throughout the rebuild.
 
-The campaign target is 26 fighters: five selectable protagonists, twenty enemy
-followers, and the antagonist. Players keep a chosen protagonist for a campaign;
-levels 1–20 lead to the antagonist at level 21. The opening film shows the central
-survivor's childhood village attack and revenge vow. Proposed cinematic details
-and the relationship between the five protagonists remain subject to story design.
+The campaign target is 14 fighters: four selectable protagonists and ten
+antagonists (nine followers and their leader). Players keep a chosen protagonist
+for a campaign; levels 1–9 lead to the antagonist at level 10. The opening film
+shows the central survivor's childhood village attack and revenge vow. Proposed
+cinematic details and the relationship between the four protagonists remain
+subject to story design.
 
 Your first task is milestone 1: establish a reproducible foundation for a
 server-authoritative multiplayer backend. Work on a dedicated branch.

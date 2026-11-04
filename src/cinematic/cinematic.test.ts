@@ -49,6 +49,11 @@ describe("cinematic script", () => {
     assert.ok(speech.includes("This time, I'll be ready."));
   });
 
+  it("matches the revised campaign: nine followers before the leader", async () => {
+    const { END_CARD } = await import("./script.ts");
+    assert.equal(END_CARD.tagline, "Nine stand between you and revenge.");
+  });
+
   it("reports overlapping cues and gaps", () => {
     const shots = [
       { ...SHOTS[0], start: 0, end: 2 },

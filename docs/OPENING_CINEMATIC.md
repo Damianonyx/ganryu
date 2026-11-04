@@ -2,7 +2,7 @@
 
 A watchable preview of the proposed opening cinematic, integrated with the game's loading flow. The art, sound, and staging are **temporary**: procedural 2D silhouettes and synthesized audio that make the treatment reviewable before character designs, 3D animation, music, and voice exist.
 
-The screenplay follows the current brief (≈75 seconds). The wooden charm, cellar, dialogue, and exact staging remain draft additions. The protagonist, his parents, and the antagonist are unnamed placeholders. The other four protagonists do not appear and their origins are left open.
+The screenplay follows the current brief (≈75 seconds). The wooden charm, cellar, dialogue, and exact staging remain draft additions. The protagonist, his parents, and the antagonist are unnamed placeholders. The film follows the village survivor only; the other three protagonists do not appear, and their backgrounds are left open.
 
 ## Viewing the preview
 
@@ -128,13 +128,13 @@ Each frame is a pure function of film time, so retimed shots can be checked imme
 **Assumptions**
 
 - The film plays before the title menu. Protagonist selection remains on the existing select screen after it.
-- The cinematic shows the canonical survivor's childhood regardless of which protagonist the player later chooses.
+- The cinematic shows the village survivor's childhood regardless of which of the four protagonists the player later chooses (per the proposed connection: one male protagonist is the survivor, the other three are allies).
 - "Continue"/"Skip" while watching records the intro as skipped; reaching the end records it as completed.
 - Only critical tasks gate the menu for returning players, so they do not wait for portrait prefetching.
 
 **Recommended next steps**
 
-1. Decide the survivor/ensemble model and the antagonist's identity, then replace placeholder names and art.
+1. Finalize the four protagonists' connection and the antagonist's identity, then replace placeholder names and art.
 2. Choose the production format: real-time 3D with the game's models, or a pre-rendered video with this preloader shell. The controller, loading logic, and subtitles are independent of the painter and can be reused for either.
 3. Record voice-over and compose music; replace `score.ts` with audio files and keep subtitles timed to them.
 4. Add a full storyboard review pass using the contact sheet before investing in final animation.

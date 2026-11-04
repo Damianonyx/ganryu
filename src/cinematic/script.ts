@@ -18,7 +18,7 @@
  *   who already watched should see it again on their next visit.
  */
 
-export const INTRO_SCRIPT_VERSION = 1;
+export const INTRO_SCRIPT_VERSION = 2;
 
 /** Placeholder display names. Final names are undecided. */
 export const SPEAKERS = {
@@ -117,7 +117,7 @@ export const SHOTS: Shot[] = [
   // 00:18–00:28 THE HIDING PLACE
   { id: "3a", scene: "hiding", start: 18, end: 21, kind: "hatch-open", note: "The father lifts a floor hatch over a small stone cellar; the mother lowers the boy in." },
   { id: "3b", scene: "hiding", start: 21, end: 23.6, kind: "grip-sleeve", note: "The boy grips his mother's sleeve." },
-  { id: "3c", scene: "hiding", start: 23.6, end: 26.6, kind: "charm-hand", note: "She presses a small wooden charm into his hand and closes his fingers around it." },
+  { id: "3c", scene: "hiding", start: 23.6, end: 26.6, kind: "charm-hand", note: "She places a small wooden charm in his hand and closes his fingers around it." },
   { id: "3d", scene: "hiding", start: 26.6, end: 28, kind: "hatch-close", note: "The hatch closes. Through a narrow gap he sees his parents turn toward the door." },
 
   // 00:28–00:40 THE MAN HE WILL REMEMBER
@@ -135,14 +135,14 @@ export const SHOTS: Shot[] = [
   { id: "5c", scene: "buried", start: 44.4, end: 49, kind: "cellar-dark", fadeOut: 1, note: "He curls beneath the stone wall clutching the charm; smoke and orange light drift past a vent." },
 
   // 00:49–00:58 THE SURVIVOR
-  { id: "6a", scene: "survivor", start: 49, end: 52, kind: "dawn-emerge", fadeIn: 1.2, note: "Gray dawn. The boy forces his way up through cooled wreckage." },
+  { id: "6a", scene: "survivor", start: 49, end: 52, kind: "dawn-emerge", fadeIn: 1.2, note: "Gray dawn. The boy crawls up through the cooled wreckage." },
   { id: "6b", scene: "survivor", start: 52, end: 55, kind: "ruins-search", note: "He searches the silent ruins, calling softly." },
-  { id: "6c", scene: "survivor", start: 55, end: 58, kind: "kneel", fadeOut: 0.6, note: "He kneels where his home stood; the charm hangs from his clenched fist." },
+  { id: "6c", scene: "survivor", start: 55, end: 58, kind: "kneel", fadeOut: 0.6, note: "He kneels where his home once stood, the charm in his fist." },
 
   // 00:58–00:70 THE YEARS BETWEEN
   { id: "7a", scene: "years", start: 58, end: 61, kind: "first-stance", note: "He returns to his father's stance. Swings. Misses. Tries again." },
   { id: "7b", scene: "years", start: 61, end: 62.2, kind: "montage-rain", note: "Rain running down his face." },
-  { id: "7c", scene: "years", start: 62.2, end: 63.3, kind: "montage-knocked", note: "A practice sword knocked from his hands (autumn)." },
+  { id: "7c", scene: "years", start: 62.2, end: 63.3, kind: "montage-knocked", note: "A practice sword slips from his hands on impact (autumn)." },
   { id: "7d", scene: "years", start: 63.3, end: 64.4, kind: "montage-wrist", note: "A wrapped wrist tightening around the grip." },
   { id: "7e", scene: "years", start: 64.4, end: 65.5, kind: "montage-snow", note: "Bare feet steadying in snow." },
   { id: "7f", scene: "years", start: 65.5, end: 66.4, kind: "montage-fall", note: "Another fall." },
@@ -150,7 +150,7 @@ export const SHOTS: Shot[] = [
   { id: "7h", scene: "years", start: 67.4, end: 70, kind: "match-cut", note: "A swing begun by the child finishes in the hands of the adult warrior." },
 
   // 00:70–00:76 THE HUNT BEGINS
-  { id: "8a", scene: "hunt", start: 70, end: 71.3, kind: "tie-charm", note: "The adult ties the wooden charm beneath his armor." },
+  { id: "8a", scene: "hunt", start: 70, end: 71.3, kind: "tie-charm", note: "The adult secures the wooden charm beneath his armor." },
   { id: "8b", scene: "hunt", start: 71.3, end: 73, kind: "fortress-draw", note: "Across the valley an enemy fortress rises above the clouds. He draws his blade." },
   { id: "8c", scene: "hunt", start: 73, end: 73.3, kind: "black", note: "Cut to black." },
   { id: "8d", scene: "hunt", start: 73.3, end: 74.8, kind: "tagline", note: "On-screen text." },
@@ -199,7 +199,7 @@ export const CUES: Cue[] = [
 
 /** End-card copy. Title is the working title until the final name is chosen. */
 export const END_CARD = {
-  tagline: "Twenty stand between you and revenge.",
+  tagline: "Nine stand between you and revenge.",
   title: "GANRYŪ",
   subtitle: "巌流",
 };

@@ -2,7 +2,7 @@
 
 ## Confirmed direction
 
-The game is being redesigned across its characters, controls, abilities, strongest fighter, arenas, identity, and backend. The planned roster has 26 fighters: five selectable protagonists, twenty enemy followers, and the antagonist. Players choose a protagonist for a campaign spanning twenty preliminary encounters and a final confrontation at level 21.
+The game is being redesigned across its characters, controls, abilities, strongest fighter, arenas, identity, and backend. The planned roster has 14 fighters: four selectable protagonists (two male and two female samurai) and ten antagonists — nine followers and their leader. Players choose a protagonist for a campaign spanning nine preliminary encounters and a final confrontation at level 10. This replaces the earlier 26-fighter, 21-level plan.
 
 Current work is story and character development before the Claude implementation handoff. See [STORYLINE.md](STORYLINE.md) for the childhood village attack, revenge premise, opening cinematic treatment, campaign chapters, and unresolved relationship between the survivor and the other playable heroes.
 
@@ -17,10 +17,10 @@ The current roster and campaign are reference material. Existing names, art, num
 | Game name | Select a distinctive name after confirming the setting and signature mechanic | Open; GANRYŪ remains the working title |
 | Setting | Dark samurai/fantasy | Confirmed |
 | Strongest fighter | Strongest in the lore, with a balanced playable PvP version | Confirmed policy; identity and kit remain open |
-| Target roster size | 26 fighters: five protagonists, twenty enemy followers, and their leader | Confirmed target; implement and test in batches |
-| Campaign structure | Twenty preliminary encounters, then the antagonist at level 21 | Confirmed target; current implementation still has twelve levels |
+| Target roster size | 14 fighters: four protagonists, nine enemy followers, and their leader | Confirmed target; implement and test in batches |
+| Campaign structure | Nine preliminary encounters, then the antagonist at level 10 | Confirmed target; current implementation still has twelve levels |
 | Opening cinematic | Childhood village attack, the leader killing the parents, survival, and a vow to train for revenge | Confirmed events; treatment and survival details are draft |
-| Five protagonist origins | Preserve the sole-survivor premise while defining the other four heroes | Relationship still open |
+| Four protagonist origins | One male protagonist is the village survivor; the other three are allies with their own reasons to oppose the antagonist | Proposed; not finalized |
 | Match size | Prove 1v1 first; specify co-op/team sizes before implementing them | Proposed implementation order |
 | Time folding | Retain only if its shared multiplayer rules are clear and enjoyable | Under review with the other abilities |
 | Target devices | Test keyboard/mouse and touch separately; decide controller support explicitly | Final input scope open |

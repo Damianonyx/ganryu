@@ -4,9 +4,9 @@ A dark samurai/fantasy arena combat game in active redevelopment.
 
 **GANRYŪ is the working title.** The final game name, fighter identities, abilities, controls, and arena designs are being reconsidered together.
 
-The goal is a story-driven arena combat game with multiplayer, where players can choose a favorite fighter, master a distinct combat style, and fight across varied arenas. The planned campaign follows a village survivor's quest to avenge his parents: defeat twenty members of the attacking faction, then confront their leader at level 21.
+The goal is a story-driven arena combat game with multiplayer, where players can choose a favorite fighter, master a distinct combat style, and fight across varied arenas. The planned campaign follows a village survivor's quest to avenge his parents: defeat nine members of the attacking faction, then confront their leader at level 10.
 
-The planned roster contains **26 fighters: five selectable protagonists, twenty enemy followers, and the antagonist**. Players take their chosen protagonist through the campaign. The rebuild also includes clearer controls, redesigned abilities, improved 3D animation, and a backend that owns match rules and results.
+The planned roster contains **14 fighters: four selectable protagonists (two male and two female samurai) and ten antagonists — nine followers and their leader**. Players take their chosen protagonist through the campaign. The rebuild also includes clearer controls, redesigned abilities, improved 3D animation, and a backend that owns match rules and results.
 
 ## Current status
 
@@ -14,13 +14,13 @@ This repository contains an early browser prototype. The planned redesign has no
 
 | Area | Available in the prototype | Rebuild direction |
 | --- | --- | --- |
-| Fighters | 18 selectable fighters and two boss definitions | 26 redesigned fighters: five protagonists and 21 enemy-faction characters, including their leader |
+| Fighters | 18 selectable fighters and two boss definitions | 14 redesigned fighters: four protagonists and ten enemy-faction characters, including their leader |
 | Combat | Local combat against AI, keyboard/touch input, and a time-fold ability | Responsive controls, readable attacks, explicit ability rules, and balanced matchups |
 | Arenas | One arena structure with visual variants | Distinct arenas with defined layouts, spawn rules, and supported match modes |
 | Multiplayer | Room discovery and WebRTC signaling; entering a match currently starts local gameplay | Real shared matches, server validation, reconnect handling, and reliable results |
 | Accounts | Sign-in and per-user save endpoints | Persistent profiles, favorite fighters, match history, and server-validated progression |
 
-The existing campaign has twelve levels. The planned replacement has 21 levels and a childhood opening cinematic. A preview of that cinematic, with temporary art and sound, now plays before the title menu and loads the game behind it; see [the cinematic notes](docs/OPENING_CINEMATIC.md). Its story and character details are being developed in the [storyline draft](docs/STORYLINE.md). The current roster, controls, progression, and boss rules remain prototype content. Online duel and co-op gameplay are not ready for release.
+The existing campaign has twelve levels. The planned replacement has 10 levels and a childhood opening cinematic. A preview of that cinematic, with temporary art and sound, now plays before the title menu and loads the game behind it; see [the cinematic notes](docs/OPENING_CINEMATIC.md). Its story and character details are being developed in the [storyline draft](docs/STORYLINE.md). The current roster, controls, progression, and boss rules remain prototype content. Online duel and co-op gameplay are not ready for release.
 
 ## Rebuild priorities
 
