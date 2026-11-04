@@ -1,6 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ControlDock } from "@/components/controls";
+import { IntroController } from "@/components/opening-cinematic";
 import { Overlays } from "@/components/overlays";
+import { settleTask } from "@/cinematic/readiness";
 import { Engine } from "@/game/engine";
 import { bindInput } from "@/game/input";
 import { PLAYABLE } from "@/game/roster";
@@ -18,6 +20,13 @@ export function GameStage() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Engine | null>(null);
   const { user, isPending } = useCurrentUserState();
+  // While the opening cinematic covers the stage, the engine renders one
+  // frame (loading readiness) and then idles instead of drawing unseen frames.
+  const coveredRef = useRef(true);
+  const [replayToken, setReplayToken] = useState(0);
+  const onCoverChange = useCallback((covering: boolean) => {
+    coveredRef.current = covering;
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -52,13 +61,19 @@ export function GameStage() {
 
     let raf = 0;
     let last = performance.now();
+    let frames = 0;
     const loop = (now: number) => {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const w = wrap.clientWidth;
       const h = wrap.clientHeight;
       engine.resize(w, h);
-      engine.step(dt);
+      if (frames < 2 || !coveredRef.current) {
+        engine.step(dt);
+        frames += 1;
+        // The first rendered frame compiles shaders and uploads geometry.
+        if (frames === 2) settleTask("engine", true);
+      }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
@@ -69,6 +84,10 @@ export function GameStage() {
       engineRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (!isPending) settleTask("session", true);
+  }, [isPending]);
 
   useEffect(() => {
     if (isPending || !user) return;
@@ -164,6 +183,7 @@ export function GameStage() {
   const result = useGame((s) => s.result);
   const fighterId = useGame((s) => s.fighterId);
   const maxLevel = useGame((s) => s.maxLevel);
+  const muted = useGame((s) => s.muted);
 
   useEffect(() => {
     if (isPending) return;
@@ -202,9 +222,19 @@ export function GameStage() {
         onMute={onMute}
         onRematch={onRematch}
         onTitle={onTitle}
+        onReplayIntro={() => {
+          unlock();
+          setReplayToken((n) => n + 1);
+        }}
       />
       {mode === "play" && <ControlDock />}
       {mode === "lobby" && <LobbyNet />}
+      <IntroController
+        replayToken={replayToken}
+        muted={muted}
+        onToggleMute={onMute}
+        onCoverChange={onCoverChange}
+      />
     </div>
   );
 }

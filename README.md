@@ -20,7 +20,7 @@ This repository contains an early browser prototype. The planned redesign has no
 | Multiplayer | Room discovery and WebRTC signaling; entering a match currently starts local gameplay | Real shared matches, server validation, reconnect handling, and reliable results |
 | Accounts | Sign-in and per-user save endpoints | Persistent profiles, favorite fighters, match history, and server-validated progression |
 
-The existing campaign has twelve levels. The planned replacement has 21 levels and a childhood opening cinematic. Its story and character details are being developed in the [storyline draft](docs/STORYLINE.md). The current roster, controls, progression, and boss rules remain prototype content. Online duel and co-op gameplay are not ready for release.
+The existing campaign has twelve levels. The planned replacement has 21 levels and a childhood opening cinematic. A preview of that cinematic, with temporary art and sound, now plays before the title menu and loads the game behind it; see [the cinematic notes](docs/OPENING_CINEMATIC.md). Its story and character details are being developed in the [storyline draft](docs/STORYLINE.md). The current roster, controls, progression, and boss rules remain prototype content. Online duel and co-op gameplay are not ready for release.
 
 ## Rebuild priorities
 
@@ -33,6 +33,7 @@ The existing campaign has twelve levels. The planned replacement has 21 levels a
 The long-term roster should let players specialize in a favorite character. The dark samurai/fantasy setting is confirmed. The strongest fighter will be strongest in the lore, with a balanced playable version for PvP. That fighter's name, identity, and abilities remain to be designed.
 
 - [Storyline and opening cinematic draft](docs/STORYLINE.md)
+- [Opening cinematic preview and preloader](docs/OPENING_CINEMATIC.md)
 - [Rebuild plan and design decisions](docs/REBUILD_PLAN.md)
 - [Claude Code implementation brief — handoff on hold during story development](docs/CLAUDE_CODE_BRIEF.md)
 - [Shared development instructions](AGENTS.md)

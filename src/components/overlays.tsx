@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Volume2, VolumeX, Swords, Users, Eye, LogIn } from "lucide-react";
+import { Volume2, VolumeX, Swords, Users, Eye, LogIn, Film } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ type OverlayProps = {
   onMute: () => void;
   onRematch: () => void;
   onTitle: () => void;
+  onReplayIntro: () => void;
 };
 
 export function Overlays(props: OverlayProps) {
@@ -95,7 +96,7 @@ function TopBar({ onMute, onTitle }: { onMute: () => void; onTitle: () => void }
   );
 }
 
-function TitleScreen({ onCampaign, onWatch, onOpenLobby }: OverlayProps) {
+function TitleScreen({ onCampaign, onWatch, onOpenLobby, onReplayIntro }: OverlayProps) {
   return (
     <div className="pointer-events-auto mx-auto mt-auto mb-8 flex w-full max-w-lg flex-col items-center px-6 pb-[max(1rem,env(safe-area-inset-bottom))] landscape:mb-6 landscape:flex-row landscape:items-end landscape:justify-between landscape:max-w-5xl">
       <div className="mb-8 text-center landscape:mb-0 landscape:text-left">
@@ -117,9 +118,14 @@ function TitleScreen({ onCampaign, onWatch, onOpenLobby }: OverlayProps) {
             <Users className="size-4" /> Co-op
           </Button>
         </div>
-        <Button variant="text" onClick={onWatch}>
-          <Eye className="size-4" /> Watch the ring
-        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="text" onClick={onWatch}>
+            <Eye className="size-4" /> Watch the ring
+          </Button>
+          <Button variant="text" onClick={onReplayIntro} data-testid="replay-intro">
+            <Film className="size-4" /> Replay intro
+          </Button>
+        </div>
       </div>
     </div>
   );

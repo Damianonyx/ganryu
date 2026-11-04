@@ -1,6 +1,6 @@
 # Storyline and opening cinematic — draft 1
 
-This document records the campaign premise and develops a first narrative treatment. Confirmed decisions come from the project owner; proposed scenes and chapter details remain creative drafts. No cinematic or redesigned campaign has been implemented.
+This document records the campaign premise and develops a first narrative treatment. Confirmed decisions come from the project owner; proposed scenes and chapter details remain creative drafts. The redesigned campaign has not been implemented. A preview of the opening cinematic, using temporary art and the current ≈75-second screenplay, is described in [OPENING_CINEMATIC.md](OPENING_CINEMATIC.md).
 
 ## Confirmed story and game structure
 
@@ -39,6 +39,8 @@ Recommended story logic: the followers control routes, strongholds, and access t
 The leader's reason for attacking the village should matter to the wider story. It remains undecided; do not introduce a chosen-one prophecy, secret bloodline, resurrection, or supernatural pact as established canon.
 
 ## Opening cinematic — proposed 70-second cut
+
+This table is the earlier outline. The current screenplay — with the hiding place, charm, dialogue, and ≈75-second timing — lives in `src/cinematic/script.ts` and is previewable in the game (see [OPENING_CINEMATIC.md](OPENING_CINEMATIC.md)). Both remain drafts.
 
 Use the survivor's childhood memory to establish the stakes before the campaign. Names, exact ages, emblem design, dialogue, music, and final duration are not yet locked.
 
