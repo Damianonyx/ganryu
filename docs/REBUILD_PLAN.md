@@ -4,15 +4,17 @@
 
 The game is being redesigned across its characters, controls, abilities, strongest fighter, arenas, identity, and backend. The roster will expand, and players should be able to select and develop familiarity with a favorite fighter.
 
+The setting remains dark samurai/fantasy. The strongest fighter will be strongest in the lore and have a balanced playable PvP version. These are confirmed design decisions.
+
 The current roster and campaign are reference material. Existing names, art, numerical rankings, abilities, and the twelve-level structure are not fixed requirements for the new game.
 
-## Decisions still open
+## Design decisions
 
 | Decision | Working recommendation | Status |
 | --- | --- | --- |
 | Game name | Select a distinctive name after confirming the setting and signature mechanic | Open; GANRYŪ remains the working title |
-| Setting | Use the existing dark samurai/fantasy direction as a starting point | Open; a broader original setting is possible |
-| Strongest fighter | Let a story character or boss be exceptional; balance any selectable PvP version | Recommendation, not a finalized character |
+| Setting | Dark samurai/fantasy | Confirmed |
+| Strongest fighter | Strongest in the lore, with a balanced playable PvP version | Confirmed policy; identity and kit remain open |
 | Final roster size | Expand in tested batches; use two reference fighters for the first online milestone | No launch count committed |
 | Match size | Prove 1v1 first; specify co-op/team sizes before implementing them | Proposed implementation order |
 | Time folding | Retain only if its shared multiplayer rules are clear and enjoyable | Under review with the other abilities |
@@ -43,7 +45,7 @@ Players should be able to choose a favorite fighter from the available roster. P
 
 Recommended policy: mastery unlocks expression, cosmetics, or recognition rather than an automatic statistical advantage in PvP. This recommendation can be revisited with an explicit progression design.
 
-A strongest story character can establish the world's power scale. A boss version may have exceptional rules in PvE. If that character is playable in competitive matches, define a mode-specific balanced kit and meaningful counters. Do not assign the final strongest fighter's name or abilities before the creative decision is made.
+The strongest story character establishes the world's power scale. Its playable PvP version must have a balanced kit and meaningful counters. A separate boss version may have exceptional rules in PvE. Do not assign the final strongest fighter's name or abilities before those creative decisions are made.
 
 ## Controls and combat readability
 

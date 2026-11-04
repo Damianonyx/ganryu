@@ -13,7 +13,7 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       {
         name: "description",
-        content: "A character-driven arena combat game in development, with a planned expanded roster, redesigned abilities, varied arenas, and authoritative multiplayer.",
+        content: "A dark samurai/fantasy arena combat game in development, with a planned expanded roster, redesigned abilities, varied arenas, and authoritative multiplayer.",
       },
       { name: "theme-color", content: "#0a090c" },
     ],

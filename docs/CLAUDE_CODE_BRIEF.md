@@ -14,6 +14,10 @@ controls, strongest character, arenas, and multiplayer backend are being redesig
 The current content is a prototype. Do not treat existing fighter names, ranks,
 boss rules, or controls as finalized design decisions.
 
+Two design rules are confirmed: retain the dark samurai/fantasy setting, and make
+the strongest lore fighter balanced when played in PvP. Its identity and abilities
+are still open. Preserve these rules throughout the rebuild.
+
 Your first task is milestone 1: establish a reproducible foundation for a
 server-authoritative multiplayer backend. Work on a dedicated branch.
 

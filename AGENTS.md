@@ -6,6 +6,7 @@ These instructions apply to Codex, Claude Code, and other contributors throughou
 
 - Read `README.md` and `docs/REBUILD_PLAN.md` before implementing a feature.
 - The project is an arena combat prototype undergoing a full redesign.
+- Confirmed creative rules: dark samurai/fantasy setting; the strongest lore fighter has a balanced playable PvP version.
 - The final name, roster size, fighter identities, strongest fighter, input design, and arena rules are not all settled. Distinguish proposals from decisions.
 - Preserve stable internal identifiers and save compatibility when display names change.
 - Describe implemented behavior accurately. A room list is not a working online match.

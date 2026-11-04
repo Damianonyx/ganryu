@@ -1,6 +1,6 @@
 # GANRYŪ
 
-A character-driven arena combat game in active redevelopment.
+A dark samurai/fantasy arena combat game in active redevelopment.
 
 **GANRYŪ is the working title.** The final game name, fighter identities, abilities, controls, and arena designs are being reconsidered together.
 
@@ -28,7 +28,7 @@ The existing campaign has twelve levels. Its roster, controls, progression, and 
 4. Validate controls, match fairness, latency handling, reconnects, and saved results.
 5. Expand the roster and arenas, then add further match modes.
 
-The long-term roster should let players specialize in a favorite character. The relationship between the strongest story character, bosses, and competitive balance is an explicit design decision still to be finalized.
+The long-term roster should let players specialize in a favorite character. The dark samurai/fantasy setting is confirmed. The strongest fighter will be strongest in the lore, with a balanced playable version for PvP. That fighter's name, identity, and abilities remain to be designed.
 
 - [Rebuild plan and design decisions](docs/REBUILD_PLAN.md)
 - [Claude Code implementation brief](docs/CLAUDE_CODE_BRIEF.md)
