@@ -13,7 +13,7 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       {
         name: "description",
-        content: "Ganryū — a 4D ronin arena. Pick a fighter, climb twelve folds, and cut what steel cannot.",
+        content: "A character-driven arena combat game in development, with a planned expanded roster, redesigned abilities, varied arenas, and authoritative multiplayer.",
       },
       { name: "theme-color", content: "#0a090c" },
     ],
