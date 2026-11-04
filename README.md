@@ -1,74 +1,76 @@
 # GANRYŪ
 
-巌流 — Time is the blade.
+A dark samurai/fantasy arena combat game in active redevelopment.
 
-GANRYŪ is a 4D ronin fighting game. Pick a fighter, climb twelve levels, and fold time when steel is not enough. The last pair cannot be cut unless you fold the Fourth.
+**GANRYŪ is the working title.** The final game name, fighter identities, abilities, controls, and arena designs are being reconsidered together.
 
-Live: [ganryu.grok.me](https://ganryu.grok.me)
+The goal is a story-driven arena combat game with multiplayer, where players can choose a favorite fighter, master a distinct combat style, and fight across varied arenas. The planned campaign follows a village survivor's quest to avenge his parents: defeat twenty members of the attacking faction, then confront their leader at level 21.
 
-## Play
+The planned roster contains **26 fighters: five selectable protagonists, twenty enemy followers, and the antagonist**. Players take their chosen protagonist through the campaign. The rebuild also includes clearer controls, redesigned abilities, improved 3D animation, and a backend that owns match rules and results.
 
-- **Campaign** — twelve levels. Enemies hit harder, move faster, and fight smarter as the folds rise. Levels 11 and 12 are two-on-one.
-- **Duel** — a private fight against another player.
-- **Co-op** — two players in the same room.
-- **Watch the ring** — a live simulation of the arena.
-- **Sign in** — email and password. Fighter, fold, wins, and losses are saved to the account and restored on the next login.
+## Current status
 
-Landscape is the intended layout. A corner dock (stick, slash, parry, leap, power, fold) covers touch. Keyboard works too.
+This repository contains an early browser prototype. The planned redesign has not been implemented yet.
 
-| Action | Keys |
-| --- | --- |
-| Move | W A S D or arrows |
-| Slash | J or Space |
-| Parry | L or Shift |
-| Leap | K or C |
-| Power | Q or E |
-| Fold | F or R |
-
-**Fold** is the fourth dimension: a brief cut through time. On the last fold it is the only way through.
-
-## Roster
-
-Eighteen fighters are playable. Each has its own weapon, pace, and power — mist step, raven storm, ember trail, iron stillness, blood cross, night bind, twin arrows, horn charge, spirit coins, dragon coil, water step, blood seal, iai, howl, gore, magma, reap, crush.
-
-Two are not selectable. **Thorn Sovereign** and **Spiked Abyss** are the unbeatable bosses of level 12, **The Uncut Pair**. You fight both at once.
-
-| Fold | Level | Foes |
+| Area | Available in the prototype | Rebuild direction |
 | --- | --- | --- |
-| 1 | First Fang | Werewolf |
-| 2 | Fog Twin | Kage |
-| 3 | Horned Grove | Chimera |
-| 4 | Cinder Path | Hellwolf |
-| 5 | The Field | Field Oni |
-| 6 | Ember Court | Enma |
-| 7 | Iron Horn | Kabuto |
-| 8 | Closing Hand | Titan Claw |
-| 9 | Dragon Vow | Ryu |
-| 10 | Crimson Still | Akatsuki |
-| 11 | Twin Blades | Yoru and Akai |
-| 12 | The Uncut Pair | Thorn Sovereign and Spiked Abyss |
+| Fighters | 18 selectable fighters and two boss definitions | 26 redesigned fighters: five protagonists and 21 enemy-faction characters, including their leader |
+| Combat | Local combat against AI, keyboard/touch input, and a time-fold ability | Responsive controls, readable attacks, explicit ability rules, and balanced matchups |
+| Arenas | One arena structure with visual variants | Distinct arenas with defined layouts, spawn rules, and supported match modes |
+| Multiplayer | Room discovery and WebRTC signaling; entering a match currently starts local gameplay | Real shared matches, server validation, reconnect handling, and reliable results |
+| Accounts | Sign-in and per-user save endpoints | Persistent profiles, favorite fighters, match history, and server-validated progression |
 
-## Stack
+The existing campaign has twelve levels. The planned replacement has 21 levels and a childhood opening cinematic. Its story and character details are being developed in the [storyline draft](docs/STORYLINE.md). The current roster, controls, progression, and boss rules remain prototype content. Online duel and co-op gameplay are not ready for release.
 
-- React 19, TanStack Start, Tailwind CSS v4
-- Three.js arena, procedural fighters, Zustand
-- Better Auth (email and password)
-- Postgres, with PGLite when no database URL is set
-- WebRTC peer rooms for duel and co-op
+## Rebuild priorities
 
-## Run
+1. Establish the game's identity, combat rules, fighter roles, and arena rules.
+2. Make the project reproducible with documented configuration and reliable checks.
+3. Build a complete online duel using two fighters and one arena.
+4. Validate controls, match fairness, latency handling, reconnects, and saved results.
+5. Expand the roster and arenas, then add further match modes.
+
+The long-term roster should let players specialize in a favorite character. The dark samurai/fantasy setting is confirmed. The strongest fighter will be strongest in the lore, with a balanced playable version for PvP. That fighter's name, identity, and abilities remain to be designed.
+
+- [Storyline and opening cinematic draft](docs/STORYLINE.md)
+- [Rebuild plan and design decisions](docs/REBUILD_PLAN.md)
+- [Claude Code implementation brief — handoff on hold during story development](docs/CLAUDE_CODE_BRIEF.md)
+- [Shared development instructions](AGENTS.md)
+
+## Development
+
+Use Node.js 24 LTS and npm. From the repository root:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
 Open `http://127.0.0.1:8080`.
 
+The current frontend uses React 19, TanStack Start, Three.js, Zustand, and Tailwind CSS. Authentication uses Better Auth. Database access uses PostgreSQL, with an in-memory PGlite fallback for local development.
+
+### Database and configuration
+
+Set `DATABASE_URL` to use PostgreSQL. Without it, database accounts, sessions, and saves use the in-memory fallback and reset when the server restarts. Browser-local progress is stored separately.
+
+The current `npm run build` command also runs database migrations when `DATABASE_URL` is present. Use an isolated development or preview database for local validation. Separating migration execution from builds is part of the foundation work.
+
+Independent production deployment also needs explicit authentication configuration and replacement of remaining hosting-specific integrations. A production-ready configuration guide is part of the rebuild; setting a database URL alone does not complete that work.
+
+### Checks
+
 ```bash
 npm run typecheck
+npm run lint
 npm test
 npm run build
 ```
 
-Set `DATABASE_URL` for Postgres. Without it, saves use the local PGLite fallback.
+At the initial rebuild review, type checking and the production build passed. The script test suite had 17 failures and lint had two errors. The separate auth/data test suite passed. Several tests still assume files and defaults from the original development environment. Restoring a reliable test baseline is the first implementation task.
+
+Combat rules, two-client gameplay, reconnects, and authoritative results need dedicated coverage before multiplayer release. A passing frontend build does not establish that online matches work.
+
+## Working on the rebuild
+
+Codex and Claude Code should use the same instructions in [AGENTS.md](AGENTS.md), the same documented message contracts, and small changes with observable acceptance criteria. Planned features must remain labeled as planned until verified end to end.

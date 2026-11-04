@@ -12,5 +12,4 @@ attachments
 !.env.example
 .project_id
 .DS_Store
-AGENTS.md
 startup.sh
