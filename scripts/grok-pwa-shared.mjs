@@ -112,8 +112,27 @@ export function publicAppHost(hostHeader) {
  */
 export function resolvePublicHost(hostHeader) {
   return (
-    publicAppHost(process.env?.VITE_PUBLIC_HOSTNAME) || publicAppHost(hostHeader)
+    publicAppHost(process.env?.VITE_PUBLIC_HOSTNAME) ||
+    vercelProductionHost(process.env?.VERCEL_PROJECT_PRODUCTION_URL) ||
+    publicAppHost(hostHeader)
   );
+}
+
+/**
+ * Self-hosted on Vercel: the project's production domain (Vercel sets
+ * VERCEL_PROJECT_PRODUCTION_URL). Unlike preview URLs it is public, so it is
+ * a valid absolute origin for og:image even when it is a `*.vercel.app` name.
+ */
+export function vercelProductionHost(value) {
+  const host = String(value ?? "")
+    .replace(/^https?:\/\//, "")
+    .split("/")[0]
+    .split(":")[0]
+    .trim()
+    .toLowerCase();
+  if (!host || !/^[a-z0-9.-]+$/.test(host) || !host.includes(".")) return "";
+  if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return "";
+  return host;
 }
 
 export function isInstallQuery(url) {

@@ -287,8 +287,31 @@ test("published VITE_PUBLIC_HOSTNAME wins over request Host for og:image", () =>
   }
 });
 
+test("self-hosted Vercel production domain is used for og:image", () => {
+  const prev = process.env.VITE_PUBLIC_HOSTNAME;
+  const prevProd = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  delete process.env.VITE_PUBLIC_HOSTNAME;
+  process.env.VERCEL_PROJECT_PRODUCTION_URL = "ganryu.vercel.app";
+  try {
+    const out = injectGrokPwaHead("<html><head><title>GANRYU</title></head></html>", {
+      host: "ganryu-git-feature-team.vercel.app",
+      site: { title: "GANRYU", card: "custom", banner: "/x-banner.jpg" },
+    });
+    assert.match(out, /property="og:image" content="https:\/\/ganryu\.vercel\.app\/og\.jpg"/);
+    assert.match(out, /property="x:game:image" content="https:\/\/ganryu\.vercel\.app\/x-banner\.jpg"/);
+    assert.doesNotMatch(out, /ganryu-git-feature-team/);
+  } finally {
+    if (prev === undefined) delete process.env.VITE_PUBLIC_HOSTNAME;
+    else process.env.VITE_PUBLIC_HOSTNAME = prev;
+    if (prevProd === undefined) delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
+    else process.env.VERCEL_PROJECT_PRODUCTION_URL = prevProd;
+  }
+});
+
 test("vercel Host without a public hostname emits no og:image", () => {
   const prev = process.env.VITE_PUBLIC_HOSTNAME;
+  const prevProd = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
   delete process.env.VITE_PUBLIC_HOSTNAME;
   try {
     const out = injectGrokPwaHead("<html><head><title>RACK</title></head></html>", {
@@ -300,6 +323,7 @@ test("vercel Host without a public hostname emits no og:image", () => {
   } finally {
     if (prev === undefined) delete process.env.VITE_PUBLIC_HOSTNAME;
     else process.env.VITE_PUBLIC_HOSTNAME = prev;
+    if (prevProd !== undefined) process.env.VERCEL_PROJECT_PRODUCTION_URL = prevProd;
   }
 });
 
