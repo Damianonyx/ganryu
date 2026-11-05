@@ -1,22 +1,43 @@
-# Storyline and opening cinematic — draft 1
+# Storyline and opening cinematic — draft 2
 
-This document records the campaign premise and develops a first narrative treatment. Confirmed decisions come from the project owner; proposed scenes and chapter details remain creative drafts. No cinematic or redesigned campaign has been implemented.
+This document records the campaign premise and the current narrative treatment. Confirmed decisions come from the project owner; proposed scenes, chapter details, and the protagonists' connection remain creative drafts. The redesigned campaign has not been implemented. A preview of the opening cinematic, using temporary art and the current ≈75-second screenplay, is described in [OPENING_CINEMATIC.md](OPENING_CINEMATIC.md).
+
+Draft 2 replaces the earlier plan of 26 fighters and 21 campaign levels.
 
 ## Confirmed story and game structure
 
 - The setting is dark samurai/fantasy.
-- The central protagonist is a powerless child when evil samurai and monsters attack his village.
-- The leader of the attacking faction personally kills his parents and becomes the main antagonist.
-- The child survives the attack as the village's sole survivor.
-- Grief and rage drive his vow to train, become stronger than the antagonist, and avenge his parents.
-- The campaign's twenty preliminary encounters develop the player's combat mastery. All twenty must be cleared before the final confrontation at level 21.
-- The planned named fighter roster contains 26 characters: five protagonists and 21 members of the enemy faction, counting its leader. This means twenty enemy followers plus the antagonist, not 21 followers plus an additional boss.
-- Players choose one of the five protagonists and use that character throughout their campaign.
+- The central protagonist is a young boy living peacefully with his parents in a mountain village.
+- One night, evil samurai and monsters attack the village. The assault is organized and overwhelming.
+- The leader of the attacking faction — **Nethrak, The Eternal Nightmare** — personally kills the boy's parents and becomes the main antagonist. The boy witnesses their deaths but is too young and powerless to intervene.
+- The boy survives as the village's sole survivor.
+- Grief and rage drive his promise to train until he can surpass the antagonist and avenge his parents. His ambition is to become the strongest samurai.
+- Years of practice follow. He struggles, fails, and gradually learns to control both his weapon and his anger.
+- The planned roster contains **14 named fighters**:
+  - four playable protagonists — two male and two female samurai;
+  - ten antagonists — nine followers and the faction's leader. The leader is counted among the ten.
+- Players choose one of the four protagonists and use that character throughout their campaign. Each protagonist must be able to complete the whole campaign through skill and mastery.
+- The campaign has **ten levels**: nine encounters against the leader's followers, then the leader at level 10. Level 10 stays locked until all nine preceding enemies are defeated.
+- The followers are real enemies, not friendly training instructors. The protagonist develops by fighting them.
 - The strongest fighter in the lore has a balanced playable PvP version. Lore rank does not give an automatic competitive advantage.
-- Fighters need distinct identities, powers, skills, and improved 3D movement and animation.
-- Different matches will use different arenas.
+- Fighters need distinct names, appearances, personalities, weapons, powers, skills, and improved 3D movement and animation.
+- Different matches use different arenas.
 
-The sole-survivor premise is the current canon. The relationship between that survivor and the other four selectable protagonists still needs a decision. Do not silently introduce four more survivors or give unrelated characters the same childhood history.
+## How the four protagonists fit together
+
+Confirmed by the project owner: **Kairo** is the village survivor and the main character. He meets the other three protagonists — **Hakuren**, **Shion**, and **Akari** — along the way. See [CHARACTERS.md](CHARACTERS.md) for the roster.
+
+Still proposed:
+
+- The three allies have their own reasons to oppose the antagonist; those reasons are not yet written.
+- The four share the campaign's central mission; the player chooses which warrior to control in fights.
+- Their shared story does not require all four fighters to appear in every encounter. The selected protagonist remains the player's fighter for the whole run.
+
+Rules that hold under this proposal:
+
+- The childhood cinematic follows the village survivor. It does not become the childhood of whichever hero is selected.
+- Do not introduce additional survivors from the destroyed village.
+- The other three protagonists' backgrounds, motivations, names, weapons, and abilities will be developed separately.
 
 ## Narrative treatment — proposed
 
@@ -24,97 +45,51 @@ The village falls in a single night. Armored samurai move through its streets wh
 
 At dawn, he emerges into the ruins. He has no weapon capable of challenging the man responsible, no army, and no home to return to. He has a memory of the killer and a promise: he will become strong enough to face him.
 
-Years of practice turn that promise into a dangerous purpose. The campaign begins when he is old enough to take up the hunt. His growth continues through twenty battles against the antagonist's followers. Each opponent exposes a weakness he must overcome; each victory opens another part of the enemy's territory and reveals more about the night his village burned.
+Years of practice turn that promise into a dangerous purpose. When he begins his pursuit, nine dangerous followers stand between him and the antagonist; they control the routes and strongholds leading to their leader. Each opponent tests a weakness and demands greater mastery.
 
-The final opponent is the man from his childhood. Reaching him proves the hero can survive his faction. Defeating him requires the discipline and mastery earned across the journey, rather than rage alone.
-
-The relationship of the other playable protagonists to this treatment is pending. Their motives, dialogue, and participation must fit the final ensemble structure.
-
-### Why the twenty encounters matter
-
-The enemies are not friendly instructors. Training happens through practice, defeat, and hard-earned victories against the faction. Early battles develop fundamental skills; later ones force players to combine them.
-
-Recommended story logic: the followers control routes, strongholds, and access to their leader. Clearing their encounters creates a credible path to the final arena. The actual geography and access rules are still to be designed.
+The final opponent is the man from his childhood. Reaching him proves the hero can survive his faction. Defeating him requires the discipline learned across the journey, rather than rage alone.
 
 The leader's reason for attacking the village should matter to the wider story. It remains undecided; do not introduce a chosen-one prophecy, secret bloodline, resurrection, or supernatural pact as established canon.
 
-## Opening cinematic — proposed 70-second cut
+## Opening cinematic — proposed
 
-Use the survivor's childhood memory to establish the stakes before the campaign. Names, exact ages, emblem design, dialogue, music, and final duration are not yet locked.
+The current screenplay (≈75 seconds, eight scenes from "Before the fire" to "The hunt begins") is maintained as data in `src/cinematic/script.ts` and is previewable in the game. It ends on the on-screen text "Nine stand between you and revenge." followed by the game title.
 
-| Time | Image and action | Sound and narrative purpose |
-| --- | --- | --- |
-| 0–8 s | A quiet evening in the village. The child practices an awkward movement with a wooden stick. A parent gently corrects his stance. | Village ambience and a small moment of affection establish what will be lost. |
-| 8–18 s | A warning bell interrupts the evening. Samurai enter through smoke; monster silhouettes move behind them. The family rushes inside. | The bell gives way to footsteps, broken wood, and distant fighting. Show a coordinated attack. |
-| 18–33 s | The parents hide the child beneath the house. Through a narrow gap, he sees the leader confront them. A distinctive blade and emblem identify the killer. The parents fall; the image stays with the child's reaction. | The surrounding noise drops away at the moment of loss. The leader is recognizable without revealing his full ability kit. |
-| 33–43 s | Fire and falling timber conceal the hiding place. Unable to move the debris, the child listens as the attackers leave. | Muffled sound and breathing make his helplessness immediate. This is the proposed survival explanation, not a secret power. |
-| 43–52 s | At dawn, he crawls into the ruined village and finds a family keepsake. He searches for someone to answer him and receives only silence. | Let the aftermath breathe. The keepsake's form and later significance remain open. |
-| 52–64 s | Repeated practice across changing seasons: failed swings, bleeding knuckles implied by a wrapped hand, falls, recovery, improved stance. A match cut takes the same motion from child to older fighter. | A recurring rhythm gradually becomes controlled. Training takes years; the child does not immediately begin fighting adult commanders. |
-| 64–70 s | The older survivor looks toward enemy territory. Cut to the working title and the campaign entry screen. | Proposed adult voice-over: “I survived that night. One day, he will answer for it.” |
-
-The scene timing and survival mechanism are proposals. The confirmed events are the village attack, the parents' deaths at the leader's hands, the child's survival, and the revenge-driven training.
-
-### Loading and replay behavior — recommendation
-
-- Load required assets behind the cinematic; do not force every visit to wait for the whole film.
-- Offer Skip and subtitles. Make the film replayable from the menu.
-- If the film ends or is skipped before loading completes, continue with an honest loading state rather than restarting the film.
-- If loading finishes first, allow the player to finish watching or continue immediately.
-- Keep first-time viewing separate from ordinary return visits.
-- Make audio start behavior work with browser playback restrictions.
-- Choose whether protagonist selection comes before or after the film once the five-protagonist story model is decided.
+The hiding place, wooden charm, dialogue, and exact staging are proposed screenplay details. The confirmed events are the village attack, the parents' deaths at the leader's hands, the child's survival, and the revenge-driven training. Names are placeholders: CHILD / ADULT PROTAGONIST, FATHER, MOTHER, ANTAGONIST. The antagonist must be recognizable by his face, armor emblem, and distinctive sword; their final designs are open.
 
 ## Campaign chapters — proposed
 
-The numbered structure is fixed at twenty encounters followed by the antagonist at level 21. These chapter titles, locations, and combat lessons are draft organizing ideas.
+The structure is fixed at nine encounters followed by the leader at level 10. Chapter titles, locations, and combat lessons are draft organizing ideas.
 
 | Levels | Working chapter | Narrative purpose | Combat focus | Arena direction |
 | --- | --- | --- | --- | --- |
-| 1–5 | Ashes | Begin the hunt and break the faction's outer defenses. | Movement, spacing, basic attacks, defense, and recovery. | Abandoned village approaches, outposts, and road checkpoints. |
-| 6–10 | The Hunt | Pursue the faction through territory where its monsters operate. | Reading distinct powers, managing resources, and punishing missed attacks. | Forest paths, ruined shrines, caves, and mountain crossings. |
-| 11–15 | Broken Oaths | Face commanders and uncover the reason behind the village attack. | Combining defensive and offensive tools against more complex opponents. | Captured settlements, fortified courtyards, and corrupted temple grounds. |
-| 16–20 | The Inner Circle | Defeat the five elite fighters guarding the leader's domain. | Full mastery of the selected hero and preparation for the final encounter. | Stronghold approaches and distinct inner-court arenas. |
-| 21 | The Reckoning | Confront the leader responsible for the parents' deaths. | A fair test of the mechanics learned across the campaign. | A dedicated final arena tied to the antagonist's identity. |
+| 1–3 | The Outer Defenses | Confront the faction's outer fighters. | Movement, spacing, basic attacks, defense, and controlling aggression. | Abandoned roads, occupied outposts, village approaches. |
+| 4–6 | The Pursuit | Move deeper into faction territory; reveal information about the faction and the village attack. | Distinctive enemy abilities, timing, resource management, and exploiting weaknesses. | Forests, ruined shrines, mountain crossings, captured settlements. |
+| 7–9 | The Inner Circle | Defeat three elite followers who protect the leader. The ninth victory opens access to him. | Combining earlier lessons; preparation for the final battle. | A distinct arena for each elite fighter. |
+| 10 | The Reckoning | Confront the leader responsible for the parents' deaths. | Dangerous but understandable attacks; victory depends on skills learned in the campaign. | A final arena reflecting his identity and power. |
 
-Each numbered preliminary level should have its own named faction opponent. Chapter-end scenes can reveal story information between fights. Do not assume twenty completely unrelated asset sets: locations can share a regional art style while keeping arena layouts and match identities distinct.
+Each preliminary level has its own named faction opponent, and each of the three elites needs a distinct personality, combat style, and arena. Background figures in the cinematic do not create additional roster slots.
 
-The exact mix of human, corrupted samurai, and monster fighters is open. Background figures in the cinematic do not automatically create additional selectable roster slots.
-
-The five protagonists are the confirmed campaign choices. Whether enemy-faction characters will also be selectable in a separate versus mode is undecided; a 26-character world roster does not establish 26 playable campaign heroes.
-
-## Five selectable protagonists — unresolved story connection
-
-The recommended model is one canonical village survivor and four allies who join the same revenge campaign for their own reasons. The group shares a journey, while the selected protagonist is the player's fighter for the run. This keeps the survivor's history singular and gives the other four their own identities.
-
-Alternative models discussed but not adopted: the chosen protagonist is the sole survivor in that playthrough, or five survivors were separated. The latter changes the current sole-survivor premise and must not be treated as established fact.
-
-Whichever model is chosen, the campaign must answer:
-
-- Why each of the five is committed to reaching the antagonist.
-- Whose childhood appears in the film and who speaks its dialogue.
-- How the selected fighter participates in the final confrontation.
-- How defeat, retries, and a new campaign with another hero fit the experience.
-
-The player's selected hero should remain viable through all 21 levels. Do not require switching to a supposedly superior fighter to finish the campaign. Switching heroes can start a separate run without erasing the existing one; the exact save policy remains to be specified.
+Whether enemy characters become selectable in a separate versus mode is undecided; the 14-character roster does not establish 14 playable campaign heroes.
 
 ## Character and animation development
 
-Develop a character sheet for all 26 fighters. Each sheet should cover name, faction, story role, motivation, silhouette, weapon, stance, strengths, weaknesses, powers, counterplay, and arena association. Enemy fighters also need their campaign position and the skill they test.
+Develop a character sheet for all 14 fighters covering name, faction, story role, motivation, personality, silhouette, weapon, stance, strengths, weaknesses, powers, counterplay, and arena association. Enemy fighters also need their campaign position and the skill they test.
 
-For each ability, define its visible warning, startup, reach, effect, cost, cooldown, recovery, and interruption rules. Make abilities legible and distinct before expanding their visual effects. A lore description alone is not a complete gameplay specification.
+The four protagonists should offer different fighting styles with meaningful strengths and weaknesses. For each ability, define its visible warning, startup, reach, effect, cost, cooldown, recovery, and interruption rules.
 
-Give each fighter a coherent 3D animation set: idle, movement and turns, attacks, defense/parry, evasion, ability activation, hit reactions, knockdown/recovery where needed, defeat, and victory. Weapon grip, foot contact, weight transfer, and transitions should support the character's fighting style.
+Give each fighter a coherent 3D animation set: recognizable stance, convincing movement and turns, readable attack preparation, impact, recovery, defense, evasion, ability activation, hit reactions, defeat, and victory. Powerful attacks should have readable preparation and punishable recovery.
 
-Combat timing and animation must agree. Powerful attacks should have readable preparation and punishable recovery. Camera shake and effects should reinforce impact while keeping the action visible. Victory poses can express personality without adding a combat advantage.
+Do not assign existing prototype abilities to the new fighters by default. Design the four protagonist playstyles and the leader first, then build the nine followers around a deliberate difficulty curve.
 
-Do not assign all existing prototype abilities to the new fighters by default. Design the five protagonist playstyles and the antagonist first, then build the twenty followers around a deliberate difficulty curve.
+## Still open
 
-## Next story decisions
+1. Final game name.
+2. Character names, identities, and exact ages.
+3. The antagonist's motive for attacking the village and why monsters serve his faction.
+4. Final confirmation of the four protagonists' connection, and the three allies' backgrounds and motives.
+5. Final powers, weapons, and abilities.
+6. The exact survival mechanism and the keepsake's significance.
+7. Whether enemy characters become playable in a separate versus mode.
 
-1. Establish the relationship between the survivor and the five playable protagonists.
-2. Give the antagonist a motive for attacking the village and a reason to command monsters.
-3. Define the survivor's identity, personality, and moral limits beyond revenge.
-4. Design the other four protagonists' motives and contrasting fighting styles.
-5. Name the faction, village, characters, and final game after the world and central conflict are clear.
-
-The Claude implementation brief remains on hold while the story and character direction are developed. This document is narrative planning, not authorization to implement the whole campaign or produce the final video.
+The rebuild and authoritative multiplayer backend remain future implementation work.

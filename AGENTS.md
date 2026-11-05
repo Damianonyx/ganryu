@@ -7,7 +7,7 @@ These instructions apply to Codex, Claude Code, and other contributors throughou
 - Read `README.md`, `docs/REBUILD_PLAN.md`, and `docs/STORYLINE.md` before implementing a feature.
 - The project is an arena combat prototype undergoing a full redesign.
 - Confirmed creative rules: dark samurai/fantasy setting; the strongest lore fighter has a balanced playable PvP version.
-- Confirmed targets: 26 fighters (five protagonists, twenty enemy followers, and the antagonist), with the antagonist encountered at campaign level 21 after twenty preliminary encounters.
+- Confirmed targets: 14 fighters (four playable protagonists — two male and two female samurai — and ten antagonists: nine followers plus their leader). The leader is fought at campaign level 10 after nine preliminary encounters.
 - The final name, fighter identities, strongest fighter's identity, input design, and arena rules are not all settled. Distinguish proposals from decisions.
 - Current work is storyline and character design before the implementation handoff. The opening cinematic treatment is a draft; do not treat proposed details as final canon.
 - Preserve stable internal identifiers and save compatibility when display names change.

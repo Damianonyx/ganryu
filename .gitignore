@@ -13,3 +13,6 @@ attachments
 .project_id
 .DS_Store
 startup.sh
+.venv-blender
+__pycache__
+scripts/_*.tmp.mjs

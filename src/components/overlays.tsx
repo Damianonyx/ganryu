@@ -1,11 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { Volume2, VolumeX, Swords, Users, Eye, LogIn } from "lucide-react";
+import { Volume2, VolumeX, Swords, Users, Eye, LogIn, Film } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Portrait } from "@/components/portrait";
-import { LEVELS } from "@/game/levels";
-import { PLAYABLE, getChar } from "@/game/roster";
+import { WarriorSelect } from "@/components/warrior-select";
+import { FINAL_LEVEL, LEVELS } from "@/game/levels";
+
+function chapterOf(level: number) {
+  if (level >= FINAL_LEVEL) return "The Reckoning";
+  if (level >= 7) return "The Inner Circle";
+  if (level >= 4) return "The Pursuit";
+  return "The Outer Defenses";
+}
+import { getChar } from "@/game/roster";
 import { useGame } from "@/game/store";
 import type { CharId } from "@/game/types";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
@@ -22,6 +30,7 @@ type OverlayProps = {
   onMute: () => void;
   onRematch: () => void;
   onTitle: () => void;
+  onReplayIntro: () => void;
 };
 
 export function Overlays(props: OverlayProps) {
@@ -30,7 +39,7 @@ export function Overlays(props: OverlayProps) {
     <div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
       <TopBar onMute={props.onMute} onTitle={props.onTitle} />
       {mode === "title" && <TitleScreen {...props} />}
-      {mode === "select" && <SelectScreen onBack={props.onTitle} />}
+      {mode === "select" && <WarriorSelect onBack={props.onTitle} onEnter={() => useGame.getState().setMode("levels")} />}
       {mode === "levels" && <LevelScreen onStart={props.onStartLevel} onBack={() => useGame.getState().setMode("select")} />}
       {mode === "lobby" && <LobbyScreen onBack={props.onTitle} onEnter={props.onEnterLobby} />}
       {mode === "result" && <ResultScreen onRematch={props.onRematch} onTitle={props.onTitle} />}
@@ -49,7 +58,7 @@ function TopBar({ onMute, onTitle }: { onMute: () => void; onTitle: () => void }
       <button type="button" onClick={onTitle} className="text-left">
         <p className="font-display text-xl tracking-[0.22em] text-paper">GANRYŪ</p>
         <p className="mt-0.5 font-body text-[0.62rem] tracking-[0.32em] text-mist uppercase">
-          {mode === "play" ? "Fourth fold" : "巌流"}
+          {mode === "play" ? "The hunt" : "巌流"}
         </p>
       </button>
       <div className="flex items-center gap-2">
@@ -95,14 +104,14 @@ function TopBar({ onMute, onTitle }: { onMute: () => void; onTitle: () => void }
   );
 }
 
-function TitleScreen({ onCampaign, onWatch, onOpenLobby }: OverlayProps) {
+function TitleScreen({ onCampaign, onWatch, onOpenLobby, onReplayIntro }: OverlayProps) {
   return (
     <div className="pointer-events-auto mx-auto mt-auto mb-8 flex w-full max-w-lg flex-col items-center px-6 pb-[max(1rem,env(safe-area-inset-bottom))] landscape:mb-6 landscape:flex-row landscape:items-end landscape:justify-between landscape:max-w-5xl">
       <div className="mb-8 text-center landscape:mb-0 landscape:text-left">
-        <p className="font-body text-[0.68rem] tracking-[0.42em] text-mist uppercase">Time is the blade</p>
+        <p className="font-body text-[0.68rem] tracking-[0.42em] text-mist uppercase">Nine stand between you and revenge</p>
         <h1 className="mt-2 font-display text-5xl leading-none tracking-[0.16em] text-paper sm:text-6xl">GANRYŪ</h1>
         <p className="mx-auto mt-4 max-w-sm font-body text-sm leading-relaxed text-paper-dim landscape:mx-0">
-          Eighteen blades. Twelve folds. The last pair cannot be cut unless you fold the Fourth.
+          A village burned in a single night. One boy survived to remember the man who did it. Cut through Nethrak’s nine followers — then face the Eternal Nightmare himself.
         </p>
       </div>
       <div className="grid w-full max-w-sm gap-2">
@@ -117,84 +126,15 @@ function TitleScreen({ onCampaign, onWatch, onOpenLobby }: OverlayProps) {
             <Users className="size-4" /> Co-op
           </Button>
         </div>
-        <Button variant="text" onClick={onWatch}>
-          <Eye className="size-4" /> Watch the ring
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function SelectScreen({ onBack }: { onBack: () => void }) {
-  const fighterId = useGame((s) => s.fighterId);
-  const def = getChar(fighterId);
-  return (
-    <div className="pointer-events-auto flex min-h-0 flex-1 flex-col px-4 pb-4 pt-1 sm:px-7">
-      <div className="mb-2 flex items-end justify-between">
-        <div>
-          <p className="font-body text-[0.62rem] tracking-[0.3em] text-mist uppercase">Choose a blade</p>
-          <h2 className="font-display text-3xl tracking-[0.12em]">{def.name}</h2>
-        </div>
-        <Button variant="text" size="sm" onClick={onBack}>
-          Back
-        </Button>
-      </div>
-      <div className="grid min-h-0 flex-1 gap-3 overflow-hidden landscape:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="grid grid-cols-4 gap-1.5 overflow-auto sm:grid-cols-6 md:grid-cols-9">
-          {PLAYABLE.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => useGame.getState().setFighter(c.id)}
-              className={cn(
-                "relative aspect-[3/4] overflow-hidden rounded-sm border",
-                c.id === fighterId ? "border-paper" : "border-line hover:border-line-strong",
-              )}
-            >
-              <Portrait src={c.portrait} alt={c.name} priority={c.id === fighterId} />
-              <span className="absolute inset-x-0 bottom-0 bg-ink/75 px-1 py-0.5 font-body text-[0.55rem] tracking-[0.1em] text-paper uppercase">
-                {c.name}
-              </span>
-            </button>
-          ))}
-        </div>
-        <aside className="flex min-h-0 flex-col gap-2 overflow-auto rounded-md border border-line bg-ink-2/85 p-3">
-          <div className="relative h-28 overflow-hidden rounded-sm border border-line sm:h-36">
-            <Portrait src={def.portrait} alt={def.name} priority />
-          </div>
-          <div>
-            <p className="font-body text-[0.62rem] tracking-[0.28em] text-mist uppercase">
-              {def.kana} · Rank {def.rank}
-            </p>
-            <p className="font-display text-xl">{def.title}</p>
-            <p className="mt-1 text-sm leading-relaxed text-paper-dim">{def.blurb}</p>
-          </div>
-          <StatRow label="HP" v={def.hp} max={230} />
-          <StatRow label="ATK" v={def.atk} max={26} />
-          <StatRow label="DEF" v={def.def} max={20} />
-          <StatRow label="SPD" v={Math.round(def.spd * 100)} max={130} />
-          <div className="rounded-sm border border-line bg-ink/40 px-2.5 py-2">
-            <p className="font-body text-[0.58rem] tracking-[0.22em] text-mist uppercase">Art</p>
-            <p className="font-display text-base text-paper">{def.power.name}</p>
-            <p className="mt-0.5 text-xs text-paper-dim">{def.power.desc}</p>
-          </div>
-          <Button className="mt-auto w-full shrink-0" onClick={() => useGame.getState().setMode("levels")}>
-            Choose fold
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="text" onClick={onWatch}>
+            <Eye className="size-4" /> Watch a duel
           </Button>
-        </aside>
+          <Button variant="text" onClick={onReplayIntro} data-testid="replay-intro">
+            <Film className="size-4" /> Replay intro
+          </Button>
+        </div>
       </div>
-    </div>
-  );
-}
-
-function StatRow({ label, v, max }: { label: string; v: number; max: number }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="w-8 font-body text-[0.6rem] tracking-[0.2em] text-mist uppercase">{label}</span>
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-paper/10">
-        <div className="h-full bg-paper" style={{ width: `${Math.min(100, (v / max) * 100)}%` }} />
-      </div>
-      <span className="w-8 text-right font-body text-xs tabular-nums text-paper">{v}</span>
     </div>
   );
 }
@@ -203,11 +143,11 @@ function LevelScreen({ onStart, onBack }: { onStart: (n: number) => void; onBack
   const maxLevel = useGame((s) => s.maxLevel);
   const level = useGame((s) => s.level);
   return (
-    <div className="pointer-events-auto flex min-h-0 flex-1 flex-col px-4 pb-4 pt-1 sm:px-7">
+    <div className="pointer-events-auto flex min-h-0 flex-1 flex-col bg-gradient-to-b from-ink/50 via-ink/70 to-ink/90 px-4 pb-4 pt-1 sm:px-7">
       <div className="mb-2 flex items-end justify-between">
         <div>
-          <p className="font-body text-[0.62rem] tracking-[0.3em] text-mist uppercase">Twelve folds</p>
-          <h2 className="font-display text-3xl tracking-[0.12em]">The ring</h2>
+          <p className="font-body text-[0.62rem] tracking-[0.3em] text-mist uppercase">Ten battles</p>
+          <h2 className="font-display text-3xl tracking-[0.12em]">The hunt</h2>
         </div>
         <Button variant="text" size="sm" onClick={onBack}>
           Back
@@ -228,7 +168,7 @@ function LevelScreen({ onStart, onBack }: { onStart: (n: number) => void; onBack
                 onStart(L.id);
               }}
               className={cn(
-                "flex flex-col overflow-hidden rounded-md border text-left",
+                "flex flex-col overflow-hidden rounded-md border bg-ink-2/90 text-left backdrop-blur-sm",
                 selected ? "border-paper" : "border-line",
                 locked ? "opacity-40" : "hover:border-line-strong",
               )}
@@ -239,9 +179,9 @@ function LevelScreen({ onStart, onBack }: { onStart: (n: number) => void; onBack
                     <Portrait key={f.id} src={f.portrait} alt={f.name} />
                   ))}
                 </div>
-                {L.id === 12 && (
+                {L.id === FINAL_LEVEL && (
                   <span className="absolute left-2 top-2 rounded-xs bg-blood px-1.5 py-0.5 font-body text-[0.55rem] tracking-[0.16em] text-paper uppercase">
-                    Uncut
+                    Nethrak
                   </span>
                 )}
                 {L.enemies.length > 1 && (
@@ -252,7 +192,7 @@ function LevelScreen({ onStart, onBack }: { onStart: (n: number) => void; onBack
               </div>
               <div className="p-2.5">
                 <p className="font-body text-[0.58rem] tracking-[0.24em] text-mist uppercase">
-                  Fold {String(L.id).padStart(2, "0")}
+                  {chapterOf(L.id)} · {String(L.id).padStart(2, "0")}
                 </p>
                 <p className="font-display text-lg leading-tight">{L.name}</p>
                 <p className="mt-0.5 line-clamp-2 text-xs text-paper-dim">{L.blurb}</p>
@@ -285,7 +225,7 @@ function PlayHud() {
           power={hud.power / hud.powerMax}
         />
         <div className="hidden text-center sm:block">
-          <p className="font-body text-[0.58rem] tracking-[0.28em] text-mist uppercase">Fold {level}</p>
+          <p className="font-body text-[0.58rem] tracking-[0.28em] text-mist uppercase">Battle {level}</p>
           {hud.combo > 1 && <p className="font-display text-2xl tabular-nums text-paper">{hud.combo} cut</p>}
         </div>
         <div className="flex flex-col items-end gap-1.5">
@@ -375,18 +315,18 @@ function ResultScreen({ onRematch, onTitle }: { onRematch: () => void; onTitle: 
   return (
     <div className="pointer-events-auto m-auto w-full max-w-md rounded-lg border border-line bg-ink-2/90 px-6 py-8 text-center">
       <p className="font-body text-[0.62rem] tracking-[0.32em] text-mist uppercase">
-        Fold {String(level).padStart(2, "0")}
+        {chapterOf(level)} · {String(level).padStart(2, "0")}
       </p>
-      <h2 className="mt-2 font-display text-4xl tracking-[0.12em]">{win ? "The cut lands" : "The ring takes you"}</h2>
+      <h2 className="mt-2 font-display text-4xl tracking-[0.12em]">{win ? (level >= FINAL_LEVEL ? "It is finished" : "The cut lands") : "You fall"}</h2>
       <p className="mt-3 text-sm text-paper-dim">
         {win
-          ? level >= 12
-            ? "Even the Uncut pair yielded to the Fourth."
-            : "The next fold is open."
-          : "Rise. Fold time. Cut again."}
+          ? level >= FINAL_LEVEL
+            ? "Nethrak falls. The village is answered."
+            : "The road to the next follower is open."
+          : "Steady your feet. Try again."}
       </p>
       <div className="mt-6 grid gap-2">
-        <Button onClick={onRematch}>{win && level < 12 ? "Next fold" : "Again"}</Button>
+        <Button onClick={onRematch}>{win && level < FINAL_LEVEL ? "Next battle" : "Again"}</Button>
         <Button variant="ghost" onClick={onTitle}>
           Title
         </Button>
