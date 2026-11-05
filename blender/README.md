@@ -4,7 +4,7 @@ Procedural Blender scenes for the opening cinematic. Every shot is generated fro
 
 This is a **look-development test**, not final production. It shows lighting, atmosphere, and staging for selected screenplay beats. The characters are blockouts:
 
-- **Thorn antagonist** (`characters.build_thorn_antagonist`) — built from the project owner's turnaround sheet: spined crown, beaked red helmet, layered thorn-shard armor and tattered robe, red veins, and four chains ending in glowing sickle talons. His exact role in the faction is not yet confirmed. The final in-game model should replace this procedural version.
+- **Kharzul, The Hand of Thorns** (`characters.build_thorn_antagonist`), Nethrak's second in command, built from the owner's turnaround sheet: spined crown, beaked red helmet, layered thorn-shard armor and tattered robe, red veins, and four chains ending in glowing sickle talons. The final in-game model should replace this procedural version.
 - **Protagonist, parents, samurai, monsters** — generic placeholder silhouettes until their designs exist.
 
 ## The opening film (`blender/film/`)
