@@ -34,6 +34,7 @@ The long-term roster should let players specialize in a favorite character. The 
 
 - [Storyline and opening cinematic draft](docs/STORYLINE.md)
 - [Opening cinematic preview and preloader](docs/OPENING_CINEMATIC.md)
+- [Character roster](docs/CHARACTERS.md)
 - [Rebuild plan and design decisions](docs/REBUILD_PLAN.md)
 - [Claude Code implementation brief — handoff on hold during story development](docs/CLAUDE_CODE_BRIEF.md)
 - [Shared development instructions](AGENTS.md)

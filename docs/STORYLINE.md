@@ -9,7 +9,7 @@ Draft 2 replaces the earlier plan of 26 fighters and 21 campaign levels.
 - The setting is dark samurai/fantasy.
 - The central protagonist is a young boy living peacefully with his parents in a mountain village.
 - One night, evil samurai and monsters attack the village. The assault is organized and overwhelming.
-- The leader of the attacking faction personally kills the boy's parents and becomes the main antagonist. The boy witnesses their deaths but is too young and powerless to intervene.
+- The leader of the attacking faction — **Nethrak, The Eternal Nightmare** — personally kills the boy's parents and becomes the main antagonist. The boy witnesses their deaths but is too young and powerless to intervene.
 - The boy survives as the village's sole survivor.
 - Grief and rage drive his promise to train until he can surpass the antagonist and avenge his parents. His ambition is to become the strongest samurai.
 - Years of practice follow. He struggles, fails, and gradually learns to control both his weapon and his anger.
@@ -23,10 +23,13 @@ Draft 2 replaces the earlier plan of 26 fighters and 21 campaign levels.
 - Fighters need distinct names, appearances, personalities, weapons, powers, skills, and improved 3D movement and animation.
 - Different matches use different arenas.
 
-## How the four protagonists fit together — proposed, not finalized
+## How the four protagonists fit together
 
-- One of the male protagonists is the village survivor.
-- The other male protagonist and the two female protagonists are allies with their own reasons to oppose the antagonist.
+Confirmed by the project owner: **Kairo** is the village survivor and the main character. He meets the other three protagonists — **Hakuren**, **Shion**, and **Akari** — along the way. See [CHARACTERS.md](CHARACTERS.md) for the roster.
+
+Still proposed:
+
+- The three allies have their own reasons to oppose the antagonist; those reasons are not yet written.
 - The four share the campaign's central mission; the player chooses which warrior to control in fights.
 - Their shared story does not require all four fighters to appear in every encounter. The selected protagonist remains the player's fighter for the whole run.
 
