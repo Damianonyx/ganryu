@@ -13,7 +13,7 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       {
         name: "description",
-        content: "A dark samurai/fantasy arena combat game in development, with a planned expanded roster, redesigned abilities, varied arenas, and authoritative multiplayer.",
+        content: "A dark samurai/fantasy arena game. A village burned; one boy survived. Choose your warrior, cut through Nethrak's nine followers, and face the Eternal Nightmare.",
       },
       { name: "theme-color", content: "#0a090c" },
     ],
