@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Portrait } from "@/components/portrait";
-import { LEVELS } from "@/game/levels";
+import { FINAL_LEVEL, LEVELS } from "@/game/levels";
+
+function chapterOf(level: number) {
+  if (level >= FINAL_LEVEL) return "The Reckoning";
+  if (level >= 7) return "The Inner Circle";
+  if (level >= 4) return "The Pursuit";
+  return "The Outer Defenses";
+}
 import { PLAYABLE, getChar } from "@/game/roster";
 import { useGame } from "@/game/store";
 import type { CharId } from "@/game/types";
@@ -50,7 +57,7 @@ function TopBar({ onMute, onTitle }: { onMute: () => void; onTitle: () => void }
       <button type="button" onClick={onTitle} className="text-left">
         <p className="font-display text-xl tracking-[0.22em] text-paper">GANRYŪ</p>
         <p className="mt-0.5 font-body text-[0.62rem] tracking-[0.32em] text-mist uppercase">
-          {mode === "play" ? "Fourth fold" : "巌流"}
+          {mode === "play" ? "The hunt" : "巌流"}
         </p>
       </button>
       <div className="flex items-center gap-2">
@@ -100,10 +107,10 @@ function TitleScreen({ onCampaign, onWatch, onOpenLobby, onReplayIntro }: Overla
   return (
     <div className="pointer-events-auto mx-auto mt-auto mb-8 flex w-full max-w-lg flex-col items-center px-6 pb-[max(1rem,env(safe-area-inset-bottom))] landscape:mb-6 landscape:flex-row landscape:items-end landscape:justify-between landscape:max-w-5xl">
       <div className="mb-8 text-center landscape:mb-0 landscape:text-left">
-        <p className="font-body text-[0.68rem] tracking-[0.42em] text-mist uppercase">Time is the blade</p>
+        <p className="font-body text-[0.68rem] tracking-[0.42em] text-mist uppercase">Nine stand between you and revenge</p>
         <h1 className="mt-2 font-display text-5xl leading-none tracking-[0.16em] text-paper sm:text-6xl">GANRYŪ</h1>
         <p className="mx-auto mt-4 max-w-sm font-body text-sm leading-relaxed text-paper-dim landscape:mx-0">
-          Eighteen blades. Twelve folds. The last pair cannot be cut unless you fold the Fourth.
+          A village burned in a single night. One boy survived to remember the man who did it. Cut through Nethrak’s nine followers — then face the Eternal Nightmare himself.
         </p>
       </div>
       <div className="grid w-full max-w-sm gap-2">
@@ -120,7 +127,7 @@ function TitleScreen({ onCampaign, onWatch, onOpenLobby, onReplayIntro }: Overla
         </div>
         <div className="grid grid-cols-2 gap-2">
           <Button variant="text" onClick={onWatch}>
-            <Eye className="size-4" /> Watch the ring
+            <Eye className="size-4" /> Watch a duel
           </Button>
           <Button variant="text" onClick={onReplayIntro} data-testid="replay-intro">
             <Film className="size-4" /> Replay intro
@@ -135,10 +142,10 @@ function SelectScreen({ onBack }: { onBack: () => void }) {
   const fighterId = useGame((s) => s.fighterId);
   const def = getChar(fighterId);
   return (
-    <div className="pointer-events-auto flex min-h-0 flex-1 flex-col px-4 pb-4 pt-1 sm:px-7">
+    <div className="pointer-events-auto flex min-h-0 flex-1 flex-col bg-gradient-to-b from-ink/40 via-ink/60 to-ink/85 px-4 pb-4 pt-1 sm:px-7">
       <div className="mb-2 flex items-end justify-between">
         <div>
-          <p className="font-body text-[0.62rem] tracking-[0.3em] text-mist uppercase">Choose a blade</p>
+          <p className="font-body text-[0.62rem] tracking-[0.3em] text-mist uppercase">Choose your warrior</p>
           <h2 className="font-display text-3xl tracking-[0.12em]">{def.name}</h2>
         </div>
         <Button variant="text" size="sm" onClick={onBack}>
@@ -185,7 +192,7 @@ function SelectScreen({ onBack }: { onBack: () => void }) {
             <p className="mt-0.5 text-xs text-paper-dim">{def.power.desc}</p>
           </div>
           <Button className="mt-auto w-full shrink-0" onClick={() => useGame.getState().setMode("levels")}>
-            Choose fold
+            Choose battle
           </Button>
         </aside>
       </div>
@@ -209,11 +216,11 @@ function LevelScreen({ onStart, onBack }: { onStart: (n: number) => void; onBack
   const maxLevel = useGame((s) => s.maxLevel);
   const level = useGame((s) => s.level);
   return (
-    <div className="pointer-events-auto flex min-h-0 flex-1 flex-col px-4 pb-4 pt-1 sm:px-7">
+    <div className="pointer-events-auto flex min-h-0 flex-1 flex-col bg-gradient-to-b from-ink/50 via-ink/70 to-ink/90 px-4 pb-4 pt-1 sm:px-7">
       <div className="mb-2 flex items-end justify-between">
         <div>
-          <p className="font-body text-[0.62rem] tracking-[0.3em] text-mist uppercase">Twelve folds</p>
-          <h2 className="font-display text-3xl tracking-[0.12em]">The ring</h2>
+          <p className="font-body text-[0.62rem] tracking-[0.3em] text-mist uppercase">Ten battles</p>
+          <h2 className="font-display text-3xl tracking-[0.12em]">The hunt</h2>
         </div>
         <Button variant="text" size="sm" onClick={onBack}>
           Back
@@ -234,7 +241,7 @@ function LevelScreen({ onStart, onBack }: { onStart: (n: number) => void; onBack
                 onStart(L.id);
               }}
               className={cn(
-                "flex flex-col overflow-hidden rounded-md border text-left",
+                "flex flex-col overflow-hidden rounded-md border bg-ink-2/90 text-left backdrop-blur-sm",
                 selected ? "border-paper" : "border-line",
                 locked ? "opacity-40" : "hover:border-line-strong",
               )}
@@ -245,9 +252,9 @@ function LevelScreen({ onStart, onBack }: { onStart: (n: number) => void; onBack
                     <Portrait key={f.id} src={f.portrait} alt={f.name} />
                   ))}
                 </div>
-                {L.id === 12 && (
+                {L.id === FINAL_LEVEL && (
                   <span className="absolute left-2 top-2 rounded-xs bg-blood px-1.5 py-0.5 font-body text-[0.55rem] tracking-[0.16em] text-paper uppercase">
-                    Uncut
+                    Nethrak
                   </span>
                 )}
                 {L.enemies.length > 1 && (
@@ -258,7 +265,7 @@ function LevelScreen({ onStart, onBack }: { onStart: (n: number) => void; onBack
               </div>
               <div className="p-2.5">
                 <p className="font-body text-[0.58rem] tracking-[0.24em] text-mist uppercase">
-                  Fold {String(L.id).padStart(2, "0")}
+                  {chapterOf(L.id)} · {String(L.id).padStart(2, "0")}
                 </p>
                 <p className="font-display text-lg leading-tight">{L.name}</p>
                 <p className="mt-0.5 line-clamp-2 text-xs text-paper-dim">{L.blurb}</p>
@@ -291,7 +298,7 @@ function PlayHud() {
           power={hud.power / hud.powerMax}
         />
         <div className="hidden text-center sm:block">
-          <p className="font-body text-[0.58rem] tracking-[0.28em] text-mist uppercase">Fold {level}</p>
+          <p className="font-body text-[0.58rem] tracking-[0.28em] text-mist uppercase">Battle {level}</p>
           {hud.combo > 1 && <p className="font-display text-2xl tabular-nums text-paper">{hud.combo} cut</p>}
         </div>
         <div className="flex flex-col items-end gap-1.5">
@@ -381,18 +388,18 @@ function ResultScreen({ onRematch, onTitle }: { onRematch: () => void; onTitle: 
   return (
     <div className="pointer-events-auto m-auto w-full max-w-md rounded-lg border border-line bg-ink-2/90 px-6 py-8 text-center">
       <p className="font-body text-[0.62rem] tracking-[0.32em] text-mist uppercase">
-        Fold {String(level).padStart(2, "0")}
+        {chapterOf(level)} · {String(level).padStart(2, "0")}
       </p>
-      <h2 className="mt-2 font-display text-4xl tracking-[0.12em]">{win ? "The cut lands" : "The ring takes you"}</h2>
+      <h2 className="mt-2 font-display text-4xl tracking-[0.12em]">{win ? (level >= FINAL_LEVEL ? "It is finished" : "The cut lands") : "You fall"}</h2>
       <p className="mt-3 text-sm text-paper-dim">
         {win
-          ? level >= 12
-            ? "Even the Uncut pair yielded to the Fourth."
-            : "The next fold is open."
-          : "Rise. Fold time. Cut again."}
+          ? level >= FINAL_LEVEL
+            ? "Nethrak falls. The village is answered."
+            : "The road to the next follower is open."
+          : "Steady your feet. Try again."}
       </p>
       <div className="mt-6 grid gap-2">
-        <Button onClick={onRematch}>{win && level < 12 ? "Next fold" : "Again"}</Button>
+        <Button onClick={onRematch}>{win && level < FINAL_LEVEL ? "Next battle" : "Again"}</Button>
         <Button variant="ghost" onClick={onTitle}>
           Title
         </Button>
