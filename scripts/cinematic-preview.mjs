@@ -118,6 +118,11 @@ async function verify(browser) {
     await page.getByTestId("intro-sound").click();
     await page.waitForTimeout(300);
     check("sound starts after tapping Sound", (await page.evaluate(() => window.__cinematic.audio())) === "running");
+    await page.waitForTimeout(800);
+    const vo = await page.evaluate(() => window.__cinematic.voices && window.__cinematic.voices());
+    const ft = await page.evaluate(() => window.__cinematic.time());
+    check("tapping Sound leaves sound on (not muted)", (await page.getByTestId("intro-sound").getAttribute("aria-pressed")) === "true");
+    check("voice track plays in sync with the film", !!vo && vo.playing && !vo.muted && Math.abs(vo.time - ft) < 1.0, JSON.stringify({ ...vo, film: ft }));
     await page.getByTestId("intro-subtitles").click();
     check("subtitles toggle off", (await page.getByTestId("intro-subtitles").getAttribute("aria-pressed")) === "false");
     await page.getByTestId("intro-subtitles").click();

@@ -178,12 +178,13 @@ type FilmProps = {
 type AudioUi = "locked" | "running" | "suspended";
 
 /**
- * The rendered 3D film (blender/film). When it is present and the player has
- * not asked for reduced motion, it supplies picture and sound; otherwise the
- * procedural canvas film and synthesized score play. Subtitles and controls
- * are shared.
+ * The loading-screen film is the painted canvas film (owner's choice), with
+ * its synthesized score plus a recorded-voice track kept in sync with the
+ * film clock. The rendered 3D film (blender/film) remains available with
+ * `?film=3d`. Subtitles and controls are shared.
  */
 export const FILM_VIDEO = "/cinematic/opening.mp4";
+export const FILM_VOICES = "/cinematic/voices.mp3";
 type FilmMode = "video" | "canvas";
 
 function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, onEnd, onSkip }: FilmProps) {
@@ -211,10 +212,11 @@ function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, o
   const activeRef = useRef(active);
   activeRef.current = active;
   const videoRef = useRef<HTMLVideoElement>(null);
+  const voiceRef = useRef<HTMLAudioElement>(null);
   const [mode, setMode] = useState<FilmMode>(() => {
     if (typeof window === "undefined") return "video";
     const q = new URLSearchParams(window.location.search).get("film");
-    return q === "canvas" ? "canvas" : "video";
+    return q === "3d" ? "video" : "canvas";
   });
   const modeRef = useRef(mode);
   modeRef.current = mode;
@@ -247,6 +249,13 @@ function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, o
     const s = scoreRef.current;
     if (!s) return;
     s.unlock();
+    soundWantedRef.current = true;
+    const voice = voiceRef.current;
+    if (voice) {
+      // start inside the gesture so mobile browsers allow it; the loop keeps it in sync
+      voice.muted = false;
+      void voice.play().catch(() => undefined);
+    }
     window.setTimeout(() => setAudioUi(s.state), 60);
   }, []);
 
@@ -269,6 +278,8 @@ function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const mutedRef = useRef(muted);
+  mutedRef.current = muted;
   useEffect(() => scoreRef.current?.setMuted(muted || mode === "video"), [muted, mode]);
   useEffect(() => {
     const v = videoRef.current;
@@ -312,6 +323,14 @@ function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, o
       if (modeRef.current === "canvas") {
         paintFrame(ctx, canvas.width, canvas.height, t, { reduced: reducedRef.current });
         scoreRef.current?.update(t);
+        const voice = voiceRef.current;
+        if (voice) {
+          const audible = running && soundWantedRef.current && !mutedRef.current && t < FILM_DURATION;
+          if (audible) {
+            if (Math.abs(voice.currentTime - t) > 0.25) voice.currentTime = t;
+            if (voice.paused) void voice.play().catch(() => undefined);
+          } else if (!voice.paused) voice.pause();
+        }
       }
       // Re-render React (subtitles, UI) at ~10 Hz, not every frame.
       const tenth = Math.floor(t * 10);
@@ -337,8 +356,19 @@ function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, o
 
   // Stop the loop entirely once the film is no longer active (fading out).
   useEffect(() => {
-    if (!active) scoreRef.current?.setPaused(true);
+    if (!active) {
+      scoreRef.current?.setPaused(true);
+      voiceRef.current?.pause();
+    }
   }, [active]);
+  useEffect(() => {
+    const voice = voiceRef.current;
+    return () => {
+      // a detached media element can keep playing; stop it (keep src so a
+      // remount, e.g. React StrictMode in development, still works)
+      voice?.pause();
+    };
+  }, []);
 
   const toggleSubs = useCallback(() => {
     setSubs((v) => {
@@ -347,15 +377,17 @@ function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, o
     });
   }, []);
 
+  // Decide from what the button showed when pressed: the pointer-down that
+  // preceded this click has already unlocked audio, so checking the live
+  // audio state here would turn sound straight back off.
   const soundButton = useCallback(() => {
-    const s = scoreRef.current;
-    if (s && s.state !== "running") {
+    if (audioUi !== "running") {
       tryUnlock();
       if (muted) onToggleMute();
       return;
     }
     onToggleMute();
-  }, [muted, onToggleMute, tryUnlock]);
+  }, [audioUi, muted, onToggleMute, tryUnlock]);
 
   // Keyboard: Esc skip, Space/K pause, M sound, C subtitles.
   useEffect(() => {
@@ -394,6 +426,10 @@ function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, o
       duration: FILM_DURATION,
       audio: () => (modeRef.current === "video" ? (soundWantedRef.current && !videoRef.current?.muted ? "running" : "locked") : (scoreRef.current?.state ?? "locked")),
       mode: () => modeRef.current,
+      voices: () => {
+        const v = voiceRef.current;
+        return v ? { playing: !v.paused, time: v.currentTime, muted: v.muted } : null;
+      },
     };
     return () => {
       window.__cinematic = undefined;
@@ -415,6 +451,7 @@ function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, o
       className="absolute inset-0 outline-none select-none"
     >
       <canvas ref={canvasRef} className={cn("absolute inset-0 h-full w-full", mode === "video" && "invisible")} aria-hidden />
+      {mode === "canvas" && <audio ref={voiceRef} src={FILM_VOICES} preload="auto" muted data-testid="intro-voices" />}
       {mode === "video" && (
         <video
           ref={videoRef}
@@ -581,6 +618,7 @@ declare global {
       duration: number;
       audio: () => string;
       mode: () => string;
+      voices: () => { playing: boolean; time: number; muted: boolean } | null;
     };
   }
 }
