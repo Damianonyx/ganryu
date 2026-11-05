@@ -590,9 +590,33 @@ def embers(name, center, spread, count, mat, seed=3, size=0.02):
     return ob
 
 
-def render(path, samples=64, res=None, frame=None):
+def use_eevee(samples=8):
+    """EEVEE: much faster than Cycles; runs on Mesa's software OpenGL without a GPU."""
     sc = bpy.context.scene
-    sc.cycles.samples = samples
+    sc.render.engine = "BLENDER_EEVEE"
+    ee = sc.eevee
+    ee.taa_render_samples = samples
+    for attr, val in (
+        ("use_shadows", True),
+        ("use_volumetric_shadows", True),
+        ("volumetric_tile_size", "8"),
+        ("volumetric_samples", 48),
+        ("use_raytracing", False),
+        ("use_gtao", True),
+        ("use_bloom", True),
+    ):
+        try:
+            setattr(ee, attr, val)
+        except (AttributeError, TypeError):
+            pass
+
+
+def render(path, samples=64, res=None, frame=None, engine="cycles"):
+    sc = bpy.context.scene
+    if engine == "eevee":
+        sc.eevee.taa_render_samples = samples
+    else:
+        sc.cycles.samples = samples
     if res is not None:
         sc.render.resolution_x, sc.render.resolution_y = res
     if frame is not None:

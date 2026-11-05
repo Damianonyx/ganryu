@@ -34,6 +34,7 @@ def main():
     ap.add_argument("--frame", type=int, default=None, help="single frame of the animation")
     ap.add_argument("--out", default=os.path.join(HERE, "..", "artifacts", "blender"))
     ap.add_argument("--res", default=None, help="e.g. 1280x720")
+    ap.add_argument("--engine", default=None, choices=["cycles", "eevee"])
     args = ap.parse_args()
 
     mod = importlib.import_module(f"shot_{args.shot}")
@@ -51,6 +52,9 @@ def main():
     sc = bpy.context.scene
     sc.render.resolution_x, sc.render.resolution_y = res
     sc.cycles.samples = samples
+    engine = args.engine or getattr(mod, "ENGINE", "cycles")
+    if engine == "eevee":
+        lib.use_eevee(samples)
 
     if args.frames:
         a, b = (int(x) for x in args.frames.split("-"))
@@ -59,13 +63,13 @@ def main():
         os.makedirs(d, exist_ok=True)
         for f in range(a, b + 1):
             t = time.time()
-            lib.render(os.path.join(d, f"{f:04d}.png"), samples, res, frame=f)
+            lib.render(os.path.join(d, f"{f:04d}.png"), samples, res, frame=f, engine=engine)
             print(f"[{args.shot}] frame {f} {time.time() - t:.1f}s", flush=True)
     else:
         frame = args.frame or getattr(mod, "STILL_FRAME", 1)
         t = time.time()
         path = os.path.join(args.out, f"{args.shot}{'-preview' if args.preview else ''}.png")
-        lib.render(path, samples, res, frame=frame)
+        lib.render(path, samples, res, frame=frame, engine=engine)
         print(f"[{args.shot}] {path} in {time.time() - t:.1f}s")
 
 
