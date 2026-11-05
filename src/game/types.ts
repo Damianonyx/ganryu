@@ -1,24 +1,26 @@
 export type CharId =
-  | "kage"
-  | "karasu"
-  | "enma"
-  | "akatsuki"
-  | "akai"
-  | "yoru"
-  | "hana"
-  | "kabuto"
-  | "shiro"
-  | "ryu"
-  | "mizuchi"
-  | "akakage"
-  | "shizuka"
-  | "werewolf"
-  | "chimera"
-  | "hellwolf"
-  | "fieldoni"
-  | "titan"
-  | "thorn"
-  | "abyss";
+  // protagonists
+  | "kairo"
+  | "hakuren"
+  | "shion"
+  | "akari"
+  // antagonists (campaign order)
+  | "kurogane"
+  | "sei"
+  | "rei"
+  | "mumyo"
+  | "vargash"
+  | "mokuren"
+  | "gorvane"
+  | "enjiro"
+  | "kharzul"
+  | "nethrak";
+
+/** Fighter IDs from the prototype roster; old saves may still contain them. */
+export const LEGACY_CHAR_IDS = [
+  "kage", "karasu", "enma", "akatsuki", "akai", "yoru", "hana", "kabuto", "shiro",
+  "ryu", "mizuchi", "akakage", "shizuka", "werewolf", "chimera", "hellwolf", "fieldoni", "titan",
+] as const;
 
 export type HatKind = "none" | "kasa" | "straw" | "kabuto" | "mask" | "hood" | "crown";
 export type HairKind = "none" | "topknot" | "long" | "white-pony" | "bob" | "spiky" | "mane";

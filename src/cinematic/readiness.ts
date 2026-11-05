@@ -70,7 +70,7 @@ export function startGameLoading(portraits: string[]) {
   if (started || typeof window === "undefined") return;
   started = true;
   registerTask("fonts", "Typefaces");
-  registerTask("portraits", "Fighter portraits", 2, false);
+  registerTask("portraits", "Fighter art", 2, false);
   // Settled by GameStage: first rendered frame, and the auth session check.
   registerTask("engine", "Arena renderer", 3);
   registerTask("session", "Player profile");

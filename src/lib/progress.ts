@@ -4,7 +4,13 @@ import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
 import type { CharId } from "@/game/types";
 
+// Current protagonists first; legacy prototype IDs stay valid so existing
+// rows keep loading (the client maps them to a current fighter).
 const PLAYABLE = [
+  "kairo",
+  "hakuren",
+  "shion",
+  "akari",
   "kage",
   "karasu",
   "enma",

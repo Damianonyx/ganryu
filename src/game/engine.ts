@@ -94,8 +94,8 @@ export class Engine {
     this.kind = "watch";
     this.arena.apply("mist");
     this.syncFog();
-    const a = getChar("kage");
-    const b = getChar("enma");
+    const a = getChar("kairo");
+    const b = getChar("nethrak");
     const fa = new Fighter(a, 0, -3.1, 0, -Math.PI / 2);
     const fb = new Fighter(b, 1, 3.1, 0, Math.PI / 2);
     this.add(fa);
@@ -126,9 +126,7 @@ export class Engine {
       this.add(e);
     });
     this.hint =
-      L.id === 12 || L.enemies.some((id) => getChar(id).unbeatable)
-        ? "Ordinary steel glances. Fold the Fourth (F) to cut them."
-        : L.id === 1
+      L.id === 1
           ? "WASD move · J slash · L parry · K leap · Q art · F fold"
           : L.blurb;
     this.hintT = 5.5;
@@ -481,6 +479,39 @@ export class Engine {
     const p = this.player;
     const target = p ?? this.fighters[0];
     if (!target) return;
+    // Side-on fighting-game framing: look across the line between the player
+    // and the nearest living foe, so both read in profile.
+    const foe = p
+      ? this.fighters
+          .filter((f) => f.team !== p.team && !f.dead)
+          .sort((a, b) => Math.hypot(a.x - p.x, a.z - p.z) - Math.hypot(b.x - p.x, b.z - p.z))[0]
+      : this.fighters.length > 1
+        ? this.fighters[1]
+        : undefined;
+    const lead = p ?? this.fighters[0];
+    if (lead && foe) {
+      const dx = foe.x - lead.x;
+      const dz = foe.z - lead.z;
+      const sep = Math.hypot(dx, dz) || 1;
+      // candidate camera sides: perpendicular to the fighters' line
+      const nx = -dz / sep;
+      const nz = dx / sep;
+      const curX = Math.sin(this.camYaw);
+      const curZ = Math.cos(this.camYaw);
+      const sgn = nx * curX + nz * curZ >= 0 ? 1 : -1;
+      const want = Math.atan2(nx * sgn, nz * sgn);
+      const dyaw = ((want - this.camYaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+      this.camYaw += dyaw * Math.min(1, 2.6 * dt);
+      const midX = (lead.x + foe.x) / 2;
+      const midZ = (lead.z + foe.z) / 2;
+      // fit both fighters plus a margin inside the horizontal field of view
+      const halfW = Math.tan(((this.camera.fov / 2) * Math.PI) / 180) * Math.max(0.3, this.camera.aspect);
+      const wantDist = Math.min(14, Math.max(4.8, (sep / 2 + 1.35) / halfW));
+      this.camDist += (wantDist - this.camDist) * Math.min(1, 2.2 * dt);
+      this.camPitch += (0.16 - this.camPitch) * Math.min(1, 2 * dt);
+      this.frameSide(midX, midZ, dt);
+      return;
+    }
     if (p) {
       const dyaw = ((p.yaw - this.camYaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
       this.camYaw += dyaw * Math.min(1, 3.4 * dt);
@@ -507,6 +538,25 @@ export class Engine {
     this.camPos.set(cx, cy, cz);
     this.camera.position.lerp(this.camPos, 1 - Math.exp(-4.8 * dt));
     this.camera.lookAt(target.x + leadX, lookY, target.z + leadZ);
+  }
+
+  private frameSide(midX: number, midZ: number, dt: number) {
+    const dist = this.foldingWorld ? this.camDist + 1.1 : this.camDist;
+    const fx = -Math.sin(this.camYaw);
+    const fz = -Math.cos(this.camYaw);
+    const lookY = 1.15 + (this.foldingWorld ? 0.2 : 0);
+    let cx = midX - fx * dist;
+    let cy = lookY + Math.sin(this.camPitch) * dist * 0.95;
+    let cz = midZ - fz * dist;
+    const shake = this.trauma * this.trauma;
+    if (shake > 0.002) {
+      cx += (Math.random() - 0.5) * shake * 0.55;
+      cy += (Math.random() - 0.5) * shake * 0.28;
+      cz += (Math.random() - 0.5) * shake * 0.35;
+    }
+    this.camPos.set(cx, cy, cz);
+    this.camera.position.lerp(this.camPos, 1 - Math.exp(-5.5 * dt));
+    this.camera.lookAt(midX, lookY, midZ);
   }
 
   hud(): HudSnap {
@@ -557,6 +607,12 @@ export class Engine {
         if (p) p.beginAnim(name);
       },
       ids: () => self.fighters.map((f) => f.def.id),
+      state: () => ({
+        cam: self.camera.position.toArray(),
+        camYaw: self.camYaw,
+        camDist: self.camDist,
+        fighters: self.fighters.map((f) => ({ id: f.def.id, x: f.x, z: f.z, dead: f.dead })),
+      }),
       freeze: () => {
         for (const f of self.fighters) {
           if (f.isPlayer) continue;
@@ -622,6 +678,7 @@ declare global {
       cam: (d: number, p?: number) => void;
       pose: (name: import("./types").AnimName) => void;
       ids: () => string[];
+      state: () => { cam: number[]; camYaw: number; camDist: number; fighters: { id: string; x: number; z: number; dead: boolean }[] };
       freeze: () => void;
       foeAnim: (name: import("./types").AnimName) => void;
       lookAtFoe: (dist?: number) => void;

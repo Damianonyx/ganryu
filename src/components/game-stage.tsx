@@ -5,7 +5,9 @@ import { Overlays } from "@/components/overlays";
 import { settleTask } from "@/cinematic/readiness";
 import { Engine } from "@/game/engine";
 import { bindInput } from "@/game/input";
+import { FINAL_LEVEL } from "@/game/levels";
 import { PLAYABLE } from "@/game/roster";
+import { migrateSave } from "@/game/save-migration";
 import { useGame } from "@/game/store";
 import type { CharId } from "@/game/types";
 import { useP2PRoom } from "@/lib/multiplayer";
@@ -53,7 +55,7 @@ export function GameStage() {
           wins: number;
           losses: number;
         };
-        if (PLAYABLE.some((c) => c.id === s.fighterId)) useGame.getState().applySave(s);
+        useGame.getState().applySave(migrateSave(s));
       }
     } catch {
       /* ignore */
@@ -94,13 +96,15 @@ export function GameStage() {
     void loadProgress()
       .then((s) => {
         const local = useGame.getState();
-        useGame.getState().applySave({
-          fighterId: s.fighterId,
-          maxLevel: Math.max(s.maxLevel, local.maxLevel),
-          currentLevel: Math.max(s.currentLevel, local.level),
-          wins: Math.max(s.wins, local.wins),
-          losses: Math.max(s.losses, local.losses),
-        });
+        useGame.getState().applySave(
+          migrateSave({
+            fighterId: s.fighterId,
+            maxLevel: Math.max(s.maxLevel, local.maxLevel),
+            currentLevel: Math.max(s.currentLevel, local.level),
+            wins: Math.max(s.wins, local.wins),
+            losses: Math.max(s.losses, local.losses),
+          }),
+        );
       })
       .catch(() => {
         /* unsigned or empty */
@@ -169,7 +173,7 @@ export function GameStage() {
   const onRematch = () => {
     unlock();
     const s = useGame.getState();
-    const n = s.result === "win" && s.level < 12 ? s.level + 1 : s.level;
+    const n = s.result === "win" && s.level < FINAL_LEVEL ? s.level + 1 : s.level;
     useGame.getState().setLevel(n);
     engineRef.current?.startCampaign(s.fighterId, n);
   };
@@ -213,7 +217,7 @@ export function GameStage() {
           unlock();
           const s = useGame.getState();
           if (s.playKind === "duel") {
-            const foe = PLAYABLE.find((c) => c.id !== s.fighterId)?.id ?? "kage";
+            const foe = PLAYABLE.find((c) => c.id !== s.fighterId)?.id ?? "kurogane";
             engineRef.current?.startDuel(s.fighterId, foe);
           } else {
             engineRef.current?.startCampaign(s.fighterId, s.level);

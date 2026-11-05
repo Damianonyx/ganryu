@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { buildRig, type Rig } from "./mesh";
+import type { Rig } from "./mesh";
+import { buildSpriteRig } from "./sprite-rig";
 import type { AnimName, CharacterDef, CharId, InputFrame, PowerKind } from "./types";
 
 let nid = 1;
@@ -54,7 +55,7 @@ export class Fighter {
     this.id = `f${nid++}`;
     this.def = def;
     this.team = team;
-    this.rig = buildRig(def);
+    this.rig = buildSpriteRig(def);
     this.x = x;
     this.z = z;
     this.yaw = yaw;

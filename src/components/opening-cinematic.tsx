@@ -14,7 +14,8 @@ import { loadStore, startGameLoading, summarize, type LoadState } from "@/cinema
 import { CinematicScore } from "@/cinematic/score";
 import { CUES, FILM_DURATION, INTRO_SCRIPT_VERSION, SPEAKERS, type Cue } from "@/cinematic/script";
 import { cuesAt } from "@/cinematic/timeline";
-import { PLAYABLE } from "@/game/roster";
+import { ROSTER } from "@/game/roster";
+import { allSpriteUrls } from "@/game/sprite-rig";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -66,7 +67,7 @@ export function IntroController({ replayToken, muted, onToggleMute, onCoverChang
   const load = filmShown ? all : critical;
 
   useEffect(() => {
-    startGameLoading(PLAYABLE.map((c) => c.portrait));
+    startGameLoading(allSpriteUrls(ROSTER.map((c) => c.id)));
     const override = parseIntroOverride(window.location.search);
     const play = shouldAutoplayIntro(readIntroRecord(), override, INTRO_SCRIPT_VERSION);
     const t = Number(new URLSearchParams(window.location.search).get("t"));
