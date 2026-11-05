@@ -211,6 +211,17 @@ def assemble(draft, audio_path=None):
         out = os.path.join(seg_dir, f"{sid}.mp4")
         have = os.path.isdir(frames) and len(os.listdir(frames)) > 0
         if have:
+            # rendered on twos (--step 2): hold each drawing for the missing frame
+            import shutil
+
+            last = None
+            for f in range(1, n + 1):
+                pth = os.path.join(frames, f"{f:04d}.png")
+                if os.path.exists(pth):
+                    last = pth
+                elif last:
+                    shutil.copyfile(last, pth)
+        if have:
             inp = ["-framerate", str(FPS), "-i", os.path.join(frames, "%04d.png")]
             # fill gaps (e.g. --step renders) by holding frames
             vf.insert(0, f"fps={FPS}")

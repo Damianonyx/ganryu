@@ -180,7 +180,7 @@ export type Cue = {
  */
 export const CUES: Cue[] = [
   { start: 4.2, end: 6.4, track: "speech", speaker: "father", lines: ["Steady your feet. Try again."] },
-  { start: 6.6, end: 8.9, track: "speech", speaker: "adult", voiceOver: true, lines: ["I remember his hands correcting mine.", "Her voice calling us home."] },
+  { start: 6.5, end: 9.5, track: "speech", speaker: "adult", voiceOver: true, lines: ["I remember his hands correcting mine.", "Her voice calling us home."] },
   { start: 9.0, end: 10.6, track: "sound", lines: ["[warning bell]"] },
   { start: 16.0, end: 17.6, track: "sound", lines: ["[wood splinters]"] },
   { start: 21.3, end: 22.9, track: "speech", speaker: "child", lines: ["Come with me."] },
