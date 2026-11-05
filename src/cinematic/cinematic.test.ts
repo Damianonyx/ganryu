@@ -42,7 +42,8 @@ describe("cinematic script", () => {
 
   it("keeps the confirmed story beats", () => {
     const notes = SHOTS.map((s) => s.note.toLowerCase()).join(" ");
-    for (const beat of ["bell", "antagonist", "emblem", "sword", "face", "father", "mother", "dawn", "adult"])
+    // owner decision: no armour emblem; Nethrak is recognised by face, robe, and red blade
+    for (const beat of ["bell", "antagonist", "robe", "sword", "face", "father", "mother", "dawn", "adult"])
       assert.ok(notes.includes(beat), `missing beat: ${beat}`);
     const speech = CUES.filter((c) => c.track === "speech").map((c) => c.lines.join(" "));
     assert.ok(speech.includes("Burn it."));

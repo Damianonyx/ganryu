@@ -63,7 +63,7 @@ export type ShotKind =
   | "hatch-close"
   | "door-breaks"
   | "antagonist-enters"
-  | "emblem-insert"
+  | "robe-insert"
   | "sword-face"
   | "father-falls"
   | "child-fear"
@@ -123,7 +123,7 @@ export const SHOTS: Shot[] = [
   // 00:28–00:40 THE MAN HE WILL REMEMBER
   { id: "4a", scene: "remember", start: 28, end: 30, kind: "door-breaks", note: "Through the gap: the door breaks inward." },
   { id: "4b", scene: "remember", start: 30, end: 32, kind: "antagonist-enters", note: "The antagonist enters slowly; his followers stay behind him." },
-  { id: "4c", scene: "remember", start: 32, end: 33.4, kind: "emblem-insert", note: "Detail: the emblem on his armor." },
+  { id: "4c", scene: "remember", start: 32, end: 33.4, kind: "robe-insert", note: "Detail: his white robe with crimson brushstroke flames as he steps across the floor." },
   { id: "4d", scene: "remember", start: 33.4, end: 35, kind: "sword-face", note: "Detail: his sword, then his face." },
   { id: "4e", scene: "remember", start: 35, end: 36.6, kind: "father-falls", note: "The father raises a household blade. A flash of steel. He falls out of view." },
   { id: "4f", scene: "remember", start: 36.6, end: 38.2, kind: "child-fear", note: "The mother rushes forward. The boy tries to call out; fear catches in his throat. A second movement of the sword." },
@@ -205,14 +205,15 @@ export const END_CARD = {
 };
 
 /**
- * Provisional antagonist identifiers. The three recognizable details the
- * brief asks for. Final designs are open; change the painter's
- * `drawAntagonist*` routines together with this description.
+ * How the child recognises the antagonist, Nethrak (docs/CHARACTERS.md):
+ * his face, his robe, and his sword. The owner decided against an armour
+ * emblem. Change the painter's antagonist routines together with this.
  */
 export const PROVISIONAL_ANTAGONIST_DESIGN = {
-  face: "Lacquered black half-mask with bared iron teeth; a pale scar runs vertically through the left eye; one crescent horn on the helmet is broken off.",
-  emblem: "A crimson ring enclosing three downward-pointing blades.",
-  sword: "An over-long nodachi with a crimson-wrapped grip, a ring-shaped guard echoing the emblem, and a notch near the tip.",
+  name: "Nethrak, The Eternal Nightmare (docs/CHARACTERS.md)",
+  face: "A skull face with glowing red eyes in the shadow of a wide conical steel hat.",
+  robe: "A white robe with crimson brushstroke flames along the hem (no armour emblem, by the owner's decision).",
+  sword: "An oversized red blade with a plain dark guard and a black grip wrapped in white.",
 };
 
 /**

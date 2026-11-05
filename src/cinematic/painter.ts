@@ -375,12 +375,18 @@ function figureBody(c: CanvasRenderingContext2D, f: Fig) {
 
   // garments
   c.beginPath();
-  if (f.kind === "mother") {
+  if (f.kind === "antagonist") {
+    // Nethrak: long white robe to the ground
+    c.moveTo(sh.x - H * 0.1, sh.y + torso * 0.2);
+    c.lineTo(sh.x + H * 0.1, sh.y + torso * 0.2);
+    c.lineTo(Math.max(fl.x, bl.x) + H * 0.13, -H * 0.01);
+    c.lineTo(Math.min(fl.x, bl.x) - H * 0.13, -H * 0.01);
+  } else if (f.kind === "mother") {
     c.moveTo(sh.x - H * 0.07, sh.y + torso * 0.25);
     c.lineTo(sh.x + H * 0.07, sh.y + torso * 0.25);
     c.lineTo(fl.x + H * 0.08, -H * 0.02);
     c.lineTo(bl.x - H * 0.08, -H * 0.02);
-  } else if (f.kind === "father" || f.kind === "adult" || f.kind === "samurai" || f.kind === "antagonist" || f.kind === "teen") {
+  } else if (f.kind === "father" || f.kind === "adult" || f.kind === "samurai" || f.kind === "teen") {
     // hakama / armored skirt
     c.moveTo(hip.x - H * 0.075, hip.y - H * 0.03);
     c.lineTo(hip.x + H * 0.075, hip.y - H * 0.03);
@@ -395,6 +401,24 @@ function figureBody(c: CanvasRenderingContext2D, f: Fig) {
   }
   c.closePath();
   c.fill();
+  if (f.kind === "antagonist") {
+    c.save();
+    c.fillStyle = "rgba(160,18,28,0.9)";
+    const left = Math.min(fl.x, bl.x) - H * 0.12;
+    const right = Math.max(fl.x, bl.x) + H * 0.12;
+    for (let i = 0; i < 7; i++) {
+      const x = left + ((right - left) * (i + 0.5)) / 7;
+      const hgt = H * (0.1 + 0.12 * ((i * 37) % 5) / 4);
+      c.beginPath();
+      c.moveTo(x - H * 0.028, -H * 0.012);
+      c.quadraticCurveTo(x - H * 0.03, -hgt * 0.55, x + H * 0.012, -hgt);
+      c.quadraticCurveTo(x + H * 0.005, -hgt * 0.45, x + H * 0.03, -H * 0.012);
+      c.closePath();
+      c.fill();
+    }
+    c.restore();
+    c.fillStyle = color;
+  }
 
   // torso
   c.lineWidth = H * (childish ? 0.14 : f.kind === "antagonist" ? 0.17 : 0.13);
@@ -403,7 +427,7 @@ function figureBody(c: CanvasRenderingContext2D, f: Fig) {
   c.lineTo(sh.x, sh.y + c.lineWidth * 0.3);
   c.stroke();
 
-  const armored = f.kind === "samurai" || f.kind === "antagonist";
+  const armored = f.kind === "samurai";
   if (armored || f.kind === "adult") {
     // shoulder plates (sode)
     const sw = H * (f.kind === "antagonist" ? 0.13 : 0.1);
@@ -453,13 +477,13 @@ function figureBody(c: CanvasRenderingContext2D, f: Fig) {
     const tip = { x: hand.x + Math.sin(a) * len, y: hand.y - Math.cos(a) * len };
     const grip = { x: hand.x - Math.sin(a) * H * 0.06, y: hand.y + Math.cos(a) * H * 0.06 };
     c.lineWidth = f.sword.kind === "wood" ? H * 0.022 : H * 0.014;
-    c.strokeStyle = f.sword.kind === "wood" ? "#5b4130" : color;
+    c.strokeStyle = f.sword.kind === "wood" ? "#5b4130" : f.sword.kind === "nodachi" ? "#8a0c16" : color;
     c.beginPath();
     c.moveTo(grip.x, grip.y);
     c.lineTo(tip.x, tip.y);
     c.stroke();
     if (f.sword.kind !== "wood") {
-      c.strokeStyle = f.sword.kind === "nodachi" ? "rgba(230,90,80,0.75)" : "rgba(220,225,235,0.7)";
+      c.strokeStyle = f.sword.kind === "nodachi" ? "rgba(255,70,60,0.95)" : "rgba(220,225,235,0.7)";
       c.lineWidth = H * 0.005;
       c.beginPath();
       c.moveTo(hand.x + Math.sin(a) * H * 0.03, hand.y - Math.cos(a) * H * 0.03);
@@ -512,29 +536,38 @@ function figureBody(c: CanvasRenderingContext2D, f: Fig) {
     c.closePath();
     c.fill();
     c.lineWidth = headR * 0.22;
-    if (f.kind === "antagonist") {
-      // one full crescent, one broken: the recognizable silhouette
+    c.beginPath();
+    c.moveTo(hx - headR * 0.9, hy - headR * 1.6);
+    c.lineTo(hx, hy - headR * 0.9);
+    c.lineTo(hx + headR * 0.9, hy - headR * 1.6);
+    c.stroke();
+  }
+  if (f.kind === "antagonist") {
+    // Nethrak: wide conical steel hat (jingasa) over a skull face with red eyes
+    c.fillStyle = "#1a1818";
+    c.beginPath();
+    c.arc(hx, hy, headR * 0.95, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = "#9a958e";
+    c.beginPath();
+    c.moveTo(hx - headR * 3.0, hy - headR * 0.25);
+    c.lineTo(hx, hy - headR * 1.75);
+    c.lineTo(hx + headR * 3.0, hy - headR * 0.25);
+    c.quadraticCurveTo(hx, hy - headR * 0.05, hx - headR * 3.0, hy - headR * 0.25);
+    c.fill();
+    c.strokeStyle = "rgba(235,230,222,0.7)";
+    c.lineWidth = headR * 0.12;
+    c.beginPath();
+    c.moveTo(hx - headR * 3.0, hy - headR * 0.25);
+    c.lineTo(hx, hy - headR * 1.75);
+    c.stroke();
+    for (const ex of [-0.38, 0.38]) {
+      c.fillStyle = "rgba(255,40,30,0.95)";
       c.beginPath();
-      c.moveTo(hx + headR * 0.1, hy - headR * 1.0);
-      c.quadraticCurveTo(hx + headR * 1.9, hy - headR * 1.6, hx + headR * 1.7, hy - headR * 3.1);
-      c.stroke();
-      c.beginPath();
-      c.moveTo(hx - headR * 0.1, hy - headR * 1.0);
-      c.quadraticCurveTo(hx - headR * 1.0, hy - headR * 1.4, hx - headR * 1.15, hy - headR * 1.95);
-      c.stroke();
-      // emblem on the chest
-      c.strokeStyle = "rgba(190,40,40,0.95)";
-      c.lineWidth = H * 0.008;
-      c.beginPath();
-      c.arc(sh.x + H * 0.015, sh.y + H * 0.09, H * 0.03, 0, Math.PI * 2);
-      c.stroke();
-    } else {
-      c.beginPath();
-      c.moveTo(hx - headR * 0.9, hy - headR * 1.6);
-      c.lineTo(hx, hy - headR * 0.9);
-      c.lineTo(hx + headR * 0.9, hy - headR * 1.6);
-      c.stroke();
+      c.arc(hx + headR * ex, hy + headR * 0.15, headR * 0.16, 0, Math.PI * 2);
+      c.fill();
     }
+    c.fillStyle = color;
   }
   c.restore();
 }
@@ -742,111 +775,86 @@ function face(c: CanvasRenderingContext2D, cx: number, cy: number, s: number, o:
   c.restore();
 }
 
-function drawEmblem(c: CanvasRenderingContext2D, x: number, y: number, r: number, color = "#b4232a") {
-  c.save();
-  c.translate(x, y);
-  c.strokeStyle = color;
-  c.fillStyle = color;
-  c.lineWidth = r * 0.14;
-  c.beginPath();
-  c.arc(0, 0, r, 0, Math.PI * 2);
-  c.stroke();
-  for (const a of [-0.55, 0, 0.55]) {
-    c.save();
-    c.rotate(a);
-    c.beginPath();
-    c.moveTo(-r * 0.1, -r * 0.7);
-    c.lineTo(r * 0.1, -r * 0.7);
-    c.lineTo(0, r * 0.75);
-    c.closePath();
-    c.fill();
-    c.restore();
-  }
-  c.restore();
-}
-
 function antagonistFace(g: G, cx: number, cy: number, s: number, reveal: number) {
+  // Nethrak: a skull face in the shadow of a wide conical steel hat, red eyes.
   const c = g.c;
   const fl = flicker(g, 11, 0.3);
   c.save();
   c.translate(cx, cy);
-  // helmet shell
-  c.fillStyle = "#0a0808";
+  // white robe shoulders and high collar
+  c.fillStyle = "#b8b0a6";
   c.beginPath();
-  c.ellipse(0, -s * 0.2, s * 0.62, s * 0.5, 0, Math.PI, 0);
-  c.fill();
-  c.beginPath();
-  c.moveTo(-s * 0.95, s * 0.05);
-  c.lineTo(-s * 0.55, -s * 0.25);
-  c.lineTo(s * 0.55, -s * 0.25);
-  c.lineTo(s * 0.95, s * 0.05);
-  c.lineTo(s * 0.7, s * 0.25);
-  c.lineTo(-s * 0.7, s * 0.25);
+  c.moveTo(-s * 1.5, s * 1.4);
+  c.quadraticCurveTo(-s * 0.9, s * 0.55, -s * 0.32, s * 0.5);
+  c.lineTo(s * 0.32, s * 0.5);
+  c.quadraticCurveTo(s * 0.9, s * 0.55, s * 1.5, s * 1.4);
   c.closePath();
   c.fill();
-  // horns: full crescent right, broken stump left
-  c.strokeStyle = "#1b1514";
-  c.lineCap = "round";
-  c.lineWidth = s * 0.09;
+  c.fillStyle = "rgba(150,20,28,0.85)";
   c.beginPath();
-  c.moveTo(s * 0.1, -s * 0.62);
-  c.quadraticCurveTo(s * 0.95, -s * 0.9, s * 0.85, -s * 1.55);
-  c.stroke();
-  c.beginPath();
-  c.moveTo(-s * 0.1, -s * 0.62);
-  c.quadraticCurveTo(-s * 0.5, -s * 0.8, -s * 0.58, -s * 1.02);
-  c.stroke();
-  c.strokeStyle = `rgba(255,150,80,${0.5 * fl})`;
-  c.lineWidth = s * 0.02;
-  c.beginPath();
-  c.moveTo(-s * 0.64, -s * 0.98);
-  c.lineTo(-s * 0.5, -s * 1.08);
-  c.stroke();
-  // upper face in shadow, lit from below
-  const fg = c.createLinearGradient(0, s * 0.6, 0, -s * 0.2);
-  fg.addColorStop(0, `rgba(170,70,40,${0.9 * fl})`);
-  fg.addColorStop(1, "#140d0b");
-  c.fillStyle = fg;
-  c.beginPath();
-  c.ellipse(0, s * 0.15, s * 0.38, s * 0.42, 0, 0, Math.PI * 2);
+  c.moveTo(-s * 0.12, s * 0.52);
+  c.lineTo(0, s * 0.9);
+  c.lineTo(s * 0.12, s * 0.52);
+  c.closePath();
   c.fill();
-  // eyes
+  // skull: pale bone lit from below by fire
+  const bone = c.createLinearGradient(0, s * 0.55, 0, -s * 0.35);
+  bone.addColorStop(0, `rgba(230,180,150,${0.95})`);
+  bone.addColorStop(1, "#5a544e");
+  c.fillStyle = bone;
+  c.beginPath();
+  c.ellipse(0, 0.02 * s, s * 0.34, s * 0.42, 0, 0, Math.PI * 2);
+  c.fill();
+  // jaw and teeth
+  c.fillStyle = "#1a1412";
+  c.fillRect(-s * 0.2, s * 0.3, s * 0.4, s * 0.06);
+  c.fillStyle = `rgba(230,215,200,${0.9 * fl})`;
+  for (let i = -3; i <= 3; i++) c.fillRect(i * s * 0.055 - s * 0.02, s * 0.29, s * 0.04, s * 0.08);
+  // nose cavity
+  c.fillStyle = "#120d0c";
+  c.beginPath();
+  c.moveTo(0, s * 0.08);
+  c.lineTo(-s * 0.05, s * 0.2);
+  c.lineTo(s * 0.05, s * 0.2);
+  c.closePath();
+  c.fill();
+  // eye sockets with glowing red eyes
   for (const sx of [-1, 1]) {
-    c.fillStyle = "#050404";
+    c.fillStyle = "#070505";
     c.beginPath();
-    c.ellipse(sx * s * 0.15, s * 0.04, s * 0.09, s * 0.035, sx * 0.15, 0, Math.PI * 2);
+    c.ellipse(sx * s * 0.14, -s * 0.03, s * 0.1, s * 0.085, sx * 0.2, 0, Math.PI * 2);
     c.fill();
-    c.fillStyle = `rgba(255,190,120,${0.85 * reveal})`;
+    c.fillStyle = `rgba(255,40,30,${0.6 + 0.4 * reveal})`;
     c.beginPath();
-    c.arc(sx * s * 0.15 + s * 0.02, s * 0.035, s * 0.012, 0, Math.PI * 2);
+    c.arc(sx * s * 0.14, -s * 0.03, s * 0.035, 0, Math.PI * 2);
     c.fill();
+    glow(c, sx * s * 0.14, -s * 0.03, s * 0.16, "rgba(255,30,20,0.9)", 0.5 * reveal);
   }
-  // scar through the left eye
-  c.strokeStyle = `rgba(225,205,190,${0.85 * reveal})`;
-  c.lineWidth = s * 0.018;
+  // wide conical steel hat casting the upper face into shadow
+  const steel = c.createLinearGradient(-s * 1.6, 0, s * 1.6, 0);
+  steel.addColorStop(0, "#4a4744");
+  steel.addColorStop(0.45, "#a8a39c");
+  steel.addColorStop(0.6, "#d8d3cb");
+  steel.addColorStop(1, "#3e3b38");
+  c.fillStyle = steel;
   c.beginPath();
-  c.moveTo(-s * 0.17, -s * 0.16);
-  c.lineTo(-s * 0.13, s * 0.22);
-  c.stroke();
-  // half-mask with iron teeth
-  c.fillStyle = "#0c0909";
-  c.beginPath();
-  c.moveTo(-s * 0.4, s * 0.15);
-  c.quadraticCurveTo(0, s * 0.08, s * 0.4, s * 0.15);
-  c.lineTo(s * 0.3, s * 0.55);
-  c.quadraticCurveTo(0, s * 0.72, -s * 0.3, s * 0.55);
-  c.closePath();
+  c.moveTo(-s * 1.65, -s * 0.22);
+  c.lineTo(0, -s * 0.98);
+  c.lineTo(s * 1.65, -s * 0.22);
+  c.quadraticCurveTo(0, -s * 0.12, -s * 1.65, -s * 0.22);
   c.fill();
-  c.fillStyle = `rgba(150,140,135,${0.8 * fl})`;
-  for (let i = -3; i <= 3; i++) {
+  c.strokeStyle = "rgba(40,36,34,0.8)";
+  c.lineWidth = s * 0.012;
+  for (let i = -4; i <= 4; i++) {
     c.beginPath();
-    c.moveTo(i * s * 0.06 - s * 0.025, s * 0.36);
-    c.lineTo(i * s * 0.06 + s * 0.025, s * 0.36);
-    c.lineTo(i * s * 0.06, s * 0.44);
-    c.closePath();
-    c.fill();
+    c.moveTo(0, -s * 0.98);
+    c.lineTo(i * s * 0.38, -s * 0.18);
+    c.stroke();
   }
-  drawEmblem(c, 0, -s * 0.38, s * 0.09, `rgba(190,40,40,${0.9})`);
+  c.fillStyle = "rgba(0,0,0,0.45)";
+  c.beginPath();
+  c.ellipse(0, -s * 0.12, s * 0.36, s * 0.12, 0, 0, Math.PI * 2);
+  c.fill();
   c.restore();
 }
 
@@ -1390,7 +1398,7 @@ function shotAntagonistEnters(g: G) {
       y: 900,
       h: 640,
       facing: 1,
-      color: "#060404",
+      color: "#cdc5ba",
       rim: "rgba(255,120,60,0.7)",
       stride: g.reduced ? undefined : run(g.L, 2.2),
       stepLen: 0.1,
@@ -1402,36 +1410,69 @@ function shotAntagonistEnters(g: G) {
   vignette(c, 0.6);
 }
 
-function shotEmblemInsert(g: G) {
+function shotRobeInsert(g: G) {
+  // Detail: his white robe and its crimson brushstroke flames, stepping slowly across the floor
   const c = g.c;
   const p = g.p;
-  rect(c, "#0a0707");
+  rect(c, vgrad(c, 0, STAGE_H, [[0, "#1c0f0a"], [1, "#0a0605"]]));
   c.save();
-  cam(g, 1.05 + p * 0.08, 0, 0);
-  // lamellar plates
-  for (let r = 0; r < 9; r++) {
-    for (let k = 0; k < 14; k++) {
-      const x = k * 120 + (r % 2) * 60 - 40;
-      const y = r * 100;
-      const gr = c.createLinearGradient(x, y, x, y + 96);
-      gr.addColorStop(0, "#1e1616");
-      gr.addColorStop(1, "#0b0808");
-      c.fillStyle = gr;
-      c.fillRect(x, y, 116, 96);
-    }
-    c.fillStyle = "#3a0d10";
-    c.fillRect(0, r * 100 + 94, STAGE_W, 6);
+  cam(g, 1.04 + p * 0.05, 0, 0);
+  // floorboards in firelight
+  for (let i = 0; i < 6; i++) {
+    c.fillStyle = i % 2 ? "#2a1710" : "#24140e";
+    c.fillRect(0, 640 + i * 46, STAGE_W, 44);
   }
-  // fire sheen sweeping across
-  const sx = lerp(-300, 1900, p);
-  const sh = c.createLinearGradient(sx - 300, 0, sx + 300, 0);
-  sh.addColorStop(0, "rgba(255,140,70,0)");
-  sh.addColorStop(0.5, "rgba(255,140,70,0.22)");
-  sh.addColorStop(1, "rgba(255,140,70,0)");
-  c.fillStyle = sh;
-  c.fillRect(0, 0, STAGE_W, STAGE_H);
-  drawEmblem(c, 800, 450, 190);
-  glow(c, 800, 450, 300, "rgba(200,40,30,0.5)", 0.35 * flicker(g, 7, 0.3));
+  glow(c, 300, 700, 700, "rgba(255,110,50,0.5)", 0.55 * flicker(g, 4, 0.3));
+  const x = lerp(1300, 380, p);
+  // robe hem
+  const robe = c.createLinearGradient(0, 80, 0, 760);
+  robe.addColorStop(0, "#a8a096");
+  robe.addColorStop(1, "#e4ddd2");
+  c.fillStyle = robe;
+  c.beginPath();
+  c.moveTo(x - 330, 60);
+  c.lineTo(x + 330, 60);
+  c.lineTo(x + 420, 720);
+  for (let k = 0; k <= 12; k++) c.lineTo(x + 420 - k * 70, 720 + (k % 2 ? 14 : -6));
+  c.closePath();
+  c.fill();
+  // folds
+  c.strokeStyle = "rgba(90,80,72,0.35)";
+  c.lineWidth = 6;
+  for (let k = -3; k <= 3; k++) {
+    c.beginPath();
+    c.moveTo(x + k * 90, 60);
+    c.quadraticCurveTo(x + k * 110 + 20, 400, x + k * 120, 720);
+    c.stroke();
+  }
+  // crimson brushstroke flames rising from the hem
+  c.fillStyle = "rgba(150,14,24,0.92)";
+  for (let k = 0; k < 9; k++) {
+    const fx = x - 360 + k * 90;
+    const h = 160 + ((k * 53) % 5) * 55;
+    c.beginPath();
+    c.moveTo(fx - 34, 716);
+    c.quadraticCurveTo(fx - 40, 716 - h * 0.55, fx + 14, 716 - h);
+    c.quadraticCurveTo(fx + 6, 716 - h * 0.45, fx + 38, 716);
+    c.closePath();
+    c.fill();
+  }
+  c.fillStyle = "rgba(210,30,40,0.85)";
+  c.beginPath();
+  c.moveTo(x + 120, 300);
+  c.lineTo(x + 175, 250);
+  c.lineTo(x + 150, 330);
+  c.lineTo(x + 200, 320);
+  c.lineTo(x + 130, 420);
+  c.closePath();
+  c.fill();
+  // a sandalled foot stepping out beneath the hem
+  const step = Math.max(0, Math.sin(p * Math.PI * 2));
+  c.fillStyle = "#0c0908";
+  c.beginPath();
+  c.ellipse(x - 120 - step * 60, 742, 80, 22, 0, 0, Math.PI * 2);
+  c.fill();
+  particles(g, 26, "ember", 21, 0.6);
   c.restore();
   vignette(c, 0.75);
 }
@@ -1451,42 +1492,41 @@ function shotSwordFace(g: G) {
     c.fillRect(-900, -22, 700, 44);
     // drawn blade sliding out
     const bx = -200 + k * 950;
-    const blade = c.createLinearGradient(0, -14, 0, 14);
-    blade.addColorStop(0, "#f2ede4");
-    blade.addColorStop(0.5, "#8b8d93");
-    blade.addColorStop(1, "#3d3d44");
+    const blade = c.createLinearGradient(0, -16, 0, 16);
+    blade.addColorStop(0, "#ff6a5a");
+    blade.addColorStop(0.45, "#b0101c");
+    blade.addColorStop(1, "#4a0408");
     c.fillStyle = blade;
     c.beginPath();
-    c.moveTo(-200, -14);
-    c.lineTo(bx, -14);
-    c.quadraticCurveTo(bx + 60, -6, bx + 80, 14);
-    c.lineTo(-200, 14);
+    c.moveTo(-200, -16);
+    c.lineTo(bx, -16);
+    c.quadraticCurveTo(bx + 70, -8, bx + 95, 16);
+    c.lineTo(-200, 16);
     c.closePath();
     c.fill();
-    // notch near the tip
-    c.fillStyle = "#0d0807";
+    c.strokeStyle = "rgba(255,190,170,0.85)";
+    c.lineWidth = 2.5;
     c.beginPath();
-    c.moveTo(bx - 90, -14);
-    c.lineTo(bx - 70, -2);
-    c.lineTo(bx - 50, -14);
-    c.fill();
-    c.strokeStyle = "rgba(230,100,80,0.7)";
-    c.lineWidth = 2;
-    c.beginPath();
-    c.moveTo(-200, -13);
-    c.lineTo(bx - 95, -13);
+    c.moveTo(-200, -15);
+    c.lineTo(bx, -15);
     c.stroke();
-    // ring guard echoing the emblem, crimson grip
-    drawEmblem(c, -220, 0, 42, "#7a1a1c");
-    c.fillStyle = "#6a1418";
-    c.fillRect(-470, -18, 230, 36);
-    c.strokeStyle = "#1a0a0a";
-    c.lineWidth = 4;
-    for (let i = 0; i < 8; i++) {
+    glow(c, bx * 0.6, 0, 180, "rgba(255,40,30,0.8)", 0.35 * k);
+    // plain dark guard and black grip with a white diamond wrap
+    c.fillStyle = "#151212";
+    c.beginPath();
+    c.ellipse(-210, 0, 18, 46, 0, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = "#111";
+    c.fillRect(-500, -18, 280, 36);
+    c.fillStyle = "rgba(225,220,212,0.85)";
+    for (let i = 0; i < 9; i++) {
       c.beginPath();
-      c.moveTo(-460 + i * 28, -18);
-      c.lineTo(-446 + i * 28, 18);
-      c.stroke();
+      c.moveTo(-490 + i * 30, 0);
+      c.lineTo(-478 + i * 30, -12);
+      c.lineTo(-466 + i * 30, 0);
+      c.lineTo(-478 + i * 30, 12);
+      c.closePath();
+      c.fill();
     }
     c.restore();
     glow(c, 800 + (k - 0.5) * 700, 450, 120, "rgba(255,230,200,0.7)", 0.5 * k);
@@ -1526,7 +1566,7 @@ function shotFatherFalls(g: G) {
       tilt: fall * 0.4,
     });
     const swing = seg(p, strike - 0.08, strike + 0.04);
-    figure(c, { kind: "antagonist", x: 640, y: 900, h: 640, facing: 1, color: "#060404", rim: "rgba(255,120,60,0.7)", armF: 2.5 - swing * 2.6, armB: 2.4 - swing * 2.4, sword: { a: -0.6 + swing * 2.6, len: 0.62, kind: "nodachi" } });
+    figure(c, { kind: "antagonist", x: 640, y: 900, h: 640, facing: 1, color: "#cdc5ba", rim: "rgba(255,120,60,0.7)", armF: 2.5 - swing * 2.6, armB: 2.4 - swing * 2.4, sword: { a: -0.6 + swing * 2.6, len: 0.62, kind: "nodachi" } });
     figure(c, { kind: "mother", x: 1210, y: 900, h: 560, facing: -1, color: "#090605", rim: "rgba(255,130,60,0.5)", lean: fall * 0.2 });
     // the flash of steel: a single bright arc
     if (p > strike - 0.02 && p < strike + 0.12) {
@@ -2213,7 +2253,7 @@ const ROUTINES: Record<ShotKind, (g: G) => void> = {
   "hatch-close": shotHatchClose,
   "door-breaks": shotDoorBreaks,
   "antagonist-enters": shotAntagonistEnters,
-  "emblem-insert": shotEmblemInsert,
+  "robe-insert": shotRobeInsert,
   "sword-face": shotSwordFace,
   "father-falls": shotFatherFalls,
   "child-fear": shotChildFear,
