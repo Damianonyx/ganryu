@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { FINAL_LEVEL } from "./levels";
 import type { CharId, GameMode, HudSnap, PlayKind, ResultKind } from "./types";
 
 export type SaveState = {
@@ -51,7 +52,7 @@ const emptyHud: HudSnap = {
 export const useGame = create<GameState>((set, get) => ({
   mode: "title",
   playKind: "watch",
-  fighterId: "kage",
+  fighterId: "kairo",
   level: 1,
   maxLevel: 1,
   wins: 0,
@@ -80,7 +81,7 @@ export const useGame = create<GameState>((set, get) => ({
     if (win) {
       set({
         wins: s.wins + 1,
-        maxLevel: Math.min(12, Math.max(s.maxLevel, s.level + 1)),
+        maxLevel: Math.min(FINAL_LEVEL, Math.max(s.maxLevel, s.level + 1)),
       });
     } else set({ losses: s.losses + 1 });
   },

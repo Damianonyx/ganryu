@@ -206,7 +206,7 @@ function buildHuman(def: CharacterDef): Rig {
   headG.add(skull, jaw);
   headG.add(mesh(GEO.box, dark, 0.028, 0.016, 0.012, -0.045, 0.15, 0.13));
   headG.add(mesh(GEO.box, dark, 0.028, 0.016, 0.012, 0.045, 0.15, 0.13));
-  if (def.id === "akai") {
+  if ((def.id as string) === "akai") {
     const scar = mesh(GEO.box, accent, 0.09, 0.012, 0.012, -0.04, 0.16, 0.14);
     scar.rotation.z = 0.7;
     headG.add(scar);
@@ -475,7 +475,7 @@ function addSignature(
   metal: THREE.Material,
   dark: THREE.Material,
 ) {
-  if (def.id === "karasu") {
+  if ((def.id as string) === "karasu") {
     const raven = new THREE.Group();
     raven.position.set(0.28, 1.55, -0.12);
     raven.add(mesh(GEO.sphere, dark, 0.07, 0.05, 0.1, 0, 0, 0));
@@ -483,20 +483,20 @@ function addSignature(
     raven.rotation.y = -0.6;
     body.add(raven);
   }
-  if (def.id === "shiro") {
+  if ((def.id as string) === "shiro") {
     for (let i = 0; i < 5; i++) {
       const c = mesh(GEO.cyl, metal, 0.035, 0.012, 0.035, -0.22, 0.7 - i * 0.08, -0.12);
       body.add(c);
     }
   }
-  if (def.id === "akatsuki") {
+  if ((def.id as string) === "akatsuki") {
     body.add(mesh(GEO.box, accent, 0.48, 0.36, 0.3, 0, 1.38, 0));
     body.add(mesh(GEO.box, dark, 0.22, 0.22, 0.08, 0, 1.4, 0.16));
   }
-  if (def.id === "yoru" || def.id === "mizuchi") {
+  if ((def.id as string) === "yoru" || (def.id as string) === "mizuchi") {
     body.add(mesh(GEO.box, trim, 0.36, 0.08, 0.22, 0, 1.22, 0.04));
   }
-  if (def.id === "hana") {
+  if ((def.id as string) === "hana") {
     const bow = mesh(GEO.box, accent, 0.16, 0.08, 0.04, 0.08, 0.32, -0.08);
     head.add(bow);
   }
@@ -517,9 +517,9 @@ function buildBeast(def: CharacterDef): Rig {
   root.add(body);
   body.scale.setScalar(k.scale);
 
-  const isWolf = def.id === "werewolf";
-  const isChimera = def.id === "chimera";
-  const isHell = def.id === "hellwolf";
+  const isWolf = (def.id as string) === "werewolf";
+  const isChimera = (def.id as string) === "chimera";
+  const isHell = (def.id as string) === "hellwolf";
   const bulk = isChimera ? 1.12 : isHell ? 1.04 : 1;
 
   const hipsG = new THREE.Group();

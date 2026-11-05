@@ -1,0 +1,160 @@
+# Opening cinematic and preloader
+
+The opening film plays while the game loads. It is a painted 2D film, about 76 seconds long, chosen by the owner as the loading screen. It has voices, sound effects, music, and subtitles. It follows the screenplay in `src/cinematic/script.ts` and the events in [STORYLINE.md](STORYLINE.md).
+
+The village survivor is **Kairo** (shown as the child, then the adult). The killer is **Nethrak**: a skull face with red eyes beneath a wide conical steel hat, a white robe with crimson brushstroke flames, and an oversized red blade.
+
+Five of his followers took part in the attack, as the owner approved:
+- Kurogane led the samurai.
+- The twins Sei (silver-white) and Rei (violet) moved through the forest.
+- Vargash broke the gate.
+- Kharzul waited in the doorway with Kurogane.
+
+There is no armor emblem, by the owner's decision. The other three protagonists do not appear; the film is Kairo's childhood only.
+
+The wooden charm, cellar, dialogue, and exact staging are screenplay details, not fixed canon. An optional Blender 3D version of the same film exists (`?film=3d`, see [blender/README.md](../blender/README.md)). It is not the default.
+
+## Viewing the preview
+
+```bash
+npm ci
+npm run dev
+```
+
+| URL | Behavior |
+| --- | --- |
+| `http://127.0.0.1:8080/` | Normal flow: film on first visit, menu on later visits |
+| `/?intro=1` | Always play the film |
+| `/?intro=0` | Never play the film (menu only) |
+| `/?intro=1&t=28` | Start at 28 seconds |
+| `/?intro=1&paused=1` | Start paused (Space to play) |
+| `/?intro=1&motion=reduced` | Force the reduced-motion version |
+| `/?intro=1&clean=1` | Hide controls (stills for review) |
+| `/?intro=1&film=3d` | Play the optional Blender 3D film instead (picture and sound from `public/cinematic/opening.mp4`) |
+
+From the title menu, **Replay intro** plays it again.
+
+Controls: **Skip/Continue**, **Sound**, **Subtitles (CC)**, and **Pause**. Keyboard: `Esc` skip, `Space`/`K` pause, `M` sound, `C` subtitles. The film pauses while the browser tab is hidden.
+
+### Generated previews
+
+With the dev server running:
+
+```bash
+npm run intro:contact   # artifacts/cinematic-preview/contact-sheet.html — one still per shot
+npm run intro:video     # artifacts/cinematic-preview/*.webm — real-time recording (silent)
+npm run intro:verify    # flow, audio, and layout checks; writes verify.json and screenshots
+```
+
+`artifacts/` is git-ignored. Set `PREVIEW_URL` to check another server.
+
+## Loading and hand-off behavior
+
+The game loads behind the film. Readiness is reported by the code doing the work; nothing completes on a timer.
+
+| Task | Settled when | Gates the menu when the film is skipped by preference |
+| --- | --- | --- |
+| Arena renderer | The Three.js engine has rendered its first frames (shaders compiled, scene uploaded) | Yes |
+| Player profile | The auth session check resolves (signed in or out) | Yes |
+| Typefaces | `document.fonts.ready` | Yes |
+| Fighter portraits | Every selectable fighter portrait has loaded and decoded | No — prefetch only |
+
+A failed task still counts as settled, so a missing image cannot block the game.
+
+| Situation | Result |
+| --- | --- |
+| Film ends or is skipped before loading completes | "Preparing the arena" loading state with real progress, then the menu |
+| Loading completes during the film | Skip becomes **Continue**; the film keeps playing until the player continues or it ends |
+| Returning player | Straight to the menu (briefly showing the loading state only if critical work is unfinished) |
+
+While the film covers the stage, the game engine renders its initial frames and then idles instead of drawing hidden frames. It resumes when the menu appears. Leaving the film stops its animation loop, closes its audio context, removes its listeners, and releases its canvas.
+
+### Saved state
+
+The intro outcome is stored separately under `ganryu-intro-v1` as `{ outcome: "completed" | "skipped", version, at }`. The subtitle preference uses `ganryu-intro-subtitles`. Player saves (`ganryu-save-v1`, the legacy `yonji-save-v1`, and the server save) are not read or written. Sound uses the existing `ganryu-muted` preference and mute control, so the film and game share one setting.
+
+Increase `INTRO_SCRIPT_VERSION` in `src/cinematic/script.ts` to show a substantially revised film again to players who already watched or skipped the previous version.
+
+### Sound and voices
+
+The film combines three layers:
+- **Synthesized score** (`src/cinematic/score.ts`): ambient beds plus timed hits such as the bell, steel, impacts, and the closing drum.
+- **Voice track** (`public/cinematic/voices.mp3`): the narrator (adult Kairo), father, mother, child, and Nethrak. It is kept within a quarter of a second of the film clock, and it pauses, seeks, and stops with the film.
+- **Subtitles** for every line, plus short sound captions.
+
+The voices are temporary text-to-speech (Piper), generated by `blender/film/audio.py` from the dialogue in `script.ts`. To use recorded actors, replace `voices.mp3` with a track timed to the same cues.
+
+### Audio and browser restrictions
+
+Browsers block audio until the player interacts with the page. On a first visit the film starts silently with a highlighted **Tap for sound** control. Any tap or key press also enables sound, joining the ambient bed at the current scene. The button acts on what it showed when pressed, so a first tap never toggles sound straight back off. Replay Intro starts with sound because the menu click counts as interaction. Mute is respected throughout.
+
+### Accessibility
+
+- Subtitles are on by default, set on a dark panel with text shadow for legibility over fire and smoke, and include short sound captions such as `[warning bell]`.
+- With `prefers-reduced-motion`, the film uses static cameras, no shake or screen flashes, steady firelight, fewer and slower particles, and a dissolve for the match cut. Timing and subtitles are unchanged.
+- The overlay is a labelled modal dialog. Controls are at least 44 px tall and respect device safe areas.
+- Wide screens fill the frame. Tall/portrait screens letterbox the image and place subtitles in the space below it.
+
+## Editing the film
+
+| What | Where |
+| --- | --- |
+| Shot timing, order, descriptions, fades | `SHOTS` in `src/cinematic/script.ts` |
+| Dialogue, voice-over, sound captions | `CUES` in `src/cinematic/script.ts` |
+| Speaker placeholder names | `SPEAKERS` in `src/cinematic/script.ts` |
+| Tagline and title card | `END_CARD` in `src/cinematic/script.ts` |
+| Sound hits | `SOUND_EVENTS` in `src/cinematic/script.ts` |
+| Ambient beds per scene | `bedLevels` in `src/cinematic/score.ts` |
+| How each shot is drawn | The routine for its `kind` in `src/cinematic/painter.ts` |
+| Nethrak's look | `PROVISIONAL_ANTAGONIST_DESIGN` in `script.ts`; the `antagonist` figure, `antagonistFace`, `shotRobeInsert`, and the blade in `shotSwordFace` in `painter.ts` |
+| Followers at the attack | `drawSei`, `drawRei`, `drawVargash`, `drawKharzul`, and the `samurai` figure (Kurogane's style) in `painter.ts` |
+| Voices | `CUES` in `script.ts`, then regenerate with `blender/film/audio.py` (writes the voice stem used for `public/cinematic/voices.mp3`) |
+
+Shots must be contiguous; cues must not overlap on the same track. `npm test` (and `node --experimental-strip-types --test src/cinematic/cinematic.test.ts`) validates the script.
+
+Each frame is a pure function of film time, so retimed shots can be checked immediately with `?t=` or the contact sheet.
+
+## Files
+
+- `src/cinematic/script.ts` — editable screenplay data
+- `src/cinematic/timeline.ts` — shot/cue lookup and script validation
+- `src/cinematic/painter.ts` — temporary procedural artwork
+- `src/cinematic/score.ts` — temporary synthesized sound
+- `src/cinematic/flow.ts` — film/loading/menu state transitions
+- `src/cinematic/readiness.ts` — loading tasks and progress
+- `src/cinematic/intro-state.ts` — intro outcome and subtitle preference
+- `src/components/opening-cinematic.tsx` — overlay, controls, subtitles, voice sync, loading state
+- `public/cinematic/voices.mp3` — temporary voice track; `public/cinematic/opening.mp4` — optional 3D film
+- `src/components/game-stage.tsx`, `src/components/overlays.tsx` — integration and Replay Intro
+- `scripts/cinematic-preview.mjs` — contact sheet, video, and browser verification
+
+## Temporary assets and unfinished work
+
+**Temporary**
+
+- All imagery is procedural 2D canvas painting. Characters are stylized silhouettes; Nethrak and the five followers follow their reference sheets in shape and color, not in detail.
+- The child, his parents, and the villagers have no character sheets yet.
+- The charm is a carved wooden disc on a red cord.
+- The score and sound effects are synthesized; there is no composed music.
+- Voices are text-to-speech placeholders.
+- `GANRYŪ` is the working title on the title card.
+
+**Unfinished animation and staging**
+
+- Figures use simple joint poses, with no weight transfer, cloth, or facial animation.
+- Hands (the charm, the sleeve, the wrapped wrist, tying the charm) and faces are simplified.
+- The parents' deaths are staged in silhouette through the floor gap. They read clearly but need proper direction.
+- The training montage shows age through four silhouette sizes rather than a consistent character.
+
+**Assumptions**
+
+- The film plays before the title menu. Warrior selection follows from the Campaign button.
+- The cinematic shows Kairo's childhood whichever protagonist the player later chooses.
+- "Continue" or "Skip" while watching records the intro as skipped; reaching the end records it as completed.
+- Only critical tasks gate the menu for returning players, so they do not wait for portrait prefetching.
+
+**Recommended next steps**
+
+1. Record voice actors and compose a score; keep subtitles timed to them.
+2. Design the father, mother, and child to match the cast's art style.
+3. Decide whether a future production film is painted or 3D. The controller, loading logic, voices, and subtitles work with either.
