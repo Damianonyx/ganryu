@@ -131,6 +131,7 @@ export class Engine {
           : L.blurb;
     this.hintT = 5.5;
     this.t = 0;
+    this.audio.draw();
     this.camDist = 8.6;
     this.camPitch = 0.34;
     useGame.getState().setPlay(level);
@@ -148,6 +149,7 @@ export class Engine {
     const e = new Fighter(getChar(foe), 1, 0, -4.5, Math.PI);
     this.add(e);
     this.hint = "Duel — first to fall loses.";
+    this.audio.draw();
     this.hintT = 3;
     this.camDist = 8.8;
     useGame.getState().setPlay(useGame.getState().level);
@@ -199,6 +201,7 @@ export class Engine {
   private fixed(dt: number) {
     this.t += dt;
     this.audio.tick(this.t);
+    this.sfxTick();
     this.comboT = Math.max(0, this.comboT - dt);
     if (this.comboT <= 0) this.combo = 0;
     this.hintT = Math.max(0, this.hintT - dt);
@@ -358,7 +361,7 @@ export class Engine {
         if (!a.swingFx) {
           a.swingFx = true;
           this.fx.slashArc(a.x, 1, a.z, a.yaw);
-          this.audio.slash();
+          this.audio.slash(this.pan(a));
         }
       }
       if (a.anim === "special" && a.animT > 0.08 && a.animT < 0.2 && !a.hitLanded) {
@@ -374,10 +377,36 @@ export class Engine {
     }
   }
 
+  private prevAnim = new WeakMap<Fighter, string>();
+  private panVec = new THREE.Vector3();
+
+  /** Left/right pan for a fighter from its on-screen position. */
+  private pan(f: Fighter) {
+    this.panVec.set(f.x, 1, f.z).project(this.camera);
+    return Math.max(-0.8, Math.min(0.8, this.panVec.x * 0.7));
+  }
+
+  /** Movement sounds driven by animation changes (leap, arts) and stride. */
+  private sfxTick() {
+    if (this.kind === "watch") return;
+    for (const f of this.fighters) {
+      const prev = this.prevAnim.get(f);
+      if (f.anim !== prev) {
+        if (f.anim === "leap") this.audio.leap(this.pan(f));
+        if (f.anim === "special") this.audio.power(this.pan(f));
+        this.prevAnim.set(f, f.anim);
+      }
+      if (f.isPlayer && !f.dead && f.y <= 0.01) {
+        const speed = Math.hypot(f.vx, f.vz);
+        if (speed > 1.2 && (f.anim === "idle" || f.anim === "walk")) this.audio.step(this.t, this.pan(f), speed / 4);
+      }
+    }
+  }
+
   private strike(a: Fighter, b: Fighter, dmg: number) {
     const res = b.takeHit(dmg, a, a.folding());
     if (res === "parry") {
-      this.audio.parry();
+      this.audio.parry(this.pan(b));
       this.fx.burst(b.x, 1.2, b.z, 10, "#efece4", 3.2);
       a.stun = 0.25;
       this.trauma = Math.min(1, this.trauma + 0.25);
@@ -390,11 +419,11 @@ export class Engine {
         this.hint = "The Uncut — fold the Fourth (F) to wound them.";
         this.hintT = 2.2;
       }
-      this.audio.clash();
+      this.audio.clash(this.pan(b));
       return;
     }
     if (res === "hit" || res === "dead") {
-      this.audio.hit();
+      this.audio.hit(this.pan(b));
       this.fx.burst(b.x, 1.2, b.z, 16, a.folding() ? "#efece4" : "#b4232a", 5.2);
       this.trauma = Math.min(1, this.trauma + (res === "dead" ? 0.7 : 0.38));
       this.hitstop = res === "dead" ? 0.1 : 0.055;
