@@ -54,6 +54,8 @@ Nine followers and their leader. Level 10 stays locked until all nine followers 
 
 ### Design notes
 
+- **At the village attack (owner-approved):** Nethrak led the raid. Kurogane led the samurai through the gate, the twins Sei and Rei moved through the forest, Vargash broke the gate, and Kharzul waited with Kurogane in the doorway while Nethrak killed the parents. Gorvane, Enjirō, Mumyō, and Mokuren were not present, which leaves the story free to introduce them later.
+
 - **Nethrak in the opening cinematic.** The child recognizes him by his skull face beneath the conical hat and by his oversized red blade. The owner decided not to use an armor emblem.
 - **Sei and Rei** are twins. They share a look but have different abilities, and the silver-white or violet color marks each twin's attacks as well as their body.
 - **Nethrak in PvP.** He is the strongest fighter in the lore. If he becomes playable in a versus mode, that version is balanced like any other fighter.
