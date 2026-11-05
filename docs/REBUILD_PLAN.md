@@ -4,11 +4,22 @@
 
 The game is being redesigned across its characters, controls, abilities, strongest fighter, arenas, identity, and backend. The planned roster has 14 fighters: four selectable protagonists (two male and two female samurai) and ten antagonists — nine followers and their leader. Players choose a protagonist for a campaign spanning nine preliminary encounters and a final confrontation at level 10. This replaces the earlier 26-fighter, 21-level plan.
 
-Current work is story and character development before the Claude implementation handoff. See [STORYLINE.md](STORYLINE.md) for the childhood village attack, revenge premise, opening cinematic treatment, campaign chapters, and unresolved relationship between the survivor and the other playable heroes.
+The story and cast are now defined:
+- [STORYLINE.md](STORYLINE.md) covers the village attack, the revenge premise, and the campaign chapters.
+- [CHARACTERS.md](CHARACTERS.md) covers the 14 fighters and their reference sheets.
+
+Already in the game:
+- the roster, with working names
+- the ten-battle campaign
+- the warrior-select screen
+- the opening film as the loading screen
+- touch controls and combat sound
+
+The backend milestones below have not started.
 
 The setting remains dark samurai/fantasy. The strongest fighter will be strongest in the lore and have a balanced playable PvP version. These are confirmed design decisions.
 
-The current roster and campaign are reference material. Existing names, art, numerical rankings, abilities, and the twelve-level structure are not fixed requirements for the new game.
+The prototype's original 18-fighter roster and twelve-level campaign have been replaced. Old saves still load: their wins and losses are kept, unknown fighters map to Kairo, and levels clamp to ten. The fighters' 3D bodies and in-match powers are still prototype systems restyled per character, not the final kits.
 
 ## Design decisions
 
@@ -16,11 +27,12 @@ The current roster and campaign are reference material. Existing names, art, num
 | --- | --- | --- |
 | Game name | Select a distinctive name after confirming the setting and signature mechanic | Open; GANRYŪ remains the working title |
 | Setting | Dark samurai/fantasy | Confirmed |
-| Strongest fighter | Strongest in the lore, with a balanced playable PvP version | Confirmed policy; identity and kit remain open |
+| Strongest fighter | Nethrak, The Eternal Nightmare; strongest in the lore, with a balanced version if he becomes playable in PvP | Identity confirmed; kit is a proposal |
 | Target roster size | 14 fighters: four protagonists, nine enemy followers, and their leader | Confirmed target; implement and test in batches |
-| Campaign structure | Nine preliminary encounters, then the antagonist at level 10 | Confirmed target; current implementation still has twelve levels |
-| Opening cinematic | Childhood village attack, the leader killing the parents, survival, and a vow to train for revenge | Confirmed events; treatment and survival details are draft |
-| Four protagonist origins | One male protagonist is the village survivor; the other three are allies with their own reasons to oppose the antagonist | Proposed; not finalized |
+| Campaign structure | Nine preliminary encounters, then the antagonist at level 10 | Confirmed and implemented (ten battles in four chapters) |
+| Opening cinematic | Childhood village attack, the leader killing the parents, survival, and a vow to train for revenge | Implemented as the loading-screen film (painted, with temporary voices); staging details remain draft |
+| Four protagonist origins | Kairo is the village survivor; Hakuren, Shion, and Akari are allies he meets along the way | Confirmed; the allies' motives are still open |
+| Warrior select | Only the four protagonists can be chosen to enter the arena | Confirmed and implemented |
 | Match size | Prove 1v1 first; specify co-op/team sizes before implementing them | Proposed implementation order |
 | Time folding | Retain only if its shared multiplayer rules are clear and enjoyable | Under review with the other abilities |
 | Target devices | Test keyboard/mouse and touch separately; decide controller support explicitly | Final input scope open |

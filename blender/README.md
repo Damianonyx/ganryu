@@ -7,7 +7,22 @@ This is a **look-development test**, not final production. It shows lighting, at
 - **Thorn antagonist** (`characters.build_thorn_antagonist`) — built from the project owner's turnaround sheet: spined crown, beaked red helmet, layered thorn-shard armor and tattered robe, red veins, and four chains ending in glowing sickle talons. His exact role in the faction is not yet confirmed. The final in-game model should replace this procedural version.
 - **Protagonist, parents, samurai, monsters** — generic placeholder silhouettes until their designs exist.
 
-## Shots
+## The opening film (`blender/film/`)
+
+A full 3D version of the opening film, with rigged characters (`rig.py`, `cast.py`), sets (`sets.py`), 36 shot builders (`shots.py`), a runner and assembler (`film.py`), and a soundtrack builder (`audio.py`: Piper voices, synthesized effects, and score).
+
+The owner chose the painted film as the loading screen. The rendered 3D film is kept as an option (`?film=3d`, `public/cinematic/opening.mp4`). `audio.py` also produces the voice track the painted film uses, and `sfx_export.py` produces the in-game combat sounds in `public/sfx/`.
+
+```bash
+.venv-blender/bin/python blender/film/film.py stills --draft      # one still per shot → artifacts/film/stills-sheet.jpg
+.venv-blender/bin/python blender/film/film.py render --step 2     # EEVEE frames, animated on twos
+.venv-blender/bin/python blender/film/film.py assemble            # frames + end card + audio → artifacts/film/opening-cinematic.mp4
+python blender/film/audio.py                                      # needs numpy, scipy, soundfile, piper-tts and Piper voice files
+```
+
+EEVEE runs here on Mesa's software OpenGL (install `libegl1 libegl-mesa0 libgl1-mesa-dri`).
+
+## Look-development shots
 
 | Shot | Screenplay beat | File |
 | --- | --- | --- |

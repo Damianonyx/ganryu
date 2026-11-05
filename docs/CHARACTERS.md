@@ -8,6 +8,11 @@ The 14 named fighters: four playable protagonists and ten antagonists. The refer
 
 Internal IDs are stable lowercase keys. Display names can change without breaking saves.
 
+**In the game:**
+- The roster and the ten-battle campaign are implemented (`src/game/roster.ts`, `src/game/levels.ts`).
+- The warrior-select screen shows the four protagonists with their skills and stats.
+- In matches, each fighter currently uses a prototype 3D body restyled to their sheet, with one Art power plus Fold. The skill kits below are the design target.
+
 ## Protagonists
 
 Players choose one protagonist and keep that fighter for the whole campaign. Each must be able to finish all ten levels through skill.

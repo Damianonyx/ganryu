@@ -8,8 +8,10 @@ These instructions apply to Codex, Claude Code, and other contributors throughou
 - The project is an arena combat prototype undergoing a full redesign.
 - Confirmed creative rules: dark samurai/fantasy setting; the strongest lore fighter has a balanced playable PvP version.
 - Confirmed targets: 14 fighters (four playable protagonists — two male and two female samurai — and ten antagonists: nine followers plus their leader). The leader is fought at campaign level 10 after nine preliminary encounters.
-- The final name, fighter identities, strongest fighter's identity, input design, and arena rules are not all settled. Distinguish proposals from decisions.
-- Current work is storyline and character design before the implementation handoff. The opening cinematic treatment is a draft; do not treat proposed details as final canon.
+- The cast is in [docs/CHARACTERS.md](docs/CHARACTERS.md). Names are approved working names. Kairo is the village survivor; Hakuren, Shion, and Akari are allies he meets later. Nethrak is the leader and the strongest fighter in the lore.
+- Still open: the final game name, the allies' motives, Nethrak's motive, final skill kits and balance, input design, and arena rules. Distinguish proposals from decisions.
+- The opening film's events are confirmed. Its staging, dialogue, the charm, and the cellar are screenplay details, not fixed canon.
+- Only the four protagonists are selectable in the campaign. Whether antagonists become playable in a versus mode is undecided.
 - Preserve stable internal identifiers and save compatibility when display names change.
 - Describe implemented behavior accurately. A room list is not a working online match.
 - Product copy should focus on the game and avoid code-generation attribution. Preserve applicable third-party license notices.
