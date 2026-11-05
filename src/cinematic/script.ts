@@ -110,9 +110,9 @@ export const SHOTS: Shot[] = [
 
   // 00:09–00:18 THE ATTACK
   { id: "2a", scene: "attack", start: 9, end: 11, kind: "bell", note: "A warning bell rings. The father's smile disappears." },
-  { id: "2b", scene: "attack", start: 11, end: 14, kind: "gate-threat", note: "Armored samurai emerge beyond the gate; enormous shapes move between the trees." },
+  { id: "2b", scene: "attack", start: 11, end: 14, kind: "gate-threat", note: "Kurogane leads armored samurai out beyond the gate; the twins Sei and Rei move between the trees." },
   { id: "2c", scene: "attack", start: 14, end: 16, kind: "arrow-fire", note: "An arrow strikes a lantern; fire spreads across a rooftop." },
-  { id: "2d", scene: "attack", start: 16, end: 18, kind: "gate-breach", note: "A monster crashes through the gate. Villagers scatter. The father pulls his family inside." },
+  { id: "2d", scene: "attack", start: 16, end: 18, kind: "gate-breach", note: "Vargash, the winged beast, crashes through the gate. Villagers scatter. The father pulls his family inside." },
 
   // 00:18–00:28 THE HIDING PLACE
   { id: "3a", scene: "hiding", start: 18, end: 21, kind: "hatch-open", note: "The father lifts a floor hatch over a small stone cellar; the mother lowers the boy in." },
@@ -122,7 +122,7 @@ export const SHOTS: Shot[] = [
 
   // 00:28–00:40 THE MAN HE WILL REMEMBER
   { id: "4a", scene: "remember", start: 28, end: 30, kind: "door-breaks", note: "Through the gap: the door breaks inward." },
-  { id: "4b", scene: "remember", start: 30, end: 32, kind: "antagonist-enters", note: "The antagonist enters slowly; his followers stay behind him." },
+  { id: "4b", scene: "remember", start: 30, end: 32, kind: "antagonist-enters", note: "Nethrak enters slowly; Kharzul and Kurogane stay behind him in the doorway." },
   { id: "4c", scene: "remember", start: 32, end: 33.4, kind: "robe-insert", note: "Detail: his white robe with crimson brushstroke flames as he steps across the floor." },
   { id: "4d", scene: "remember", start: 33.4, end: 35, kind: "sword-face", note: "Detail: his sword, then his face." },
   { id: "4e", scene: "remember", start: 35, end: 36.6, kind: "father-falls", note: "The father raises a household blade. A flash of steel. He falls out of view." },

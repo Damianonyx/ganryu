@@ -375,8 +375,8 @@ function figureBody(c: CanvasRenderingContext2D, f: Fig) {
 
   // garments
   c.beginPath();
-  if (f.kind === "antagonist") {
-    // Nethrak: long white robe to the ground
+  if (f.kind === "antagonist" || f.kind === "samurai") {
+    // Nethrak's white robe / the Kurogane-style followers' black robes, to the ground
     c.moveTo(sh.x - H * 0.1, sh.y + torso * 0.2);
     c.lineTo(sh.x + H * 0.1, sh.y + torso * 0.2);
     c.lineTo(Math.max(fl.x, bl.x) + H * 0.13, -H * 0.01);
@@ -386,7 +386,7 @@ function figureBody(c: CanvasRenderingContext2D, f: Fig) {
     c.lineTo(sh.x + H * 0.07, sh.y + torso * 0.25);
     c.lineTo(fl.x + H * 0.08, -H * 0.02);
     c.lineTo(bl.x - H * 0.08, -H * 0.02);
-  } else if (f.kind === "father" || f.kind === "adult" || f.kind === "samurai" || f.kind === "teen") {
+  } else if (f.kind === "father" || f.kind === "adult" || f.kind === "teen") {
     // hakama / armored skirt
     c.moveTo(hip.x - H * 0.075, hip.y - H * 0.03);
     c.lineTo(hip.x + H * 0.075, hip.y - H * 0.03);
@@ -428,9 +428,9 @@ function figureBody(c: CanvasRenderingContext2D, f: Fig) {
   c.stroke();
 
   const armored = f.kind === "samurai";
-  if (armored || f.kind === "adult") {
+  if (f.kind === "adult") {
     // shoulder plates (sode)
-    const sw = H * (f.kind === "antagonist" ? 0.13 : 0.1);
+    const sw = H * 0.1;
     const plate = (sx: number) => {
       c.beginPath();
       c.moveTo(sx - sw * 0.5, sh.y - H * 0.01);
@@ -535,12 +535,22 @@ function figureBody(c: CanvasRenderingContext2D, f: Fig) {
     c.lineTo(hx - headR * 1.1, hy + headR * 0.9);
     c.closePath();
     c.fill();
-    c.lineWidth = headR * 0.22;
+    // gold horns: a central spike and two curved side horns (Kurogane's kabuto)
+    c.strokeStyle = "rgba(196,150,84,0.95)";
+    c.lineCap = "round";
+    c.lineWidth = headR * 0.2;
     c.beginPath();
-    c.moveTo(hx - headR * 0.9, hy - headR * 1.6);
-    c.lineTo(hx, hy - headR * 0.9);
-    c.lineTo(hx + headR * 0.9, hy - headR * 1.6);
+    c.moveTo(hx, hy - headR * 1.0);
+    c.lineTo(hx + headR * 0.05, hy - headR * 2.3);
     c.stroke();
+    c.lineWidth = headR * 0.16;
+    for (const sx of [-1, 1]) {
+      c.beginPath();
+      c.moveTo(hx + sx * headR * 0.45, hy - headR * 0.95);
+      c.quadraticCurveTo(hx + sx * headR * 1.25, hy - headR * 1.3, hx + sx * headR * 1.2, hy - headR * 2.05);
+      c.stroke();
+    }
+    c.strokeStyle = color;
   }
   if (f.kind === "antagonist") {
     // Nethrak: wide conical steel hat (jingasa) over a skull face with red eyes
@@ -1078,6 +1088,265 @@ function shotBell(g: G) {
   vignette(c, 0.6);
 }
 
+
+// ------------------------------------------------- followers (docs/characters)
+
+/** Sei — smoke-tendril shadow, wild hair, silver-white eyes and grin. */
+function drawSei(g: G, x: number, y: number, h: number, alpha = 1) {
+  const c = g.c;
+  const t = g.reduced ? 0 : g.t;
+  c.save();
+  c.globalAlpha *= alpha;
+  c.translate(x, y);
+  c.fillStyle = "#030304";
+  c.strokeStyle = "#030304";
+  c.lineCap = "round";
+  // legs, torso, arms
+  c.lineWidth = h * 0.06;
+  for (const sx of [-1, 1]) {
+    c.beginPath();
+    c.moveTo(sx * h * 0.04, -h * 0.47);
+    c.lineTo(sx * h * 0.07, -h * 0.22);
+    c.lineTo(sx * h * 0.06, 0);
+    c.stroke();
+    c.beginPath();
+    c.moveTo(sx * h * 0.1, -h * 0.78);
+    c.quadraticCurveTo(sx * h * 0.17, -h * 0.6, sx * h * 0.15, -h * 0.44);
+    c.stroke();
+  }
+  c.beginPath();
+  c.ellipse(0, -h * 0.63, h * 0.1, h * 0.19, 0, 0, Math.PI * 2);
+  c.fill();
+  c.beginPath();
+  c.ellipse(0, -h * 0.87, h * 0.07, h * 0.08, 0, 0, Math.PI * 2);
+  c.fill();
+  // wild hair and drifting smoke tendrils
+  c.lineWidth = h * 0.012;
+  for (let i = 0; i < 12; i++) {
+    const a = -Math.PI / 2 + (i - 5.5) * 0.28;
+    const L = h * (0.1 + 0.08 * rnd(i + 3));
+    c.beginPath();
+    c.moveTo(0, -h * 0.9);
+    c.quadraticCurveTo(Math.cos(a) * L * 0.6 + Math.sin(t * 2 + i) * 4, -h * 0.9 + Math.sin(a) * L * 0.6, Math.cos(a) * L, -h * 0.9 + Math.sin(a) * L);
+    c.stroke();
+  }
+  for (let i = 0; i < 7; i++) {
+    const sy = -h * (0.15 + i * 0.1);
+    const side = i % 2 ? 1 : -1;
+    c.beginPath();
+    c.moveTo(side * h * 0.08, sy);
+    c.bezierCurveTo(side * h * 0.2, sy - h * 0.05 + Math.sin(t * 1.5 + i) * 6, side * h * 0.28, sy + h * 0.04, side * h * (0.34 + 0.04 * Math.sin(t + i)), sy - h * 0.06);
+    c.stroke();
+  }
+  // silver-white eyes and jagged grin
+  for (const sx of [-1, 1]) glow(c, sx * h * 0.028, -h * 0.885, h * 0.03, "rgba(235,240,255,1)", 0.95 * alpha);
+  c.strokeStyle = "rgba(235,240,255,0.9)";
+  c.lineWidth = h * 0.006;
+  c.beginPath();
+  for (let k = 0; k <= 6; k++) c.lineTo(-h * 0.035 + k * h * 0.012, -h * 0.855 + (k % 2 ? h * 0.008 : 0));
+  c.stroke();
+  c.restore();
+}
+
+/** Rei — thorned clawed shadow with a flame-like crest and violet eyes. */
+function drawRei(g: G, x: number, y: number, h: number, alpha = 1) {
+  const c = g.c;
+  const t = g.reduced ? 0 : g.t;
+  c.save();
+  c.globalAlpha *= alpha;
+  c.translate(x, y);
+  c.fillStyle = "#050307";
+  c.strokeStyle = "#050307";
+  c.lineCap = "round";
+  c.lineWidth = h * 0.055;
+  for (const sx of [-1, 1]) {
+    c.beginPath();
+    c.moveTo(sx * h * 0.04, -h * 0.47);
+    c.lineTo(sx * h * 0.09, -h * 0.24);
+    c.lineTo(sx * h * 0.07, 0);
+    c.stroke();
+    // long arms ending in curved claws
+    c.beginPath();
+    c.moveTo(sx * h * 0.11, -h * 0.78);
+    c.quadraticCurveTo(sx * h * 0.22, -h * 0.55, sx * h * 0.2, -h * 0.34);
+    c.stroke();
+    c.lineWidth = h * 0.012;
+    for (let k = 0; k < 4; k++) {
+      c.beginPath();
+      c.moveTo(sx * h * 0.2, -h * 0.34);
+      c.quadraticCurveTo(sx * h * (0.22 + k * 0.012), -h * 0.27, sx * h * (0.19 + k * 0.02), -h * 0.22);
+      c.stroke();
+    }
+    c.lineWidth = h * 0.055;
+  }
+  c.beginPath();
+  c.moveTo(-h * 0.11, -h * 0.8);
+  c.lineTo(h * 0.11, -h * 0.8);
+  c.lineTo(h * 0.06, -h * 0.47);
+  c.lineTo(-h * 0.06, -h * 0.47);
+  c.closePath();
+  c.fill();
+  // thorns along the body
+  for (let i = 0; i < 10; i++) {
+    const sy = -h * (0.3 + i * 0.05);
+    const side = i % 2 ? 1 : -1;
+    c.beginPath();
+    c.moveTo(side * h * 0.07, sy);
+    c.lineTo(side * h * 0.16, sy - h * 0.04);
+    c.lineTo(side * h * 0.07, sy - h * 0.025);
+    c.fill();
+  }
+  // head with a flame-like crest of spines
+  c.beginPath();
+  c.ellipse(0, -h * 0.86, h * 0.06, h * 0.075, 0, 0, Math.PI * 2);
+  c.fill();
+  for (let i = 0; i < 9; i++) {
+    const a = -Math.PI / 2 + (i - 4) * 0.22;
+    const L = h * (0.12 + 0.06 * rnd(i + 11));
+    c.beginPath();
+    c.moveTo(Math.cos(a - 0.08) * h * 0.04, -h * 0.9);
+    c.quadraticCurveTo(Math.cos(a) * L * 0.6 + Math.sin(t * 1.4 + i) * 3, -h * 0.9 + Math.sin(a) * L * 0.7, Math.cos(a) * L, -h * 0.9 + Math.sin(a) * L);
+    c.lineTo(Math.cos(a + 0.08) * h * 0.04, -h * 0.9);
+    c.fill();
+  }
+  for (const sx of [-1, 1]) glow(c, sx * h * 0.025, -h * 0.865, h * 0.032, "rgba(170,100,255,1)", 0.95 * alpha);
+  c.restore();
+}
+
+/** Vargash — winged bat-wolf: wolf head, spread membranous wings, orange eyes and claws. */
+function drawVargash(g: G, x: number, y: number, h: number, wing = 1) {
+  const c = g.c;
+  c.save();
+  c.translate(x, y);
+  c.fillStyle = "#050405";
+  // wings
+  for (const sx of [-1, 1]) {
+    c.beginPath();
+    c.moveTo(sx * h * 0.12, -h * 0.72);
+    c.lineTo(sx * h * (0.35 + 0.35 * wing), -h * (0.95 + 0.1 * wing));
+    c.lineTo(sx * h * (0.42 + 0.38 * wing), -h * 0.62);
+    c.quadraticCurveTo(sx * h * (0.36 + 0.25 * wing), -h * 0.58, sx * h * (0.32 + 0.22 * wing), -h * 0.48);
+    c.quadraticCurveTo(sx * h * (0.26 + 0.15 * wing), -h * 0.5, sx * h * (0.22 + 0.1 * wing), -h * 0.42);
+    c.lineTo(sx * h * 0.14, -h * 0.5);
+    c.closePath();
+    c.fill();
+    c.strokeStyle = "rgba(225,110,45,0.95)";
+    c.lineWidth = h * 0.012;
+    c.beginPath();
+    c.moveTo(sx * h * (0.35 + 0.35 * wing), -h * (0.95 + 0.1 * wing));
+    c.quadraticCurveTo(sx * h * (0.3 + 0.32 * wing), -h * (1.05 + 0.1 * wing), sx * h * (0.22 + 0.28 * wing), -h * (1.02 + 0.08 * wing));
+    c.stroke();
+  }
+  // hulking body, legs, arms with claws
+  c.beginPath();
+  c.ellipse(0, -h * 0.55, h * 0.2, h * 0.24, 0, 0, Math.PI * 2);
+  c.fill();
+  c.fillRect(-h * 0.16, -h * 0.34, h * 0.12, h * 0.34);
+  c.fillRect(h * 0.04, -h * 0.34, h * 0.12, h * 0.34);
+  for (const sx of [-1, 1]) {
+    c.beginPath();
+    c.ellipse(sx * h * 0.23, -h * 0.5, h * 0.07, h * 0.16, sx * 0.3, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = "rgba(225,110,45,0.95)";
+    c.lineWidth = h * 0.012;
+    for (let k = 0; k < 3; k++) {
+      c.beginPath();
+      c.moveTo(sx * h * (0.26 + k * 0.015), -h * 0.36);
+      c.lineTo(sx * h * (0.28 + k * 0.02), -h * 0.31);
+      c.stroke();
+    }
+  }
+  // wolf head: snout and tall ears
+  c.beginPath();
+  c.ellipse(0, -h * 0.82, h * 0.09, h * 0.08, 0, 0, Math.PI * 2);
+  c.fill();
+  c.beginPath();
+  c.moveTo(-h * 0.04, -h * 0.82);
+  c.lineTo(0, -h * 0.7);
+  c.lineTo(h * 0.04, -h * 0.82);
+  c.fill();
+  for (const sx of [-1, 1]) {
+    c.beginPath();
+    c.moveTo(sx * h * 0.03, -h * 0.88);
+    c.lineTo(sx * h * 0.08, -h * 1.0);
+    c.lineTo(sx * h * 0.09, -h * 0.85);
+    c.fill();
+    glow(c, sx * h * 0.035, -h * 0.83, h * 0.035, "rgba(255,120,40,1)", 1);
+  }
+  c.restore();
+}
+
+/** Kharzul — spined crown, beaked head, shard robe, thorned chains with red sickles. */
+function drawKharzul(g: G, x: number, y: number, h: number, alpha = 1, color = "#0a0708") {
+  const c = g.c;
+  const sway = g.reduced ? 0 : Math.sin(g.t * 1.3) * 0.04;
+  c.save();
+  c.globalAlpha *= alpha;
+  c.translate(x, y);
+  c.fillStyle = color;
+  // ragged shard robe
+  c.beginPath();
+  c.moveTo(-h * 0.08, -h * 0.72);
+  c.lineTo(h * 0.08, -h * 0.72);
+  c.lineTo(h * 0.17, -h * 0.05);
+  for (let k = 0; k <= 8; k++) c.lineTo(h * 0.17 - k * h * 0.0425, k % 2 ? 0 : -h * 0.06);
+  c.closePath();
+  c.fill();
+  // shoulders bristling with shards
+  for (let i = 0; i < 12; i++) {
+    const side = i % 2 ? 1 : -1;
+    const a = side * (0.4 + rnd(i) * 0.9);
+    c.beginPath();
+    c.moveTo(side * h * 0.08, -h * 0.72);
+    c.lineTo(side * h * 0.08 + Math.sin(a) * h * 0.12, -h * 0.72 - Math.cos(a) * h * 0.08);
+    c.lineTo(side * h * 0.1, -h * 0.66);
+    c.fill();
+  }
+  // beaked head and spined crown
+  c.beginPath();
+  c.ellipse(0, -h * 0.8, h * 0.045, h * 0.06, 0, 0, Math.PI * 2);
+  c.fill();
+  c.strokeStyle = "rgba(170,20,30,0.95)";
+  c.lineWidth = h * 0.008;
+  for (let i = 0; i < 11; i++) {
+    const a = ((i - 5) / 5) * 1.75;
+    const L = h * (0.1 + 0.08 * (1 - Math.abs(i - 5) / 5));
+    c.beginPath();
+    c.moveTo(0, -h * 0.82);
+    c.lineTo(Math.sin(a) * L, -h * 0.82 - Math.cos(a) * L);
+    c.stroke();
+  }
+  // arms and four thorned chains ending in glowing red sickles
+  for (const sx of [-1, 1]) {
+    c.strokeStyle = color;
+    c.lineWidth = h * 0.025;
+    c.beginPath();
+    c.moveTo(sx * h * 0.09, -h * 0.68);
+    c.lineTo(sx * h * 0.13, -h * 0.45);
+    c.stroke();
+    for (const off of [-0.012, 0.012]) {
+      const hx = sx * h * (0.13 + off);
+      const ex = hx + sway * h * sx;
+      c.strokeStyle = "rgba(120,20,24,0.9)";
+      c.lineWidth = h * 0.006;
+      c.setLineDash([h * 0.012, h * 0.006]);
+      c.beginPath();
+      c.moveTo(hx, -h * 0.45);
+      c.lineTo(ex, -h * 0.13);
+      c.stroke();
+      c.setLineDash([]);
+      c.strokeStyle = "rgba(255,60,40,0.95)";
+      c.lineWidth = h * 0.014;
+      c.beginPath();
+      c.moveTo(ex, -h * 0.13);
+      c.quadraticCurveTo(ex + sx * h * 0.06, -h * 0.05, ex + sx * h * 0.03, -h * 0.01);
+      c.stroke();
+      glow(c, ex + sx * h * 0.03, -h * 0.05, h * 0.04, "rgba(255,50,30,0.9)", 0.6 * alpha);
+    }
+  }
+  c.restore();
+}
+
 function shotGateThreat(g: G) {
   const c = g.c;
   const p = g.p;
@@ -1086,35 +1355,27 @@ function shotGateThreat(g: G) {
   cam(g, 1 + p * 0.08, 0, 0);
   // forest beyond the gate
   for (let i = 0; i < 12; i++) pine(c, 40 + i * 140 + rnd(i) * 50, 690, 380 + rnd(i + 2) * 120, "#0a080d");
-  // enormous shapes moving between the trees
-  for (let i = 0; i < 2; i++) {
-    const mx = lerp(i ? 1150 : 380, i ? 1050 : 520, p) + (g.reduced ? 0 : Math.sin(g.t * 0.8 + i) * 20);
-    c.fillStyle = "#050406";
-    c.beginPath();
-    c.ellipse(mx, 470, 150, 220, 0, 0, Math.PI * 2);
-    c.fill();
-    c.beginPath();
-    c.moveTo(mx - 70, 300);
-    c.lineTo(mx - 110, 200);
-    c.lineTo(mx - 30, 280);
-    c.moveTo(mx + 70, 300);
-    c.lineTo(mx + 110, 200);
-    c.lineTo(mx + 30, 280);
-    c.fill();
-    glow(c, mx - 35, 330, 22, "rgba(255,80,40,0.9)", 0.6 + 0.4 * seg(p, 0.2, 0.6));
-    glow(c, mx + 35, 330, 22, "rgba(255,80,40,0.9)", 0.6 + 0.4 * seg(p, 0.2, 0.6));
-  }
+  // the twins move between the trees: Sei (silver) left, Rei (violet) right
+  const drift = g.reduced ? 0 : Math.sin(g.t * 0.8) * 14;
+  const seiX = lerp(330, 470, p) + drift;
+  const reiX = lerp(1250, 1120, p) - drift;
+  glow(c, seiX, 520, 240, "rgba(200,210,235,0.5)", 0.22);
+  glow(c, reiX, 520, 250, "rgba(150,80,230,0.5)", 0.25);
+  drawSei(g, seiX, 700, 360, 0.95);
+  drawRei(g, reiX, 700, 380, 0.95);
   rect(c, "#120c0e", 0, 690, STAGE_W, 210);
   // samurai emerging from darkness (they advance and gain contrast)
   const emerge = seg(p, 0.05, 0.9);
-  for (let i = 0; i < 6; i++) {
-    const x = 520 + i * 110 + (i % 2) * 30;
-    const y = 700 + emerge * 50 + (i % 2) * 18;
+  // Kurogane (index 2, drawn last) leads his black-robed samurai out of the dark
+  for (const i of [0, 1, 3, 4, 5, 2]) {
+    const lead = i === 2;
+    const x = lead ? 790 : 520 + i * 110 + (i % 2) * 30;
+    const y = (lead ? 760 : 700) + emerge * 50 + (i % 2) * 18;
     figure(c, {
       kind: "samurai",
       x,
       y,
-      h: 210 + emerge * 50,
+      h: (lead ? 255 : 210) + emerge * 50,
       facing: i < 3 ? 1 : -1,
       color: "#07060a",
       rim: `rgba(255,110,60,${0.15 + 0.5 * emerge})`,
@@ -1182,29 +1443,10 @@ function shotGateBreach(g: G) {
   fire(g, 200, 700, 300, 260, 1, 1);
   fire(g, 1420, 700, 300, 220, 0.9, 2);
   rect(c, "#140c0c", 0, 700, STAGE_W, 200);
-  // the monster through the gate
+  // Vargash bursts through the gate, wings spreading
   const mx = lerp(800, 820, p);
   const mScale = lerp(0.8, 1.15, seg(p, 0.05, 0.6));
-  c.save();
-  c.translate(mx, 720);
-  c.scale(mScale, mScale);
-  c.fillStyle = "#050304";
-  c.beginPath();
-  c.ellipse(0, -260, 230, 270, 0, 0, Math.PI * 2);
-  c.fill();
-  c.beginPath();
-  c.moveTo(-120, -470);
-  c.quadraticCurveTo(-250, -620, -180, -700);
-  c.lineTo(-80, -500);
-  c.moveTo(120, -470);
-  c.quadraticCurveTo(250, -620, 180, -700);
-  c.lineTo(80, -500);
-  c.fill();
-  c.fillRect(-260, -300, 80, 280);
-  c.fillRect(180, -300, 80, 280);
-  c.restore();
-  glow(c, mx - 60, 720 - 420 * mScale, 30, "rgba(255,90,40,1)", 0.9);
-  glow(c, mx + 60, 720 - 420 * mScale, 30, "rgba(255,90,40,1)", 0.9);
+  drawVargash(g, mx, 720, 560 * mScale, 0.4 + 0.6 * seg(p, 0.05, 0.5));
   // gate planks flying
   for (let i = 0; i < 8; i++) {
     const k = seg(p, 0.06, 0.7);
@@ -1376,7 +1618,8 @@ function shotDoorBreaks(g: G) {
       c.fillRect(-40, -10, 80, 20);
       c.restore();
     }
-    for (let i = 0; i < 3; i++) figure(c, { kind: "samurai", x: 390 + i * 70, y: 640, h: 330, facing: 1, color: "#080505", alpha: open });
+    figure(c, { kind: "samurai", x: 380, y: 640, h: 330, facing: 1, color: "#080505", alpha: open });
+    drawKharzul(g, 480, 640, 360, open);
     familyInRoom(g, 1, "rgba(255,130,60,0.6)");
     c.restore();
   });
@@ -1390,7 +1633,8 @@ function shotAntagonistEnters(g: G) {
     c.save();
     cam(g, 1.03 + p * 0.03, 0, 0);
     interiorRoom(g, 1, 1);
-    for (let i = 0; i < 3; i++) figure(c, { kind: "samurai", x: 360 + i * 60, y: 640, h: 330, facing: 1, color: "#080505" });
+    figure(c, { kind: "samurai", x: 360, y: 640, h: 330, facing: 1, color: "#080505" });
+    drawKharzul(g, 430, 640, 360);
     const step = seg(p, 0, 1);
     figure(c, {
       kind: "antagonist",
