@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Portrait } from "@/components/portrait";
+import { WarriorSelect } from "@/components/warrior-select";
 import { FINAL_LEVEL, LEVELS } from "@/game/levels";
 
 function chapterOf(level: number) {
@@ -12,7 +13,7 @@ function chapterOf(level: number) {
   if (level >= 4) return "The Pursuit";
   return "The Outer Defenses";
 }
-import { PLAYABLE, getChar } from "@/game/roster";
+import { getChar } from "@/game/roster";
 import { useGame } from "@/game/store";
 import type { CharId } from "@/game/types";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
@@ -38,7 +39,7 @@ export function Overlays(props: OverlayProps) {
     <div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
       <TopBar onMute={props.onMute} onTitle={props.onTitle} />
       {mode === "title" && <TitleScreen {...props} />}
-      {mode === "select" && <SelectScreen onBack={props.onTitle} />}
+      {mode === "select" && <WarriorSelect onBack={props.onTitle} onEnter={() => useGame.getState().setMode("levels")} />}
       {mode === "levels" && <LevelScreen onStart={props.onStartLevel} onBack={() => useGame.getState().setMode("select")} />}
       {mode === "lobby" && <LobbyScreen onBack={props.onTitle} onEnter={props.onEnterLobby} />}
       {mode === "result" && <ResultScreen onRematch={props.onRematch} onTitle={props.onTitle} />}
@@ -134,80 +135,6 @@ function TitleScreen({ onCampaign, onWatch, onOpenLobby, onReplayIntro }: Overla
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function SelectScreen({ onBack }: { onBack: () => void }) {
-  const fighterId = useGame((s) => s.fighterId);
-  const def = getChar(fighterId);
-  return (
-    <div className="pointer-events-auto flex min-h-0 flex-1 flex-col bg-gradient-to-b from-ink/40 via-ink/60 to-ink/85 px-4 pb-4 pt-1 sm:px-7">
-      <div className="mb-2 flex items-end justify-between">
-        <div>
-          <p className="font-body text-[0.62rem] tracking-[0.3em] text-mist uppercase">Choose your warrior</p>
-          <h2 className="font-display text-3xl tracking-[0.12em]">{def.name}</h2>
-        </div>
-        <Button variant="text" size="sm" onClick={onBack}>
-          Back
-        </Button>
-      </div>
-      <div className="grid min-h-0 flex-1 gap-3 overflow-hidden landscape:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="grid grid-cols-4 gap-1.5 overflow-auto sm:grid-cols-6 md:grid-cols-9">
-          {PLAYABLE.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => useGame.getState().setFighter(c.id)}
-              className={cn(
-                "relative aspect-[3/4] overflow-hidden rounded-sm border",
-                c.id === fighterId ? "border-paper" : "border-line hover:border-line-strong",
-              )}
-            >
-              <Portrait src={c.portrait} alt={c.name} priority={c.id === fighterId} />
-              <span className="absolute inset-x-0 bottom-0 bg-ink/75 px-1 py-0.5 font-body text-[0.55rem] tracking-[0.1em] text-paper uppercase">
-                {c.name}
-              </span>
-            </button>
-          ))}
-        </div>
-        <aside className="flex min-h-0 flex-col gap-2 overflow-auto rounded-md border border-line bg-ink-2/85 p-3">
-          <div className="relative h-28 overflow-hidden rounded-sm border border-line sm:h-36">
-            <Portrait src={def.portrait} alt={def.name} priority />
-          </div>
-          <div>
-            <p className="font-body text-[0.62rem] tracking-[0.28em] text-mist uppercase">
-              {def.kana} · Rank {def.rank}
-            </p>
-            <p className="font-display text-xl">{def.title}</p>
-            <p className="mt-1 text-sm leading-relaxed text-paper-dim">{def.blurb}</p>
-          </div>
-          <StatRow label="HP" v={def.hp} max={230} />
-          <StatRow label="ATK" v={def.atk} max={26} />
-          <StatRow label="DEF" v={def.def} max={20} />
-          <StatRow label="SPD" v={Math.round(def.spd * 100)} max={130} />
-          <div className="rounded-sm border border-line bg-ink/40 px-2.5 py-2">
-            <p className="font-body text-[0.58rem] tracking-[0.22em] text-mist uppercase">Art</p>
-            <p className="font-display text-base text-paper">{def.power.name}</p>
-            <p className="mt-0.5 text-xs text-paper-dim">{def.power.desc}</p>
-          </div>
-          <Button className="mt-auto w-full shrink-0" onClick={() => useGame.getState().setMode("levels")}>
-            Choose battle
-          </Button>
-        </aside>
-      </div>
-    </div>
-  );
-}
-
-function StatRow({ label, v, max }: { label: string; v: number; max: number }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="w-8 font-body text-[0.6rem] tracking-[0.2em] text-mist uppercase">{label}</span>
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-paper/10">
-        <div className="h-full bg-paper" style={{ width: `${Math.min(100, (v / max) * 100)}%` }} />
-      </div>
-      <span className="w-8 text-right font-body text-xs tabular-nums text-paper">{v}</span>
     </div>
   );
 }

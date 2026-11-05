@@ -97,6 +97,10 @@ export type CharacterDef = {
   range: number;
   power: PowerDef;
   kit: Kit;
+  /** Protagonists only: shown on the warrior-select screen (docs/CHARACTERS.md). */
+  weapon?: string;
+  style?: string;
+  skills?: { name: string; desc: string; ultimate?: boolean }[];
 };
 
 export type LevelDef = {

@@ -36,6 +36,13 @@ export const ROSTER: CharacterDef[] = [
     portrait: art("kairo"), playable: true, unbeatable: false, rank: 1,
     hp: 120, atk: 15, def: 9, spd: 1.06, range: 1.8,
     power: power("shadow-step", "Shadow Step", "Dash through the foe, leaving an afterimage.", 7, "dash"),
+    weapon: "Katana", style: "All-rounder",
+    skills: [
+      { name: "Shadow Step", desc: "A short dash through the foe that leaves an afterimage." },
+      { name: "Scarf Bind", desc: "The shadow scarf lashes out at mid range to pull or interrupt." },
+      { name: "Steady Stance", desc: "A parry; perfect timing triggers a riposte. \u201cSteady your feet.\u201d" },
+      { name: "Unbroken Resolve", desc: "Rage builds as he is struck. Release it at the right moment to empower him; waste it and his guard drops.", ultimate: true },
+    ],
     kit: kit("kairo", 1),
   },
   {
@@ -44,6 +51,13 @@ export const ROSTER: CharacterDef[] = [
     portrait: art("hakuren"), playable: true, unbeatable: false, rank: 2,
     hp: 112, atk: 19, def: 7, spd: 0.94, range: 2.1,
     power: power("moonless-draw", "Moonless Draw", "A charged quick-draw that cuts through guards.", 8, "iaido"),
+    weapon: "Long katana", style: "Iaid\u014d counter",
+    skills: [
+      { name: "Moonless Draw", desc: "A charged quick-draw slash that cuts through guards." },
+      { name: "White Thread", desc: "His flowing hair turns aside one attack." },
+      { name: "Curse Price", desc: "Spends his own health to add damage." },
+      { name: "Thousand Pale Cuts", desc: "A storm of blinding draws.", ultimate: true },
+    ],
     kit: kit("hakuren", 1.02),
   },
   {
@@ -52,6 +66,13 @@ export const ROSTER: CharacterDef[] = [
     portrait: art("shion"), playable: true, unbeatable: false, rank: 3,
     hp: 110, atk: 13, def: 10, spd: 1.0, range: 2.45,
     power: power("storm-circle", "Storm Circle", "A spinning sweep that strikes everyone nearby.", 8, "aoe"),
+    weapon: "Wrapped staff", style: "Reach and control",
+    skills: [
+      { name: "Rain Sweep", desc: "A wide, low sweep that knocks foes down." },
+      { name: "Pole Vault", desc: "Vaults over the foe to reposition." },
+      { name: "Binding Wraps", desc: "Cloth wraps on the staff stun briefly." },
+      { name: "Storm Circle", desc: "A spinning sweep that strikes everyone nearby.", ultimate: true },
+    ],
     kit: kit("shion", 1),
   },
   {
@@ -60,6 +81,13 @@ export const ROSTER: CharacterDef[] = [
     portrait: art("akari"), playable: true, unbeatable: false, rank: 4,
     hp: 96, atk: 13, def: 6, spd: 1.22, range: 1.75,
     power: power("ward-seal", "Ward Seal", "A talisman ring that slows the foe.", 7, "slow"),
+    weapon: "Katana and prayer beads", style: "Speed and wards",
+    skills: [
+      { name: "Bead Snap", desc: "A mid-range whip with the prayer-bead strand." },
+      { name: "Ward Seal", desc: "A talisman ring that slows any foe inside it." },
+      { name: "Petal Rush", desc: "A multi-hit dash." },
+      { name: "Hundred Prayers", desc: "A blur of blessed cuts.", ultimate: true },
+    ],
     kit: kit("akari", 0.98),
   },
   {
