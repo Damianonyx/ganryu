@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Volume2, VolumeX, Swords, Users, Eye, LogIn, Film } from "lucide-react";
+import { Volume2, VolumeX, Swords, Eye, LogIn, Film } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ type OverlayProps = {
   onCampaign: () => void;
   onWatch: () => void;
   onStartLevel: (n: number) => void;
-  onDuel: (foe: CharId) => void;
+  onDuel: (foe?: CharId) => void;
   onOpenLobby: (kind: "duel" | "coop") => void;
   onEnterLobby: () => void;
   onMute: () => void;
@@ -104,7 +104,7 @@ function TopBar({ onMute, onTitle }: { onMute: () => void; onTitle: () => void }
   );
 }
 
-function TitleScreen({ onCampaign, onWatch, onOpenLobby, onReplayIntro }: OverlayProps) {
+function TitleScreen({ onCampaign, onWatch, onDuel, onReplayIntro }: OverlayProps) {
   return (
     <div className="pointer-events-auto mx-auto mt-auto mb-8 flex w-full max-w-lg flex-col items-center px-6 pb-[max(1rem,env(safe-area-inset-bottom))] landscape:mb-6 landscape:flex-row landscape:items-end landscape:justify-between landscape:max-w-5xl">
       <div className="mb-8 text-center landscape:mb-0 landscape:text-left">
@@ -118,14 +118,11 @@ function TitleScreen({ onCampaign, onWatch, onOpenLobby, onReplayIntro }: Overla
         <Button onClick={onCampaign} className="w-full">
           <Swords className="size-4" /> Campaign
         </Button>
-        <div className="grid grid-cols-2 gap-2">
-          <Button variant="ghost" onClick={() => onOpenLobby("duel")}>
-            Duel
-          </Button>
-          <Button variant="ghost" onClick={() => onOpenLobby("coop")}>
-            <Users className="size-4" /> Co-op
-          </Button>
-        </div>
+        {/* Online duels and co-op are not ready yet (rooms only start local
+            matches), so the title offers a direct duel against the AI instead. */}
+        <Button variant="ghost" onClick={() => onDuel()} className="w-full" data-testid="duel-ai">
+          Duel vs AI
+        </Button>
         <div className="grid grid-cols-2 gap-2">
           <Button variant="text" onClick={onWatch}>
             <Eye className="size-4" /> Watch a duel
@@ -311,7 +308,22 @@ function Meter({
 function ResultScreen({ onRematch, onTitle }: { onRematch: () => void; onTitle: () => void }) {
   const result = useGame((s) => s.result);
   const level = useGame((s) => s.level);
+  const duel = useGame((s) => s.playKind === "duel");
   const win = result === "win";
+  if (duel)
+    return (
+      <div className="pointer-events-auto m-auto w-full max-w-md rounded-lg border border-line bg-ink-2/90 px-6 py-8 text-center">
+        <p className="font-body text-[0.62rem] tracking-[0.32em] text-mist uppercase">Duel vs AI</p>
+        <h2 className="mt-2 font-display text-4xl tracking-[0.12em]">{win ? "The cut lands" : "You fall"}</h2>
+        <p className="mt-3 text-sm text-paper-dim">{win ? "Another of Nethrak's followers waits." : "Steady your feet. Try again."}</p>
+        <div className="mt-6 grid gap-2">
+          <Button onClick={onRematch}>Rematch</Button>
+          <Button variant="ghost" onClick={onTitle}>
+            Title
+          </Button>
+        </div>
+      </div>
+    );
   return (
     <div className="pointer-events-auto m-auto w-full max-w-md rounded-lg border border-line bg-ink-2/90 px-6 py-8 text-center">
       <p className="font-body text-[0.62rem] tracking-[0.32em] text-mist uppercase">

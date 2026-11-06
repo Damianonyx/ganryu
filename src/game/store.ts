@@ -81,7 +81,8 @@ export const useGame = create<GameState>((set, get) => ({
     if (win) {
       set({
         wins: s.wins + 1,
-        maxLevel: Math.min(FINAL_LEVEL, Math.max(s.maxLevel, s.level + 1)),
+        // only campaign victories open the next battle; duels never unlock levels
+        maxLevel: s.playKind === "campaign" ? Math.min(FINAL_LEVEL, Math.max(s.maxLevel, s.level + 1)) : s.maxLevel,
       });
     } else set({ losses: s.losses + 1 });
   },
