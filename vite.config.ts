@@ -145,6 +145,12 @@ function authPopupPlugin(): Plugin {
 // `0.0.0.0:8080` is the live-preview contract — don't change host/port.
 // The dev server starts once `src/router.tsx` and `src/routes/` exist — see
 // AGENTS.md § "First scaffold".
+// Show "Continue with Google" only when the deployment has a Google OAuth
+// client. Vite reads VITE_* from process.env after this file loads, so this is
+// read at build time: redeploy after adding the variables.
+process.env.VITE_GOOGLE_SIGN_IN =
+  process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim() ? "true" : "false";
+
 export default defineConfig(({ command, isPreview }) => ({
   server: {
     host: "0.0.0.0",

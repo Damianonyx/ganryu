@@ -81,6 +81,9 @@ const grokIssuer = env("GROK_AUTH_ISSUER") ?? GROK_ISSUER_DEFAULT;
 const grokClientId = env("GROK_AUTH_CLIENT_ID") ?? PREVIEW_CLIENT_ID;
 const grokClientSecret = env("GROK_AUTH_CLIENT_SECRET") ?? PREVIEW_CLIENT_SECRET;
 
+/** True when direct Google sign-in is configured for this deployment. */
+export const googleConfigured = Boolean(env("GOOGLE_CLIENT_ID") && env("GOOGLE_CLIENT_SECRET"));
+
 /** True when federated sign-in is active (real auth is enforced). */
 export const authConfigured =
   !authDisabled && Boolean(grokClientId && grokClientSecret);
@@ -103,10 +106,22 @@ const LOCAL_DEV_ORIGINS: string[] = [
   "http://127.0.0.1:8080",
   "http://[::1]:8080",
 ];
+// Hosts this deployment is reachable on. Vercel exposes its own URLs as system
+// variables (production domain, branch alias, and the per-deployment URL), so
+// sign-in works on ganryu.vercel.app and on preview deployments without extra
+// configuration. `AUTH_TRUSTED_HOSTS` (comma-separated) adds custom domains.
+const deploymentHosts: string[] = [
+  env("VERCEL_PROJECT_PRODUCTION_URL"),
+  env("VERCEL_BRANCH_URL"),
+  env("VERCEL_URL"),
+  ...(env("AUTH_TRUSTED_HOSTS")?.split(",") ?? []),
+]
+  .map((h) => h?.trim().replace(/^https?:\/\//, "").replace(/\/+$/, ""))
+  .filter((h): h is string => Boolean(h));
 const baseURL = explicitBaseURL ?? {
   // Include loopback hosts so dynamic baseURL resolves for local email/password
   // (not only the preview wildcard).
-  allowedHosts: [...previewAllowedHosts, "localhost", "127.0.0.1", "[::1]"],
+  allowedHosts: [...previewAllowedHosts, ...deploymentHosts, "localhost", "127.0.0.1", "[::1]"],
   // `auto` → trust both http:// and https:// expansions of allowedHosts
   // (preview is https; local dev is http).
   protocol: "auto" as const,
@@ -116,8 +131,9 @@ const baseURL = explicitBaseURL ?? {
 // Origins Better Auth accepts on credentialed POSTs (sign-up/sign-in, etc.).
 // Missing entries here surface as FORBIDDEN "Invalid origin".
 const trustedOrigins: string[] = explicitBaseURL
-  ? [explicitBaseURL, ...LOCAL_DEV_ORIGINS]
+  ? [explicitBaseURL, ...deploymentHosts.map((h) => `https://${h}`), ...LOCAL_DEV_ORIGINS]
   : [
+      ...deploymentHosts.map((h) => `https://${h}`),
       // Host wildcards (matched against Origin's host)
       ...previewAllowedHosts,
       // Full-origin wildcards (matched against Origin)
@@ -195,6 +211,7 @@ export const auth = betterAuth({
     accountLinking: {
       enabled: true,
       trustedProviders: [
+        "google",
         ...GROK_PROVIDERS.map((p) => p.providerId),
         GATE_PROVIDER_ID,
       ],
@@ -209,6 +226,21 @@ export const auth = betterAuth({
   // window and reduces auth flicker. See the `auth` skill for the full
   // flicker-prevention guidance (gate on `isPending`; SSR the session).
   session: { cookieCache: { enabled: true, maxAge: 300 } },
+
+  // Direct Google sign-in for deployed hosts. Needs a Google OAuth client
+  // (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET) whose authorized redirect URI is
+  // `https://<host>/api/auth/callback/google`.
+  ...(googleConfigured
+    ? {
+        socialProviders: {
+          google: {
+            clientId: env("GOOGLE_CLIENT_ID") as string,
+            clientSecret: env("GOOGLE_CLIENT_SECRET") as string,
+            prompt: "select_account" as const,
+          },
+        },
+      }
+    : {}),
 
   // Local email/password — toggled only via `./email-password` (not a plugin).
   ...(emailAndPasswordEnabled ? { emailAndPassword: { enabled: true } } : {}),

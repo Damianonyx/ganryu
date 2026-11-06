@@ -1,8 +1,8 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
+import { authClient, authEnabled, googleSignInAvailable, signInWithGoogle } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 
 export const Route = createFileRoute("/login")({ component: Login });
@@ -15,6 +15,13 @@ function Login() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // Read after mount so the server render and first client render match.
+  const [google, setGoogle] = useState(false);
+  const [googleError, setGoogleError] = useState(false);
+  useEffect(() => {
+    setGoogle(googleSignInAvailable());
+    setGoogleError(new URLSearchParams(window.location.search).get("error") === "google");
+  }, []);
 
   if (!isPending && user) return <Navigate to="/" />;
 
@@ -85,7 +92,9 @@ function Login() {
                 minLength={8}
                 required
               />
-              {error && <p className="text-sm text-blood">{error}</p>}
+              {(error || googleError) && (
+                <p className="text-sm text-blood">{error || "Google sign-in did not complete. Try again or use email."}</p>
+              )}
               <Button type="submit" disabled={busy} className="w-full">
                 {busy ? "Working…" : mode === "in" ? "Sign in" : "Create account"}
               </Button>
@@ -97,19 +106,26 @@ function Login() {
             >
               {mode === "in" ? "Need an account" : "Already have an account"}
             </button>
-            <div className="mt-5 grid gap-2">
-              {GROK_PROVIDERS.map((p) => (
+            {google && (
+              <div className="mt-5 grid gap-2">
                 <Button
-                  key={p.providerId}
                   type="button"
                   variant="ghost"
                   className="w-full"
-                  onClick={() => signIn(p.providerId, { callbackURL: "/" })}
+                  disabled={busy}
+                  onClick={() => {
+                    setError("");
+                    setBusy(true);
+                    signInWithGoogle("/").catch((err) => {
+                      setError(err instanceof Error ? err.message : "Google sign-in failed.");
+                      setBusy(false);
+                    });
+                  }}
                 >
-                  Continue with {p.label}
+                  Continue with Google
                 </Button>
-              ))}
-            </div>
+              </div>
+            )}
           </>
         ) : (
           <p className="mt-4 text-sm text-mist">Sign-in is disabled.</p>
