@@ -14,6 +14,7 @@ Years of training turn grief into purpose. As **Kairo, The Last Ember**, he hunt
 
 - [Storyline](docs/STORYLINE.md): confirmed events, the treatment, and the campaign chapters.
 - [Character roster](docs/CHARACTERS.md): the 14 fighters with their reference sheets.
+- [Contest submission](docs/SUBMISSION.md): the write-up, how to play, and how AI was used.
 
 ## The roster
 
