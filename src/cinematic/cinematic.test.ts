@@ -129,11 +129,12 @@ describe("intro state", () => {
     assert.equal(parseIntroRecord(JSON.stringify({ outcome: "watched" })), null);
   });
 
-  it("autoplays on first visit and after a script version bump", () => {
+  it("autoplays whenever the game is opened, once per browser session", () => {
     assert.equal(shouldAutoplayIntro(null, null, 1), true);
     const rec = { outcome: "completed" as const, version: 1, at: "" };
-    assert.equal(shouldAutoplayIntro(rec, null, 1), false);
-    assert.equal(shouldAutoplayIntro(rec, null, 2), true);
+    assert.equal(shouldAutoplayIntro(rec, null, 1), true);
+    assert.equal(shouldAutoplayIntro(rec, null, 1, true), false);
+    assert.equal(shouldAutoplayIntro(rec, "force", 1, true), true);
     assert.equal(shouldAutoplayIntro(rec, "force", 1), true);
     assert.equal(shouldAutoplayIntro(null, "suppress", 1), false);
   });

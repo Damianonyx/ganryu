@@ -56,7 +56,7 @@ Open `http://127.0.0.1:8080`.
 
 | URL | What it does |
 | --- | --- |
-| `/` | Normal flow: the film on a first visit, the menu on later visits |
+| `/` | Normal flow: the film plays every time the game is opened (once per browser tab session), then the menu |
 | `/?intro=1` | Always play the film (`&t=28` starts at 28 s, `&paused=1` starts paused) |
 | `/?intro=0` | Skip straight to the menu |
 | `/?intro=1&motion=reduced` | The reduced-motion version of the film |
