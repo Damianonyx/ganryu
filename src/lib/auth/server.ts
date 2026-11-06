@@ -48,7 +48,9 @@ import {
 } from "./preview";
 
 // Kick (and share) PGLite bootstrap as soon as the auth server module loads.
-void ensureDbReady();
+// Never let a failed bootstrap become an unhandled rejection (it would crash
+// the server function and take the whole site down with it).
+ensureDbReady().catch((err) => console.error("[db] bootstrap failed", err));
 
 /**
  * Preview secret must outlive module reloads: PGLite (and its session rows) is

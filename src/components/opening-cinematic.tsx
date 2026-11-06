@@ -7,6 +7,8 @@ import {
   readSubtitlesPref,
   shouldAutoplayIntro,
   writeIntroRecord,
+  markIntroSeenThisSession,
+  readIntroSeenThisSession,
   writeSubtitlesPref,
 } from "@/cinematic/intro-state";
 import { paintFrame } from "@/cinematic/painter";
@@ -68,7 +70,7 @@ export function IntroController({ replayToken, muted, onToggleMute, onCoverChang
   useEffect(() => {
     startGameLoading(ROSTER.map((c) => c.portrait));
     const override = parseIntroOverride(window.location.search);
-    const play = shouldAutoplayIntro(readIntroRecord(), override, INTRO_SCRIPT_VERSION);
+    const play = shouldAutoplayIntro(readIntroRecord(), override, INTRO_SCRIPT_VERSION, readIntroSeenThisSession());
     const t = Number(new URLSearchParams(window.location.search).get("t"));
     if (play && Number.isFinite(t) && t > 0) setStartAt(Math.min(t, FILM_DURATION - 0.1));
     setFilmShown(play);
@@ -126,11 +128,13 @@ export function IntroController({ replayToken, muted, onToggleMute, onCoverChang
           active={phase === "film"}
           onEnd={() => {
             writeIntroRecord("completed", INTRO_SCRIPT_VERSION);
+            markIntroSeenThisSession();
             dispatch({ type: "film-ended", ready: summarize(loadStore.getState(), "all").ready });
           }}
           onSkip={() => {
             const ready = summarize(loadStore.getState(), "all").ready;
             writeIntroRecord("skipped", INTRO_SCRIPT_VERSION);
+            markIntroSeenThisSession();
             dispatch({ type: ready ? "continue" : "skip", ready });
           }}
         />

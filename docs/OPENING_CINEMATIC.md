@@ -23,7 +23,7 @@ npm run dev
 
 | URL | Behavior |
 | --- | --- |
-| `http://127.0.0.1:8080/` | Normal flow: film on first visit, menu on later visits |
+| `http://127.0.0.1:8080/` | Normal flow: the film plays every time the game is opened (once per browser tab session) |
 | `/?intro=1` | Always play the film |
 | `/?intro=0` | Never play the film (menu only) |
 | `/?intro=1&t=28` | Start at 28 seconds |
@@ -65,7 +65,7 @@ A failed task still counts as settled, so a missing image cannot block the game.
 | --- | --- |
 | Film ends or is skipped before loading completes | "Preparing the arena" loading state with real progress, then the menu |
 | Loading completes during the film | Skip becomes **Continue**; the film keeps playing until the player continues or it ends |
-| Returning player | Straight to the menu (briefly showing the loading state only if critical work is unfinished) |
+| Same tab, later in the session (for example after signing in) | Straight to the menu (briefly showing the loading state only if critical work is unfinished) |
 
 While the film covers the stage, the game engine renders its initial frames and then idles instead of drawing hidden frames. It resumes when the menu appears. Leaving the film stops its animation loop, closes its audio context, removes its listeners, and releases its canvas.
 
@@ -73,7 +73,7 @@ While the film covers the stage, the game engine renders its initial frames and 
 
 The intro outcome is stored separately under `ganryu-intro-v1` as `{ outcome: "completed" | "skipped", version, at }`. The subtitle preference uses `ganryu-intro-subtitles`. Player saves (`ganryu-save-v1`, the legacy `yonji-save-v1`, and the server save) are not read or written. Sound uses the existing `ganryu-muted` preference and mute control, so the film and game share one setting.
 
-Increase `INTRO_SCRIPT_VERSION` in `src/cinematic/script.ts` to show a substantially revised film again to players who already watched or skipped the previous version.
+The owner wants the film on every visit, so it autoplays once per browser session (`ganryu-intro-session` in sessionStorage) regardless of the stored record. Increase `INTRO_SCRIPT_VERSION` in `src/cinematic/script.ts` to show a substantially revised film again to players who already watched or skipped the previous version.
 
 ### Sound and voices
 

@@ -69,10 +69,47 @@ export function parseIntroOverride(search: string): IntroOverride {
   return null;
 }
 
-export function shouldAutoplayIntro(record: IntroRecord | null, override: IntroOverride, currentVersion: number): boolean {
+/**
+ * The film plays every time someone opens the game (owner decision): once per
+ * browser session, so moving around inside the game (for example returning
+ * from sign-in) does not replay it. The stored record is kept for analytics
+ * and for `INTRO_SCRIPT_VERSION` bumps.
+ */
+export function shouldAutoplayIntro(
+  _record: IntroRecord | null,
+  override: IntroOverride,
+  _currentVersion: number,
+  seenThisSession = false,
+): boolean {
   if (override === "force") return true;
   if (override === "suppress") return false;
-  return !record || record.version < currentVersion;
+  return !seenThisSession;
+}
+
+export const INTRO_SESSION_KEY = "ganryu-intro-session";
+
+function sessionStore(): StorageLike | null {
+  try {
+    return typeof window !== "undefined" ? window.sessionStorage : null;
+  } catch {
+    return null;
+  }
+}
+
+export function readIntroSeenThisSession(store: StorageLike | null = sessionStore()): boolean {
+  try {
+    return store?.getItem(INTRO_SESSION_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function markIntroSeenThisSession(store: StorageLike | null = sessionStore()) {
+  try {
+    store?.setItem(INTRO_SESSION_KEY, "1");
+  } catch {
+    /* ignore */
+  }
 }
 
 export function readSubtitlesPref(store: StorageLike | null = storage()): boolean {
