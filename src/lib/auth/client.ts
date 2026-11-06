@@ -40,6 +40,33 @@ export const authEnabled = import.meta.env.VITE_AUTH_ENABLED !== "false";
 /** The upstream providers to render sign-in buttons for. */
 export { GROK_PROVIDERS };
 
+/**
+ * Whether to show "Continue with Google". Inside the Grok live preview the
+ * broker handles Google; on deployed hosts it needs GOOGLE_CLIENT_ID and
+ * GOOGLE_CLIENT_SECRET at build time (see `vite.config.ts`).
+ */
+export function googleSignInAvailable(): boolean {
+  return inLivePreview() || import.meta.env.VITE_GOOGLE_SIGN_IN === "true";
+}
+
+/** Sign in with Google: direct on deployed hosts, via the broker in the live preview. */
+export async function signInWithGoogle(callbackURL = "/"): Promise<void> {
+  if (inLivePreview()) return signIn("grok-google", { callbackURL });
+  await runPreSignInSignOut({
+    livePreview: false,
+    hasBearer: Boolean(getBearerToken()),
+    requestSignOut: () => authClient.signOut(),
+    clearToken: () => setBearerToken(null),
+  });
+  const { data, error } = await authClient.signIn.social({
+    provider: "google",
+    callbackURL,
+    errorCallbackURL: "/login?error=google",
+  });
+  if (error) throw new Error(error.message ?? "Google sign-in failed");
+  if (data?.url) window.location.href = data.url;
+}
+
 // ── Live-preview bearer token ────────────────────────────────────────────────
 // The embedded preview iframe has partitioned cookies, so we keep the session's
 // bearer token in sessionStorage and attach it to every Better Auth request (and

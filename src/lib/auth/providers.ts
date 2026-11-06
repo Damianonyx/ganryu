@@ -25,7 +25,9 @@ export type GrokProvider = {
   label: string;
 };
 
+// Google only for now (X sign-in removed by the owner). On deployed hosts the
+// app signs in with Google directly (`socialProviders.google` in `server.ts`);
+// this broker entry is used only inside the Grok live preview.
 export const GROK_PROVIDERS: readonly GrokProvider[] = [
   { providerId: "grok-google", idp: "google", label: "Google" },
-  { providerId: "grok-x", idp: "twitter", label: "X" },
 ];

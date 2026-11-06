@@ -84,7 +84,15 @@ The opening film's shots, dialogue, subtitles, and timing are edited in `src/cin
 
 The frontend uses React 19, TanStack Start, Three.js, Zustand, and Tailwind CSS. Authentication uses Better Auth. Database access uses PostgreSQL, with an in-memory PGlite fallback for local development.
 
-Set `DATABASE_URL` to use PostgreSQL. Without it, accounts, sessions, and server saves use the in-memory fallback and reset when the server restarts. Browser-local progress is stored separately.
+Set `DATABASE_URL` to use PostgreSQL. Without it, accounts, sessions, and server saves use the in-memory fallback and reset when the server restarts. On Vercel that means accounts can disappear between requests, so set `DATABASE_URL` for real sign-in. Browser-local progress is stored separately.
+
+### Sign-in
+
+Players can sign in with email and password, or with Google. X sign-in was removed.
+
+- **Allowed origins.** On Vercel the sign-in server trusts the deployment's own addresses automatically (`VERCEL_PROJECT_PRODUCTION_URL`, `VERCEL_BRANCH_URL`, `VERCEL_URL`). Add custom domains with `AUTH_TRUSTED_HOSTS` (comma-separated).
+- **Google.** Create an OAuth client in Google Cloud Console (APIs & Services → Credentials → OAuth client ID → Web application). Add `https://ganryu.vercel.app/api/auth/callback/google` as an authorized redirect URI, then set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in Vercel and redeploy. The "Continue with Google" button appears only when both are set.
+- **`BETTER_AUTH_SECRET`.** Set a long random value in production so sessions survive redeploys.
 
 `npm run build` also runs database migrations when `DATABASE_URL` is set. Use an isolated development or preview database for local validation.
 
