@@ -36,10 +36,11 @@ Players choose one of the four protagonists and keep that warrior for the whole 
 | Fighters | 14 fighters as animated 3D bodies styled per character | Real character models, animation sets, and skill kits matched to `docs/CHARACTERS.md` |
 | Controls | Keyboard; touch joystick with Art meter; four-button pad (Slash, Parry, Leap, Art) with cooldown rings; Fold | Remapping, controller support |
 | Camera and sound | Side-on fight camera that fits any screen; sword swings, clashes, parries, hits, footsteps, sword draw | Per-arena ambience |
-| Multiplayer | Room discovery and WebRTC signaling only. Entering a "duel" or "co-op" room still starts a local match. | Server-authoritative online duels with validated results ([plan](docs/REBUILD_PLAN.md)) |
+| Duel vs AI | One-off duel against a random follower from the title menu. Duels do not change campaign progress. | Online duels |
+| Multiplayer | Room discovery and WebRTC signaling exist in code, but online play is hidden in the menu until it works. | Server-authoritative online duels with validated results ([plan](docs/REBUILD_PLAN.md)) |
 | Accounts and saves | Sign-in, per-user server save, browser save; older prototype saves still load | Profiles, match history, server-validated progression |
 
-The skill descriptions on the select screen are the design direction from `docs/CHARACTERS.md`. In-match powers still use the prototype ability set, one Art per fighter plus Fold, until the full kits are built.
+In battle, each warrior has Slash, Parry, Leap, one Art, and Fold. The select screen marks the skill that is that Art with an **Art** badge; the other listed skills are marked **Soon**. They are the design direction from `docs/CHARACTERS.md`.
 
 ## Running it
 

@@ -6,7 +6,7 @@ import { settleTask } from "@/cinematic/readiness";
 import { Engine } from "@/game/engine";
 import { bindInput } from "@/game/input";
 import { FINAL_LEVEL } from "@/game/levels";
-import { PLAYABLE } from "@/game/roster";
+import { PLAYABLE, ROSTER } from "@/game/roster";
 import { migrateSave } from "@/game/save-migration";
 import { useGame } from "@/game/store";
 import type { CharId } from "@/game/types";
@@ -146,12 +146,21 @@ export function GameStage() {
   const onStartLevel = (n: number) => {
     unlock();
     const id = useGame.getState().fighterId;
+    useGame.setState({ playKind: "campaign" });
     engineRef.current?.startCampaign(id, n);
   };
 
-  const onDuel = (foe: CharId) => {
+  // Duel vs AI: the chosen protagonist against one of Nethrak's faction.
+  const duelFoeRef = useRef<CharId | null>(null);
+  const onDuel = (foe?: CharId) => {
     unlock();
-    engineRef.current?.startDuel(useGame.getState().fighterId, foe);
+    const foes = ROSTER.filter((c) => !c.playable);
+    const pick = foe ?? foes[Math.floor(Math.random() * foes.length)].id;
+    duelFoeRef.current = pick;
+    const s = useGame.getState();
+    const hero = PLAYABLE.some((c) => c.id === s.fighterId) ? s.fighterId : PLAYABLE[0].id;
+    useGame.setState({ playKind: "duel" });
+    engineRef.current?.startDuel(hero, pick);
   };
 
   const onOpenLobby = (kind: "duel" | "coop") => {
@@ -173,6 +182,10 @@ export function GameStage() {
   const onRematch = () => {
     unlock();
     const s = useGame.getState();
+    if (s.playKind === "duel") {
+      onDuel(duelFoeRef.current ?? undefined);
+      return;
+    }
     const n = s.result === "win" && s.level < FINAL_LEVEL ? s.level + 1 : s.level;
     useGame.getState().setLevel(n);
     engineRef.current?.startCampaign(s.fighterId, n);

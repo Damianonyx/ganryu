@@ -53,6 +53,9 @@ export function WarriorSelect({ onBack, onEnter }: { onBack: () => void; onEnter
 
   const skills = hero.skills ?? [];
   const chosen = skill !== null ? skills[skill] : null;
+  // In matches each warrior currently has one Art (their power) plus Fold;
+  // the other listed skills are the design target, shown as "Soon".
+  const inBattle = (name: string) => name === hero.power.name;
 
   const stats = [
     { label: "Health", v: hero.hp, max: 140, icon: Heart },
@@ -66,7 +69,16 @@ export function WarriorSelect({ onBack, onEnter }: { onBack: () => void; onEnter
       {skills.map((sk, i) => {
         const Icon = sk.ultimate ? Sparkles : SKILL_ICONS[i % SKILL_ICONS.length];
         return (
-          <Slot key={sk.name} label={sk.ultimate ? "Ultimate" : `Skill ${i + 1}`} active={skill === i} onClick={() => setSkill(skill === i ? null : i)} testId={`skill-${i}`} glow={sk.ultimate}>
+          <Slot
+            key={sk.name}
+            label={sk.ultimate ? "Ultimate" : `Skill ${i + 1}`}
+            active={skill === i}
+            onClick={() => setSkill(skill === i ? null : i)}
+            testId={`skill-${i}`}
+            glow={inBattle(sk.name)}
+            badge={inBattle(sk.name) ? "Art" : "Soon"}
+            dim={!inBattle(sk.name)}
+          >
             <Icon className="size-[46%]" strokeWidth={1.6} />
           </Slot>
         );
@@ -124,9 +136,13 @@ export function WarriorSelect({ onBack, onEnter }: { onBack: () => void; onEnter
         <p className="mt-0.5 line-clamp-3 text-[0.8rem] leading-snug text-paper-dim sm:text-sm">
           {chosen ? chosen.desc : hero.blurb}
         </p>
-        {!chosen && (
+        {chosen ? (
+          <p className={cn("mt-1 font-body text-[0.6rem] tracking-[0.2em] uppercase", inBattle(chosen.name) ? "text-[#e8a25a]" : "text-mist")} data-testid="skill-status">
+            {inBattle(chosen.name) ? "In battle now · Art button (Q)" : "Coming in a later update"}
+          </p>
+        ) : (
           <p className="mt-1 font-body text-[0.6rem] tracking-[0.2em] text-mist uppercase">
-            {hero.weapon} · {hero.style}
+            {hero.weapon} · In battle: Slash, Parry, Leap, {hero.power.name}, Fold
           </p>
         )}
       </div>
@@ -232,6 +248,8 @@ function Slot({
   onClick,
   glow,
   testId,
+  badge,
+  dim,
 }: {
   children: ReactNode;
   label: string;
@@ -239,6 +257,8 @@ function Slot({
   onClick?: () => void;
   glow?: boolean;
   testId?: string;
+  badge?: string;
+  dim?: boolean;
 }) {
   const Tag = onClick ? "button" : "div";
   return (
@@ -254,7 +274,17 @@ function Slot({
         )}
         style={{ width: "var(--slot)", height: "var(--slot)" }}
       >
-        {children}
+        <span className={cn("grid size-full place-items-center", dim && !active && "opacity-45")}>{children}</span>
+        {badge && (
+          <span
+            className={cn(
+              "absolute -top-1.5 -right-1.5 rounded-full px-1.5 py-px font-body text-[0.5rem] font-semibold tracking-[0.12em] uppercase shadow",
+              badge === "Art" ? "bg-[#e8a25a] text-[#1a0f06]" : "bg-[#1b2633] text-[#9fb4c6] ring-1 ring-[#7fb2d6]/30",
+            )}
+          >
+            {badge}
+          </span>
+        )}
       </Tag>
       <span className="mt-0.5 font-display text-[calc(var(--slot)*0.22)] leading-tight text-[#cfd9e2] [text-shadow:0_1px_3px_#000]">{label}</span>
     </div>
