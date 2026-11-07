@@ -1,5 +1,8 @@
 import * as THREE from "three";
-import type { AnimName, CharacterDef, Kit } from "./types";
+import { motion } from "./motion";
+import { contactShadow, studioUpgrade, withBlend } from "./rig-kit";
+import { buildSamurai } from "./rig-samurai";
+import type { AnimName, CharacterDef } from "./types";
 
 const GEO = {
   box: new THREE.BoxGeometry(1, 1, 1),
@@ -57,6 +60,8 @@ export type Rig = {
   sash: THREE.Object3D | null;
   materials: THREE.Material[];
   setAnim: (name: AnimName, t: number, speed: number, facing: 1 | -1) => void;
+  /** Per-frame motion input: velocity (world), facing yaw, and height above the floor. */
+  drive?: (dt: number, vx: number, vz: number, yaw: number, y: number, x?: number, z?: number) => void;
   setFolding: (on: boolean) => void;
   flash: (c: number) => void;
   dispose: () => void;
@@ -64,10 +69,39 @@ export type Rig = {
 
 export function buildRig(def: CharacterDef): Rig {
   const k = def.kit;
-  if (k.body === "beast") return buildBeast(def);
-  if (k.body === "titan") return buildTitan(def);
-  if (k.body === "thorn" || k.body === "abyss") return buildSovereign(def);
-  return buildHuman(def);
+  const tokens = () => motion.pose;
+  if (k.body === "human") {
+    const rig = buildSamurai(def);
+    // The gait runs continuously through idle and walk; blend everything else.
+    const both = (n: AnimName) => n === "idle" || n === "walk";
+    rig.setAnim = withBlend(rig.body, rig.setAnim, tokens, (a, b) => both(a) && both(b));
+    return rig;
+  }
+  const rig = k.body === "beast" ? buildBeast(def) : k.body === "titan" ? buildTitan(def) : buildSovereign(def);
+  // These bodies were modeled facing +Z, but the game moves fighters toward -Z.
+  if (k.body !== "beast") {
+    const turn = new THREE.Group();
+    turn.rotation.y = Math.PI;
+    for (const c of [...rig.root.children]) turn.add(c);
+    rig.root.add(turn);
+  }
+  rig.materials.forEach((m) => studioUpgrade(m as THREE.MeshStandardMaterial, k.body !== "beast"));
+  rig.setAnim = withBlend(rig.body, rig.setAnim, tokens);
+  const shadow = contactShadow(0.6 * k.scale);
+  rig.root.add(shadow);
+  rig.drive = (_dt, _vx, _vz, _yaw, y) => {
+    shadow.position.y = -y + 0.012;
+    const s = 1 / (1 + y * 0.7);
+    shadow.scale.setScalar(s);
+    (shadow.material as THREE.MeshBasicMaterial).opacity = 0.6 * s * s;
+  };
+  const dispose = rig.dispose;
+  rig.dispose = () => {
+    dispose();
+    shadow.geometry.dispose();
+    (shadow.material as THREE.Material).dispose();
+  };
+  return rig;
 }
 
 function finish(
@@ -131,376 +165,6 @@ function finish(
     flash,
     dispose: () => materials.forEach((m) => m.dispose()),
   };
-}
-
-function buildHuman(def: CharacterDef): Rig {
-  const k = def.kit;
-  const cloth = mat(k.cloth, { rough: 0.82 });
-  const accent = mat(k.accent, {
-    emissive: k.accent === "#b4232a" ? "#4a080c" : undefined,
-    eInt: 0.45,
-    rough: 0.6,
-  });
-  const skin = mat(k.skin, { rough: 0.48 });
-  const metal = mat(k.metal, { rough: 0.22, metal: 0.82 });
-  const trim = mat(k.trim, { rough: 0.55 });
-  const dark = mat("#121214", { rough: 0.5 });
-  const mats = [cloth, accent, skin, metal, trim, dark];
-
-  const root = new THREE.Group();
-  const body = new THREE.Group();
-  root.add(body);
-  body.scale.setScalar(k.scale);
-
-  const hips = mesh(GEO.box, cloth, 0.34, 0.14, 0.2, 0, 0.96, 0);
-  const torso = mesh(GEO.box, cloth, 0.4, 0.5, 0.24, 0, 1.3, 0);
-  const chest = mesh(GEO.box, cloth, 0.42, 0.18, 0.26, 0, 1.48, 0.01);
-  const collar = mesh(GEO.box, trim, 0.28, 0.12, 0.08, 0, 1.56, 0.1);
-  const obi = mesh(GEO.box, accent, 0.46, 0.1, 0.28, 0, 1.06, 0);
-  const knot = mesh(GEO.box, accent, 0.12, 0.18, 0.08, 0, 1.06, -0.16);
-  const hakama = mesh(GEO.hakama, cloth, 1, 1, 1, 0, 0.52, 0);
-  body.add(hips, torso, chest, collar, obi, knot, hakama);
-
-  const lLeg = new THREE.Group();
-  const rLeg = new THREE.Group();
-  lLeg.position.set(-0.12, 0.94, 0);
-  rLeg.position.set(0.12, 0.94, 0);
-  const lShin = new THREE.Group();
-  const rShin = new THREE.Group();
-  lShin.position.set(0, -0.42, 0);
-  rShin.position.set(0, -0.42, 0);
-  lLeg.add(mesh(GEO.cyl, cloth, 0.09, 0.42, 0.1, 0, -0.2, 0));
-  rLeg.add(mesh(GEO.cyl, cloth, 0.09, 0.42, 0.1, 0, -0.2, 0));
-  lShin.add(mesh(GEO.cyl, cloth, 0.075, 0.4, 0.085, 0, -0.18, 0));
-  rShin.add(mesh(GEO.cyl, cloth, 0.075, 0.4, 0.085, 0, -0.18, 0));
-  lShin.add(mesh(GEO.box, trim, 0.11, 0.055, 0.24, 0, -0.4, 0.04));
-  rShin.add(mesh(GEO.box, trim, 0.11, 0.055, 0.24, 0, -0.4, 0.04));
-  lLeg.add(lShin);
-  rLeg.add(rShin);
-  body.add(lLeg, rLeg);
-
-  const lArm = new THREE.Group();
-  const rArm = new THREE.Group();
-  lArm.position.set(-0.3, 1.5, 0);
-  rArm.position.set(0.3, 1.5, 0);
-  const lFore = new THREE.Group();
-  const rFore = new THREE.Group();
-  lFore.position.set(0, -0.34, 0);
-  rFore.position.set(0, -0.34, 0);
-  lArm.add(mesh(GEO.sleeve, cloth, 1, 0.72, 1, -0.02, -0.16, 0));
-  rArm.add(mesh(GEO.sleeve, cloth, 1, 0.72, 1, 0.02, -0.16, 0));
-  lArm.add(mesh(GEO.cyl, skin, 0.055, 0.32, 0.055, 0, -0.16, 0));
-  rArm.add(mesh(GEO.cyl, skin, 0.055, 0.32, 0.055, 0, -0.16, 0));
-  lFore.add(mesh(GEO.cyl, skin, 0.05, 0.3, 0.05, 0, -0.14, 0));
-  rFore.add(mesh(GEO.cyl, skin, 0.05, 0.3, 0.05, 0, -0.14, 0));
-  lFore.add(mesh(GEO.sphere, skin, 0.055, 0.055, 0.06, 0, -0.3, 0.01));
-  rFore.add(mesh(GEO.sphere, skin, 0.055, 0.055, 0.06, 0, -0.3, 0.01));
-  lArm.add(lFore);
-  rArm.add(rFore);
-  body.add(lArm, rArm);
-
-  const headG = new THREE.Group();
-  headG.position.set(0, 1.64, 0);
-  const skull = mesh(GEO.sphere, skin, 0.15, 0.17, 0.155, 0, 0.14, 0.01);
-  const jaw = mesh(GEO.sphere, skin, 0.12, 0.1, 0.12, 0, 0.04, 0.03);
-  headG.add(skull, jaw);
-  headG.add(mesh(GEO.box, dark, 0.028, 0.016, 0.012, -0.045, 0.15, 0.13));
-  headG.add(mesh(GEO.box, dark, 0.028, 0.016, 0.012, 0.045, 0.15, 0.13));
-  if ((def.id as string) === "akai") {
-    const scar = mesh(GEO.box, accent, 0.09, 0.012, 0.012, -0.04, 0.16, 0.14);
-    scar.rotation.z = 0.7;
-    headG.add(scar);
-  }
-  addHair(headG, k, trim, skin, accent);
-  addHat(headG, k, cloth, trim, metal, accent);
-  body.add(headG);
-
-  const weapon = new THREE.Group();
-  const weapon2 = k.weapons === "dual" ? new THREE.Group() : null;
-  addWeapon(weapon, k.weapons, metal, trim, accent, 1);
-  rFore.add(weapon);
-  weapon.position.set(0, -0.3, 0.02);
-  if (weapon2) {
-    addWeapon(weapon2, "katana", metal, trim, accent, -1);
-    lFore.add(weapon2);
-    weapon2.position.set(0, -0.3, 0.02);
-  }
-
-  const sash = mesh(GEO.box, accent, 0.05, 0.85, 0.016, 0.2, 1.12, 0.1);
-  sash.rotation.z = -0.55;
-  body.add(sash);
-  const ribbon = mesh(GEO.box, accent, 0.04, 0.7, 0.012, -0.18, 1.08, -0.08);
-  ribbon.rotation.z = 0.4;
-  body.add(ribbon);
-
-  addSignature(def, body, headG, cloth, accent, trim, metal, dark);
-
-  const setAnim: Rig["setAnim"] = (name, t, speed) => {
-    const w = t * speed;
-    const breath = Math.sin(w * 2.1) * 0.018;
-    body.position.y = name === "leap" ? Math.sin(Math.min(1, t * 1.8) * Math.PI) * 1.15 : breath;
-    body.scale.y = name === "leap" ? 1.04 : name === "hurt" ? 0.96 : 1;
-    lLeg.rotation.x = 0;
-    rLeg.rotation.x = 0;
-    lShin.rotation.x = 0.12;
-    rShin.rotation.x = 0.12;
-    lArm.rotation.set(0.18, 0, 0.22);
-    rArm.rotation.set(-0.12, 0, -0.18);
-    lFore.rotation.x = 0.25;
-    rFore.rotation.x = 0.15;
-    torso.rotation.set(0, 0, 0);
-    headG.rotation.set(0.05, 0, 0);
-    hakama.rotation.z = Math.sin(w * 1.4) * 0.03;
-    sash.rotation.z = -0.55 + Math.sin(w * 2.4) * 0.12;
-    ribbon.rotation.z = 0.4 + Math.sin(w * 2.1 + 1) * 0.14;
-    weapon.rotation.set(-0.15, 0, 0);
-
-    if (name === "idle" || name === "walk") {
-      const walk = name === "walk";
-      const a = Math.sin(w * (walk ? 8.2 : 1.5));
-      const amp = walk ? 0.62 : 0.07;
-      lLeg.rotation.x = a * amp;
-      rLeg.rotation.x = -a * amp;
-      lShin.rotation.x = 0.15 + Math.max(0, -a) * amp * 0.5;
-      rShin.rotation.x = 0.15 + Math.max(0, a) * amp * 0.5;
-      lArm.rotation.x = -a * amp * 0.55 + 0.15;
-      rArm.rotation.x = a * amp * 0.55 - 0.08;
-      torso.rotation.y = a * (walk ? 0.1 : 0.03);
-      headG.rotation.y = -a * 0.04;
-    }
-    if (name === "slash") {
-      const p = Math.min(1, t / 0.32);
-      if (p < 0.28) {
-        const u = p / 0.28;
-        rArm.rotation.x = -0.2 - u * 2.1;
-        rArm.rotation.z = -0.2 - u * 0.5;
-        rFore.rotation.x = 0.2;
-        torso.rotation.y = -u * 0.55;
-        torso.rotation.z = u * 0.12;
-        headG.rotation.y = -u * 0.2;
-      } else {
-        const u = (p - 0.28) / 0.72;
-        const swing = -2.3 + u * 3.6;
-        rArm.rotation.x = swing;
-        rArm.rotation.y = u * 0.9;
-        rArm.rotation.z = -0.7 + u * 0.5;
-        rFore.rotation.x = 0.4 - u * 0.6;
-        torso.rotation.y = -0.55 + u * 1.35;
-        lArm.rotation.x = -0.4;
-        lLeg.rotation.x = -0.25;
-        rLeg.rotation.x = 0.35;
-        weapon.rotation.x = -0.4 + u * 0.8;
-        hakama.rotation.z = u * 0.15;
-      }
-    }
-    if (name === "parry") {
-      rArm.rotation.set(-1.55, 0.4, -0.9);
-      lArm.rotation.set(-1.2, -0.3, 0.5);
-      rFore.rotation.x = 0.6;
-      torso.rotation.x = -0.12;
-      torso.rotation.y = 0.25;
-      headG.rotation.x = -0.1;
-    }
-    if (name === "hurt") {
-      torso.rotation.x = -0.28;
-      torso.rotation.z = 0.12;
-      headG.rotation.x = 0.2;
-      body.position.z = -0.08;
-      lArm.rotation.x = -0.6;
-    }
-    if (name === "die") {
-      body.rotation.x = Math.min(1.45, t * 2.1);
-      body.position.y = Math.min(0.15, t) * -0.35;
-    }
-    if (name === "special" || name === "fold") {
-      const lift = Math.sin(Math.min(1, t * 2.8) * Math.PI);
-      body.position.y = breath + lift * 0.42;
-      rArm.rotation.set(-2.15, 0.2, -0.3);
-      lArm.rotation.set(-1.85, -0.2, 0.3);
-      headG.rotation.x = -0.25;
-      torso.rotation.x = -0.1;
-    }
-    if (name === "leap") {
-      lLeg.rotation.x = -0.85;
-      rLeg.rotation.x = 0.55;
-      lShin.rotation.x = 0.9;
-      rShin.rotation.x = 0.4;
-      rArm.rotation.x = -1.55;
-      lArm.rotation.x = -0.7;
-    }
-  };
-
-  return finish(root, body, headG, torso, lArm, rArm, lLeg, rLeg, weapon, weapon2, sash, mats, setAnim);
-}
-
-function addHair(head: THREE.Group, k: Kit, trim: THREE.Material, skin: THREE.Material, accent: THREE.Material) {
-  if (k.hair === "none") return;
-  if (k.hair === "topknot") {
-    head.add(mesh(GEO.sphere, trim, 0.155, 0.08, 0.155, 0, 0.26, -0.01));
-    head.add(mesh(GEO.sphere, trim, 0.07, 0.07, 0.07, 0, 0.32, -0.02));
-    head.add(mesh(GEO.cyl, trim, 0.022, 0.16, 0.022, 0, 0.42, -0.02));
-  }
-  if (k.hair === "long") {
-    head.add(mesh(GEO.sphere, trim, 0.16, 0.1, 0.16, 0, 0.24, -0.02));
-    const fall = mesh(GEO.box, trim, 0.16, 0.62, 0.1, 0, -0.08, -0.13);
-    fall.rotation.x = 0.22;
-    head.add(fall);
-    head.add(mesh(GEO.box, trim, 0.08, 0.28, 0.06, -0.12, 0.02, 0.04));
-    head.add(mesh(GEO.box, trim, 0.08, 0.28, 0.06, 0.12, 0.02, 0.04));
-  }
-  if (k.hair === "white-pony") {
-    head.add(mesh(GEO.sphere, skin, 0.15, 0.1, 0.16, 0, 0.24, 0));
-    const p = mesh(GEO.cyl, skin, 0.045, 0.72, 0.045, 0.04, 0.08, -0.28);
-    p.rotation.x = 0.95;
-    head.add(p);
-    head.add(mesh(GEO.box, accent, 0.04, 0.07, 0.04, 0.03, 0.26, -0.16));
-  }
-  if (k.hair === "bob") {
-    head.add(mesh(GEO.sphere, trim, 0.175, 0.12, 0.175, 0, 0.2, -0.02));
-    head.add(mesh(GEO.box, trim, 0.2, 0.2, 0.07, 0, 0.06, -0.12));
-    head.add(mesh(GEO.box, trim, 0.07, 0.22, 0.08, -0.12, 0.08, 0.04));
-    head.add(mesh(GEO.box, trim, 0.07, 0.22, 0.08, 0.12, 0.08, 0.04));
-  }
-  if (k.hair === "spiky") {
-    for (let i = 0; i < 6; i++) {
-      const s = mesh(GEO.cone, trim, 0.045, 0.24, 0.045, (i - 2.5) * 0.05, 0.3, -0.02);
-      s.rotation.z = (i - 2.5) * 0.22;
-      head.add(s);
-    }
-  }
-}
-
-function addHat(
-  head: THREE.Group,
-  k: Kit,
-  cloth: THREE.Material,
-  trim: THREE.Material,
-  metal: THREE.Material,
-  accent: THREE.Material,
-) {
-  if (k.hat === "kasa" || k.hat === "straw") {
-    const m = k.hat === "straw" ? trim : cloth;
-    const brim = mesh(GEO.brim, m, 1, 1, 1, 0, 0.28, 0);
-    const crown = mesh(GEO.cone, m, 0.22, 0.16, 0.22, 0, 0.38, 0);
-    head.add(brim, crown);
-    if (k.hat === "straw") {
-      const cord = mesh(GEO.box, accent, 0.02, 0.22, 0.02, 0.16, 0.16, 0.08);
-      cord.rotation.z = 0.4;
-      head.add(cord);
-    }
-  }
-  if (k.hat === "kabuto") {
-    head.add(mesh(GEO.sphere, metal, 0.18, 0.14, 0.2, 0, 0.2, 0.02));
-    const hornL = mesh(GEO.cone, metal, 0.035, 0.48, 0.035, -0.14, 0.44, 0.06);
-    const hornR = mesh(GEO.cone, metal, 0.035, 0.48, 0.035, 0.14, 0.44, 0.06);
-    hornL.rotation.z = 0.7;
-    hornR.rotation.z = -0.7;
-    hornL.rotation.x = -0.25;
-    hornR.rotation.x = -0.25;
-    head.add(hornL, hornR);
-    head.add(mesh(GEO.box, cloth, 0.2, 0.14, 0.07, 0, 0.08, 0.14));
-  }
-  if (k.hat === "mask") {
-    head.add(mesh(GEO.box, accent, 0.18, 0.16, 0.1, 0, 0.12, 0.12));
-    head.add(mesh(GEO.box, cloth, 0.2, 0.08, 0.12, 0, 0.22, 0.04));
-  }
-  if (k.hat === "hood") {
-    head.add(mesh(GEO.sphere, cloth, 0.2, 0.18, 0.22, 0, 0.16, -0.02));
-  }
-  if (k.hat === "crown") {
-    for (let i = 0; i < 9; i++) {
-      const a = (i / 9) * Math.PI * 2;
-      head.add(mesh(GEO.cone, accent, 0.035, 0.3, 0.035, Math.cos(a) * 0.15, 0.34, Math.sin(a) * 0.15));
-    }
-  }
-}
-
-function addWeapon(
-  g: THREE.Group,
-  kind: Kit["weapons"],
-  metal: THREE.Material,
-  trim: THREE.Material,
-  accent: THREE.Material,
-  sign: number,
-) {
-  if (kind === "fists") {
-    g.add(mesh(GEO.sphere, trim, 0.07, 0.07, 0.08, 0, 0, 0));
-    return;
-  }
-  if (kind === "bow") {
-    const arc = mesh(GEO.cyl, trim, 0.025, 1.05, 0.025, 0, 0, 0);
-    arc.rotation.z = 0.18;
-    g.add(arc);
-    g.add(mesh(GEO.cyl, metal, 0.008, 0.95, 0.008, 0.09, 0, 0));
-    g.add(mesh(GEO.box, accent, 0.04, 0.08, 0.04, 0, 0.5, 0));
-    return;
-  }
-  if (kind === "naginata") {
-    g.add(mesh(GEO.cyl, trim, 0.022, 1.7, 0.022, 0, 0.25, 0));
-    const blade = mesh(GEO.box, metal, 0.03, 0.55, 0.09, 0, 1.18, 0);
-    blade.rotation.z = 0.08;
-    g.add(blade);
-    g.add(mesh(GEO.box, accent, 0.05, 0.04, 0.05, 0, 0.88, 0));
-    return;
-  }
-  if (kind === "claws") {
-    for (let i = 0; i < 3; i++) g.add(mesh(GEO.cone, metal, 0.025, 0.32, 0.025, (i - 1) * 0.055, 0.14, 0.04));
-    return;
-  }
-  if (kind === "scythes") {
-    g.add(mesh(GEO.cyl, trim, 0.02, 1.35, 0.02, 0, 0.22, 0));
-    g.add(mesh(GEO.box, accent, 0.05, 0.14, 0.48, 0, 0.92, 0.16));
-    return;
-  }
-  if (kind === "staff") {
-    g.add(mesh(GEO.cyl, trim, 0.025, 1.55, 0.025, 0, 0.22, 0));
-    g.add(mesh(GEO.sphere, accent, 0.07, 0.07, 0.07, 0, 1.02, 0));
-    return;
-  }
-  const tsuka = mesh(GEO.cyl, trim, 0.022, 0.26, 0.022, 0, 0.1, 0);
-  const wrap = mesh(GEO.cyl, accent, 0.024, 0.18, 0.024, 0, 0.08, 0);
-  const tsuba = mesh(GEO.box, metal, 0.13, 0.018, 0.13, 0, 0.24, 0);
-  const blade = mesh(GEO.blade, metal, 1, 1, 1, 0, 0.82, 0);
-  blade.rotation.z = 0.03 * sign;
-  g.add(tsuka, wrap, tsuba, blade);
-}
-
-function addSignature(
-  def: CharacterDef,
-  body: THREE.Group,
-  head: THREE.Group,
-  cloth: THREE.Material,
-  accent: THREE.Material,
-  trim: THREE.Material,
-  metal: THREE.Material,
-  dark: THREE.Material,
-) {
-  if ((def.id as string) === "karasu") {
-    const raven = new THREE.Group();
-    raven.position.set(0.28, 1.55, -0.12);
-    raven.add(mesh(GEO.sphere, dark, 0.07, 0.05, 0.1, 0, 0, 0));
-    raven.add(mesh(GEO.cone, dark, 0.08, 0.16, 0.04, 0.12, 0.02, 0));
-    raven.rotation.y = -0.6;
-    body.add(raven);
-  }
-  if ((def.id as string) === "shiro") {
-    for (let i = 0; i < 5; i++) {
-      const c = mesh(GEO.cyl, metal, 0.035, 0.012, 0.035, -0.22, 0.7 - i * 0.08, -0.12);
-      body.add(c);
-    }
-  }
-  if ((def.id as string) === "akatsuki") {
-    body.add(mesh(GEO.box, accent, 0.48, 0.36, 0.3, 0, 1.38, 0));
-    body.add(mesh(GEO.box, dark, 0.22, 0.22, 0.08, 0, 1.4, 0.16));
-  }
-  if ((def.id as string) === "yoru" || (def.id as string) === "mizuchi") {
-    body.add(mesh(GEO.box, trim, 0.36, 0.08, 0.22, 0, 1.22, 0.04));
-  }
-  if ((def.id as string) === "hana") {
-    const bow = mesh(GEO.box, accent, 0.16, 0.08, 0.04, 0.08, 0.32, -0.08);
-    head.add(bow);
-  }
-  void cloth;
 }
 
 function buildBeast(def: CharacterDef): Rig {

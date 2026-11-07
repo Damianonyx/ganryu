@@ -1,10 +1,12 @@
 import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { AudioBus } from "./audio";
 import { Fighter } from "./fighter";
 import { FX } from "./fx";
 import { readInput, setInjectedKeys } from "./input";
 import { follow, motion, prefersReducedMotion } from "./motion";
 import { getLevel } from "./levels";
+import { setFighterEnvironment } from "./rig-kit";
 import { getChar } from "./roster";
 import { useGame } from "./store";
 import type { CharId, HudSnap, PlayKind } from "./types";
@@ -51,6 +53,12 @@ export class Engine {
   /** Render clock for shake noise; keeps running through hit-stop. */
   private rt = 0;
   private shakeOff = new THREE.Vector3();
+  /** Look-development view (QA hook `__ganryu.studio`): one fighter, orbiting camera. */
+  private studio: { yaw: number; dist: number; pitch: number; height: number; orbit: number; walk: number; clean: boolean } | null = null;
+  /** Adaptive resolution: frame-time samples and the ratio we started from. */
+  private perf = { t: 0, n: 0, sum: 0, warm: 3 };
+  /** Studio reflection map for the fighters (see rig-kit.ts). */
+  private envTex: THREE.Texture | null = null;
 
   constructor(canvas: HTMLCanvasElement) {
     const wide = (typeof window !== "undefined" ? window.innerWidth : 800) > 700;
@@ -71,6 +79,10 @@ export class Engine {
     this.scene.add(this.arena.group);
     this.scene.add(this.fx.group);
     this.camera.position.set(0, 5.5, 11);
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmrem.dispose();
+    setFighterEnvironment(this.envTex);
     this.bootWatch();
     this.installProbe();
   }
@@ -99,6 +111,8 @@ export class Engine {
     this.combo = 0;
     this.hitstop = 0;
     this.lookReady = false;
+    this.studio = null;
+    this.arena.group.visible = true;
   }
 
   bootWatch() {
@@ -115,6 +129,23 @@ export class Engine {
     this.hint = "";
     this.camDist = 10.4;
     this.camPitch = 0.36;
+  }
+
+  /** One fighter on a turntable, for checking looks and motion. */
+  startStudio(id: CharId, o: { dist?: number; pitch?: number; height?: number; orbit?: number; walk?: number; clean?: boolean; yaw?: number } = {}) {
+    this.clearFighters();
+    this.kind = "watch";
+    this.arena.apply("mist");
+    this.syncFog();
+    const f = new Fighter(getChar(id), 0, 0, 0, 0);
+    this.add(f);
+    this.studio = { yaw: o.yaw ?? 0.6, dist: o.dist ?? 3.4, pitch: o.pitch ?? 0.16, height: o.height ?? 1.0, orbit: o.orbit ?? 0, walk: o.walk ?? 0, clean: o.clean ?? false };
+    this.arena.group.visible = !this.studio.clean;
+    if (this.studio.clean) {
+      (this.scene.background as THREE.Color).set(0xe9e6e1);
+      (this.scene.fog as THREE.FogExp2).color.set(0xe9e6e1);
+    }
+    this.lookReady = false;
   }
 
   startCampaign(hero: CharId, level: number) {
@@ -186,6 +217,7 @@ export class Engine {
   step(dt: number) {
     const cap = Math.min(dt, 0.1);
     this.rt += cap;
+    this.adaptResolution(dt);
     if (this.hitstop > 0) {
       this.hitstop -= cap;
       this.fx.step(cap);
@@ -258,6 +290,22 @@ export class Engine {
       const nearest = this.nearestFoe(p);
       if (nearest && (inp.slash || inp.power || p.anim === "slash")) p.faceToward(nearest.x, nearest.z);
       p.applyInput(inp, camYaw, dt);
+    }
+
+    if (this.studio) {
+      const f = this.fighters[0];
+      if (f && !f.dead) {
+        const s = this.studio;
+        // Walk a circle of radius 2.4 at `walk` (0–1 of full speed); stand otherwise.
+        const a = Math.atan2(f.z, f.x) + Math.PI / 2;
+        const inward = s.walk > 0 ? (Math.hypot(f.x, f.z) - 2.4) * 0.6 : 0;
+        const mx = s.walk > 0 ? (Math.cos(a) - (f.x / (Math.hypot(f.x, f.z) || 1)) * inward) * s.walk : 0;
+        const mz = s.walk > 0 ? (Math.sin(a) - (f.z / (Math.hypot(f.x, f.z) || 1)) * inward) * s.walk : 0;
+        f.applyInput({ mx, mz, slash: f.wantSlash, parry: f.wantParry, leap: f.wantLeap, power: f.wantPower, fold: f.wantFold }, 0, dt);
+        f.wantSlash = f.wantParry = f.wantLeap = f.wantPower = f.wantFold = false;
+        f.stepKinematics(dt, ARENA_R);
+      }
+      return;
     }
 
     for (const f of this.fighters) {
@@ -514,6 +562,27 @@ export class Engine {
     }
   }
 
+  /**
+   * If frames average slower than 45 fps over two seconds, render at a lower
+   * pixel ratio (never below 1). Shading cost scales with pixels, so this keeps
+   * weaker phones smooth. The first seconds (shader compilation) are ignored.
+   */
+  private adaptResolution(dt: number) {
+    const p = this.perf;
+    if (p.warm > 0) {
+      p.warm -= dt;
+      return;
+    }
+    p.t += dt;
+    p.n += 1;
+    p.sum += dt;
+    if (p.t < 2) return;
+    const avg = p.sum / p.n;
+    p.t = p.n = p.sum = 0;
+    const ratio = this.renderer.getPixelRatio();
+    if (avg > 1 / 45 && ratio > 1.001) this.renderer.setPixelRatio(Math.max(1, ratio - 0.15));
+  }
+
   /** Afterimages from where a fighter was to where they appeared, faint to strong. */
   private trail(a: Fighter, sx: number, sz: number) {
     const n = Math.max(0, Math.round(motion.dash.ghosts));
@@ -561,6 +630,15 @@ export class Engine {
   }
 
   private drawCam(dt: number) {
+    if (this.studio) {
+      const s = this.studio;
+      const f = this.fighters[0];
+      if (!f) return;
+      const yaw = s.yaw + this.t * s.orbit;
+      this.camera.position.set(f.x + Math.sin(yaw) * s.dist, s.height + Math.sin(s.pitch) * s.dist, f.z + Math.cos(yaw) * s.dist);
+      this.camera.lookAt(f.x, s.height, f.z);
+      return;
+    }
     const p = this.player;
     const target = p ?? this.fighters[0];
     if (!target) return;
@@ -669,6 +747,18 @@ export class Engine {
     window.__ganryu = {
       duel: (a, b) => self.startDuel(a, b),
       campaign: (hero, level) => self.startCampaign(hero, level),
+      studio: (id, o) => self.startStudio(id, o),
+      rig: () => self.fighters[0]?.rig ?? null,
+      info: () => ({ ...self.renderer.info.render, programs: self.renderer.info.programs?.length ?? 0 }),
+      act: (name) => {
+        const f = self.fighters[0];
+        if (!f) return;
+        if (name === "slash") f.wantSlash = true;
+        else if (name === "parry") f.wantParry = true;
+        else if (name === "leap") f.wantLeap = true;
+        else if (name === "power") f.wantPower = true;
+        else if (name === "fold") f.wantFold = true;
+      },
       cam: (d, p) => {
         self.camDist = d;
         if (p !== undefined) self.camPitch = p;
@@ -731,6 +821,8 @@ export class Engine {
     this.disposed = true;
     this.clearFighters();
     this.fx.dispose();
+    setFighterEnvironment(null);
+    this.envTex?.dispose();
     this.renderer.dispose();
     window.__controlsTest = undefined;
     window.__ganryu = undefined;
@@ -748,6 +840,10 @@ declare global {
     __ganryu?: {
       duel: (a: CharId, b: CharId) => void;
       campaign: (hero: CharId, level: number) => void;
+      studio: (id: CharId, o?: { dist?: number; pitch?: number; height?: number; orbit?: number; walk?: number; clean?: boolean; yaw?: number }) => void;
+      act: (name: "slash" | "parry" | "leap" | "power" | "fold") => void;
+      rig: () => import("./mesh").Rig | null;
+      info: () => { calls: number; triangles: number; programs: number };
       cam: (d: number, p?: number) => void;
       pose: (name: import("./types").AnimName) => void;
       ids: () => string[];

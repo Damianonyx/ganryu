@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import { InputBuffer, type Action } from "./input-buffer";
 import { buildRig, type Rig } from "./mesh";
 import { motion } from "./motion";
@@ -205,6 +204,7 @@ export class Fighter {
   stepKinematics(dt: number, arenaR: number) {
     if (this.dead) {
       this.animT += dt;
+      this.rig.drive?.(dt, 0, 0, this.yaw, this.y, this.x, this.z);
       this.rig.setAnim("die", this.animT, 1, 1);
       this.place();
       return;
@@ -245,6 +245,7 @@ export class Fighter {
     if (this.anim === "fold" && this.animT > 0.45) this.beginAnim("idle");
     if (this.anim === "hurt" && this.animT > 0.28) this.beginAnim("idle");
     const speed = Math.hypot(this.vx, this.vz);
+    this.rig.drive?.(dt, this.vx, this.vz, this.yaw, this.y, this.x, this.z);
     this.rig.setAnim(this.anim, this.animT, 1 + speed * 0.08, 1);
     this.rig.setFolding(this.foldT > 0);
     this.place();
