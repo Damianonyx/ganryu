@@ -59,11 +59,11 @@ Rates are exponential follow rates (`follow(rate, dt)` in `motion.ts`), so they 
 
 ## How the fighters move
 
-All fourteen fighters share one two-legged body (`src/game/rig-humanoid.ts`), posed procedurally every frame. The human fighters wear the samurai dressing (`rig-samurai.ts`); the others are built from their sheets in `rig-monsters.ts`, each with its own proportions, posture, stance, and gait character:
+All fourteen fighters share one two-legged body (`src/game/rig-humanoid.ts`), posed procedurally every frame. The armored fighters wear the samurai dressing (`rig-samurai.ts`), the unarmored swordsmen are in `rig-wanderers.ts`, and the monsters are in `rig-monsters.ts`, each with its own proportions, posture, stance, and gait character:
 
 | Fighter | Stance | Gait character |
 | --- | --- | --- |
-| Human fighters | Sword (kamae) | Baseline |
+| Human fighters (samurai, and Enjirō, Mokuren, Mumyō) | Sword (kamae) | Baseline; Enjirō's flames and hair, Mokuren's kesa swing |
 | Vargash | Claws, double rake | Hunched, long and bouncing, heavy landings; wings beat in the air, the jaw opens on attacks, the tail swings |
 | Sei | Claws, wide rake | Light and floating; smoke tendrils stream from the head and limbs |
 | Rei | Claws, long rake | Hunched stalker with a long stride; the thorn crest sways |

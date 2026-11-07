@@ -11,7 +11,12 @@ Internal IDs are stable lowercase keys. Display names can change without breakin
 **In the game:**
 - The roster and the ten-battle campaign are implemented (`src/game/roster.ts`, `src/game/levels.ts`).
 - The warrior-select screen shows the four protagonists with their skills and stats.
-- In matches, every fighter has a procedural 3D body built from their sheet. The nine human fighters (all four protagonists, Kurogane, Mumyō, Mokuren, Enjirō, and Nethrak) wear lacquer samurai armor with laced plates, helmets, hats or masks, and their signature details (`src/game/rig-samurai.ts`). The others (`src/game/rig-monsters.ts`):
+- In matches, every fighter has a procedural 3D body built from their sheet. Kairo, Hakuren, Shion, Akari, Kurogane, and Nethrak wear lacquer samurai armor or robes with laced plates, helmets, hats or masks, and their signature details (`src/game/rig-samurai.ts`). The three unarmored swordsmen (`src/game/rig-wanderers.ts`):
+  - **Enjirō:** an open, torn black kimono over a bare chest, a white inner panel and red cord sash, a ragged dark straw hat pierced by a long red oni horn, red eyes, long black hair, a crimson demon arm with spikes and licking flames, a laced shoulder guard on the other arm, a glowing red katana, and three scabbards.
+  - **Mokuren:** bark-grey skin with cracks, branch antlers and branches from the shoulder, an elongated bone mask with one red eye and gold rings, large white prayer beads, a brown kesa over the left shoulder under a grey plate, red cord on the bare right forearm, and a long purple hakama with a blossom panel.
+  - **Mumyō:** bandages from head to foot, cyan eyes and a toothy grin, layered dark and blue-grey robes, a bandage sash, and a katana with a glowing cyan hilt and gold guard.
+
+  The others (`src/game/rig-monsters.ts`):
   - **Vargash:** grey-muscled bat-wolf with a fur mane, wolf head with a hinged jaw and orange eyes, bat wings with orange hooks, bone gauntlet on the left arm and straps on the right, belt chains, torn orange loincloth, wrapped digitigrade clawed feet, and a furred tail.
   - **Sei:** matte black shadow traced with silver light lines, glowing white eyes, a jagged grin, and smoke tendrils streaming from the head and limbs.
   - **Rei:** bark-black stalker with ridges and a violet crack, long hooked talons, thorns along the limbs, a beaked head with violet eyes, and a swept thorn crest.
