@@ -108,10 +108,11 @@ export class FX {
     (this.ring.material as THREE.MeshBasicMaterial).opacity = 0.9;
   }
 
-  afterimage(x: number, y: number, z: number, yaw: number) {
+  /** A fading ghost of a fighter. `strength` (0–1) shortens and dims it, for trails. */
+  afterimage(x: number, y: number, z: number, yaw: number, strength = 1) {
     for (const g of this.ghosts) {
       if (g.life > 0) continue;
-      g.life = g.max;
+      g.life = g.max * Math.max(0.05, Math.min(1, strength));
       g.m.visible = true;
       g.m.position.set(x, y + 0.95, z);
       g.m.rotation.y = yaw;

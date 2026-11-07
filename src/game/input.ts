@@ -9,6 +9,9 @@ let tapParry = false;
 let tapLeap = false;
 let tapPower = false;
 let tapFold = false;
+// Touch buttons held down (Slash and Parry repeat while held, like keys).
+let holdSlash = false;
+let holdParry = false;
 
 function held(): Set<string> {
   if (injected) return new Set(injected);
@@ -23,7 +26,10 @@ export function bindInput() {
   const up = (e: KeyboardEvent) => {
     codes.delete(e.code);
   };
-  const blur = () => codes.clear();
+  const blur = () => {
+    codes.clear();
+    holdSlash = holdParry = false;
+  };
   window.addEventListener("keydown", down);
   window.addEventListener("keyup", up);
   window.addEventListener("blur", blur);
@@ -49,6 +55,12 @@ export function tap(action: "slash" | "parry" | "leap" | "power" | "fold") {
   if (action === "fold") tapFold = true;
 }
 
+/** Mark a touch button as held or released. Only Slash and Parry repeat while held. */
+export function setHeld(action: "slash" | "parry" | "leap" | "power" | "fold", on: boolean) {
+  if (action === "slash") holdSlash = on;
+  if (action === "parry") holdParry = on;
+}
+
 export function readInput(): InputFrame {
   const h = held();
   let mx = joyX;
@@ -62,8 +74,8 @@ export function readInput(): InputFrame {
     mx /= mag;
     mz /= mag;
   }
-  const slash = tapSlash || h.has("KeyJ") || h.has("Space");
-  const parry = tapParry || h.has("KeyL") || h.has("ShiftLeft") || h.has("ShiftRight");
+  const slash = tapSlash || holdSlash || h.has("KeyJ") || h.has("Space");
+  const parry = tapParry || holdParry || h.has("KeyL") || h.has("ShiftLeft") || h.has("ShiftRight");
   const leap = tapLeap || h.has("KeyK") || h.has("KeyC");
   const power = tapPower || h.has("KeyQ") || h.has("KeyE");
   const fold = tapFold || h.has("KeyF") || h.has("KeyR");

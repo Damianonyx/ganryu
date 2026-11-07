@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from "react";
-import { setJoystick, tap } from "@/game/input";
+import { setHeld, setJoystick, tap } from "@/game/input";
 import { getChar } from "@/game/roster";
 import { useGame } from "@/game/store";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ type Action = "slash" | "parry" | "leap" | "power" | "fold";
 
 const press = (a: Action) => {
   tap(a);
+  setHeld(a, true);
   try {
     navigator.vibrate?.(8);
   } catch {
@@ -42,21 +43,21 @@ export function ControlDock() {
 
       <div className="absolute bottom-[max(0.9rem,env(safe-area-inset-bottom))] right-[max(0.9rem,env(safe-area-inset-right))] [@media(pointer:fine)]:hidden">
         <div className="relative" style={{ width: "calc(var(--pad) * 3.05)", height: "calc(var(--pad) * 3.05)" }}>
-          <Face className="left-1/2 top-0 -translate-x-1/2" label="Leap" onPress={() => press("leap")} testId="btn-leap">
+          <Face className="left-1/2 top-0 -translate-x-1/2" label="Leap" action="leap" testId="btn-leap">
             <IconLeap />
           </Face>
-          <Face className="left-0 top-1/2 -translate-y-1/2" label="Parry" onPress={() => press("parry")} testId="btn-parry">
+          <Face className="left-0 top-1/2 -translate-y-1/2" label="Parry" action="parry" testId="btn-parry">
             <IconShield />
           </Face>
-          <Face className="right-0 top-1/2 -translate-y-1/2" label="Art" ring={powerK} ready={powerK >= 0.98} onPress={() => press("power")} testId="btn-art" title={def.power.name}>
+          <Face className="right-0 top-1/2 -translate-y-1/2" label="Art" ring={powerK} ready={powerK >= 0.98} action="power" testId="btn-art" title={def.power.name}>
             <IconArt />
           </Face>
-          <Face className="bottom-0 left-1/2 -translate-x-1/2" label="Slash" primary onPress={() => press("slash")} testId="btn-slash">
+          <Face className="bottom-0 left-1/2 -translate-x-1/2" label="Slash" primary action="slash" testId="btn-slash">
             <IconSword />
           </Face>
         </div>
         <div className="absolute" style={{ left: "calc(var(--pad) * -0.55)", top: "calc(var(--pad) * -0.55)" }}>
-          <Face small label="Fold" ring={foldK} ready={foldK >= 0.98} cyan onPress={() => press("fold")} testId="btn-fold">
+          <Face small label="Fold" ring={foldK} ready={foldK >= 0.98} cyan action="fold" testId="btn-fold">
             <IconHourglass />
           </Face>
         </div>
@@ -68,7 +69,7 @@ export function ControlDock() {
 function Face({
   children,
   label,
-  onPress,
+  action,
   primary,
   small,
   ring,
@@ -80,7 +81,7 @@ function Face({
 }: {
   children: ReactNode;
   label: string;
-  onPress: () => void;
+  action: Action;
   primary?: boolean;
   small?: boolean;
   ring?: number;
@@ -100,11 +101,20 @@ function Face({
         data-testid={testId}
         onPointerDown={(e) => {
           e.preventDefault();
-          onPress();
+          // The press comes first: nothing below may stop it from registering.
+          press(action);
+          e.currentTarget.dataset.pressed = "";
+          capture(e.currentTarget, e.pointerId);
         }}
+        onPointerUp={(e) => release(e.currentTarget, action)}
+        onPointerCancel={(e) => release(e.currentTarget, action)}
+        onLostPointerCapture={(e) => release(e.currentTarget, action)}
         onContextMenu={(e) => e.preventDefault()}
         className={cn(
-          "relative grid place-items-center rounded-full transition-transform duration-75 select-none active:scale-[0.92]",
+          // Press in instantly; spring back out with a slight overshoot (docs/MOTION.md).
+          "relative grid place-items-center rounded-full select-none",
+          "transition-[transform,filter] duration-(--dur-fast) ease-(--ease-emphasis)",
+          "data-[pressed]:scale-[0.9] data-[pressed]:brightness-125 data-[pressed]:duration-0",
           "shadow-[0_4px_14px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]",
           primary
             ? "bg-[radial-gradient(circle_at_35%_30%,#3a1216,#16090b_70%)] text-[#ffd7d0]"
@@ -132,6 +142,20 @@ function Face({
   );
 }
 
+/** Keep receiving this finger's events even if it slides off the control. */
+function capture(el: HTMLElement, pointerId: number) {
+  try {
+    el.setPointerCapture(pointerId);
+  } catch {
+    /* the pointer is already gone; pointerup will still release */
+  }
+}
+
+function release(el: HTMLElement, action: Action) {
+  delete el.dataset.pressed;
+  setHeld(action, false);
+}
+
 function Stick({ meter }: { meter: number }) {
   const origin = useRef<{ x: number; y: number; id: number; r: number } | null>(null);
   const knob = useRef<HTMLDivElement>(null);
@@ -152,7 +176,11 @@ function Stick({ meter }: { meter: number }) {
   const release = () => {
     origin.current = null;
     setJoystick(0, 0);
-    if (knob.current) knob.current.style.transform = "translate(-50%, -50%)";
+    if (knob.current) {
+      // The knob follows the finger exactly while held, and springs home on release.
+      knob.current.style.transition = "transform var(--dur-base) var(--ease-emphasis)";
+      knob.current.style.transform = "translate(-50%, -50%)";
+    }
   };
 
   // Art meter: a 120° arc hugging the upper-right of the stick
@@ -164,9 +192,10 @@ function Stick({ meter }: { meter: number }) {
       style={{ width: "calc(var(--pad) * 2.55)", height: "calc(var(--pad) * 2.55)", touchAction: "none" }}
       onPointerDown={(e) => {
         const el = e.currentTarget as HTMLDivElement;
-        el.setPointerCapture(e.pointerId);
+        capture(el, e.pointerId);
         const rect = el.getBoundingClientRect();
         origin.current = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, id: e.pointerId, r: rect.width * 0.32 };
+        if (knob.current) knob.current.style.transition = "none";
         move(e.clientX, e.clientY);
       }}
       onPointerMove={(e) => {

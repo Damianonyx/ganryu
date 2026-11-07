@@ -35,7 +35,7 @@ Players choose one of the four protagonists and keep that warrior for the whole 
 | Warrior select | Full-screen select for the four protagonists, showing each warrior's skills, stats, story, and campaign progress. Fits phones (portrait and landscape) and desktop. | Unlockables and mastery |
 | Campaign | Ten battles in four chapters (The Outer Defenses, The Pursuit, The Inner Circle, The Reckoning), against local AI | Story scenes between chapters, distinct arena layouts |
 | Fighters | 14 fighters as animated 3D bodies styled per character | Real character models, animation sets, and skill kits matched to `docs/CHARACTERS.md` |
-| Controls | Keyboard; touch joystick with Art meter; four-button pad (Slash, Parry, Leap, Art) with cooldown rings; Fold | Remapping, controller support |
+| Controls | Keyboard; touch joystick with Art meter; four-button pad (Slash, Parry, Leap, Art) with cooldown rings; Fold. Presses made while busy are buffered for 150 ms, Parry can cut a slash's recovery short, and touch Slash and Parry repeat while held | Remapping, controller support |
 | Camera and sound | Side-on fight camera that fits any screen; sword swings, clashes, parries, hits, footsteps, sword draw | Per-arena ambience |
 | Duel vs AI | One-off duel against a random follower from the title menu. Duels do not change campaign progress. | Online duels |
 | Multiplayer | Room discovery and WebRTC signaling exist in code, but online play is hidden in the menu until it works. | Server-authoritative online duels with validated results ([plan](docs/REBUILD_PLAN.md)) |
@@ -61,6 +61,7 @@ Open `http://127.0.0.1:8080`.
 | `/?intro=0` | Skip straight to the menu |
 | `/?intro=1&motion=reduced` | The reduced-motion version of the film |
 | `/?intro=1&film=3d` | The optional Blender 3D version of the film |
+| `/?tune=1` | Shows a motion tuning panel during battles (input buffer, hit-stop, shake, camera) |
 
 Keyboard: `WASD` move · `J` slash · `L` parry · `K` leap · `Q` Art · `F` Fold. In the film: `Esc` skip, `Space` pause, `M` sound, `C` subtitles.
 
@@ -75,10 +76,12 @@ Keyboard: `WASD` move · `J` slash · `L` parry · `K` leap · `Q` Art · `F` Fo
 | `public/cinematic/` | Film voice track, and the optional 3D film |
 | `public/sfx/` | Combat sound effects |
 | `blender/` | Blender scripts for the optional 3D film and its soundtrack ([README](blender/README.md)) |
-| `docs/` | Storyline, characters, cinematic notes, rebuild plan |
+| `docs/` | Storyline, characters, cinematic notes, motion language, rebuild plan |
 | `server/`, `src/lib/` | Auth, database, saves, multiplayer signaling |
 
 The opening film's shots, dialogue, subtitles, and timing are edited in `src/cinematic/script.ts`. See [docs/OPENING_CINEMATIC.md](docs/OPENING_CINEMATIC.md).
+
+How the game moves (interface timing, input buffering, hit-stop, camera, Fold, reduced motion) is defined once in [docs/MOTION.md](docs/MOTION.md), with tokens in `src/styles.css` and `src/game/motion.ts`.
 
 ## Configuration
 
@@ -102,6 +105,7 @@ Players can sign in with email and password, or with Google. X sign-in was remov
 npm run typecheck
 npm run lint
 npm test
+npm run lint:motion    # raw durations, curves, and transition: all in components
 npm run build
 npm run intro:verify   # with the dev server running: browser checks for the film and loading flow
 ```
@@ -113,14 +117,15 @@ Current results:
 | Typecheck | Passes |
 | Build | Passes |
 | Opening-film browser checks (`intro:verify`) | 34/34 pass |
-| TypeScript test suites, including the cinematic tests | 72/72 pass (run directly; see below) |
+| TypeScript test suites, including the cinematic and motion tests | 82/82 pass (run directly; see below) |
+| Motion linter (`lint:motion`) | Clean |
 | Lint | 2 errors, both pre-existing |
 | Script tests (`npm test`) | 17 pre-existing failures |
 
 The 17 script-test failures come from tests that assume files from the original authoring environment. Because `npm test` chains its suites, those failures also stop the TypeScript suites from running, so run those directly:
 
 ```bash
-node --experimental-strip-types --test src/lib/app-data/app-data.test.ts src/lib/app-data/readiness-schedule.test.ts src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts src/cinematic/cinematic.test.ts
+node --experimental-strip-types --test src/lib/app-data/app-data.test.ts src/lib/app-data/readiness-schedule.test.ts src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts src/cinematic/cinematic.test.ts src/game/motion.test.ts
 ```
 
 Restoring a reliable test baseline is part of the foundation work in the rebuild plan.

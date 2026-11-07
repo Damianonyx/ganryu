@@ -3,6 +3,7 @@ import { AudioBus } from "./audio";
 import { Fighter } from "./fighter";
 import { FX } from "./fx";
 import { readInput, setInjectedKeys } from "./input";
+import { follow, motion, prefersReducedMotion } from "./motion";
 import { getLevel } from "./levels";
 import { getChar } from "./roster";
 import { useGame } from "./store";
@@ -40,6 +41,16 @@ export class Engine {
   private hitstop = 0;
   private ghostT = 0;
   private lastFold = false;
+  /** Smoothed point the camera looks at (docs/MOTION.md: the camera never snaps). */
+  private lookPos = new THREE.Vector3();
+  private lookWant = new THREE.Vector3();
+  private lookReady = false;
+  /** 0 → 1 blend into Fold's view, eased (see `foldEase`). */
+  private foldMix = 0;
+  private foldEase = 0;
+  /** Render clock for shake noise; keeps running through hit-stop. */
+  private rt = 0;
+  private shakeOff = new THREE.Vector3();
 
   constructor(canvas: HTMLCanvasElement) {
     const wide = (typeof window !== "undefined" ? window.innerWidth : 800) > 700;
@@ -87,6 +98,7 @@ export class Engine {
     this.over = false;
     this.combo = 0;
     this.hitstop = 0;
+    this.lookReady = false;
   }
 
   bootWatch() {
@@ -173,6 +185,7 @@ export class Engine {
 
   step(dt: number) {
     const cap = Math.min(dt, 0.1);
+    this.rt += cap;
     if (this.hitstop > 0) {
       this.hitstop -= cap;
       this.fx.step(cap);
@@ -206,16 +219,25 @@ export class Engine {
     if (this.comboT <= 0) this.combo = 0;
     this.hintT = Math.max(0, this.hintT - dt);
     if (this.hintT <= 0) this.hint = "";
-    this.trauma = Math.max(0, this.trauma - dt * 2.4);
+    this.trauma = Math.max(0, this.trauma - dt * motion.shake.decay);
 
     const p = this.player;
     const folding = !!p && p.folding();
     this.foldingWorld = folding;
     this.arena.pulseFold(folding);
-    (this.scene.fog as THREE.FogExp2).density = folding ? 0.048 : 0.028;
-    this.renderer.toneMappingExposure = folding ? 0.78 : 1.12;
-    this.camera.fov = folding ? 42 : 48;
-    this.camera.updateProjectionMatrix();
+    // Fold's view blends in and out over `fold.blend` instead of switching in one frame.
+    const step = motion.fold.blend > 0 ? dt / motion.fold.blend : 1;
+    this.foldMix = folding ? Math.min(1, this.foldMix + step) : Math.max(0, this.foldMix - step);
+    const e = this.foldMix * this.foldMix * (3 - 2 * this.foldMix);
+    this.foldEase = e;
+    (this.scene.fog as THREE.FogExp2).density = 0.028 + (0.048 - 0.028) * e;
+    this.renderer.toneMappingExposure = 1.12 + (0.78 - 1.12) * e;
+    // Reduced motion keeps the fog and light change but not the zoom.
+    const fov = prefersReducedMotion() ? 48 : 48 + (42 - 48) * e;
+    if (Math.abs(this.camera.fov - fov) > 1e-4) {
+      this.camera.fov = fov;
+      this.camera.updateProjectionMatrix();
+    }
     if (p) p.rig.setFolding(folding);
     if (folding && !this.lastFold) {
       this.fx.foldRing(p!.x, p!.z);
@@ -409,8 +431,8 @@ export class Engine {
       this.audio.parry(this.pan(b));
       this.fx.burst(b.x, 1.2, b.z, 10, "#efece4", 3.2);
       a.stun = 0.25;
-      this.trauma = Math.min(1, this.trauma + 0.25);
-      this.hitstop = 0.04;
+      this.trauma = Math.min(1, this.trauma + motion.shake.parry);
+      this.hitstop = motion.hitstop.parry;
       return;
     }
     if (res === "immune") {
@@ -425,8 +447,8 @@ export class Engine {
     if (res === "hit" || res === "dead") {
       this.audio.hit(this.pan(b));
       this.fx.burst(b.x, 1.2, b.z, 16, a.folding() ? "#efece4" : "#b4232a", 5.2);
-      this.trauma = Math.min(1, this.trauma + (res === "dead" ? 0.7 : 0.38));
-      this.hitstop = res === "dead" ? 0.1 : 0.055;
+      this.trauma = Math.min(1, this.trauma + (res === "dead" ? motion.shake.kill : motion.shake.hit));
+      this.hitstop = res === "dead" ? motion.hitstop.kill : motion.hitstop.hit;
       if (a.isPlayer) {
         this.combo += 1;
         this.comboT = 2.2;
@@ -442,8 +464,11 @@ export class Engine {
     this.fx.foldRing(a.x, a.z);
     if (kind === "dash") {
       const f = a.forward();
+      const sx = a.x;
+      const sz = a.z;
       a.x += f.x * 3.2;
       a.z += f.z * 3.2;
+      this.trail(a, sx, sz);
       a.iFrames = 0.35;
       if (foe && Math.hypot(foe.x - a.x, foe.z - a.z) < 2) this.strike(a, foe, a.atk * 1.2);
     } else if (kind === "aoe") {
@@ -471,8 +496,11 @@ export class Engine {
     } else if (kind === "teleport") {
       if (foe) {
         const f = foe.forward();
+        const sx = a.x;
+        const sz = a.z;
         a.x = foe.x - f.x * 1.4;
         a.z = foe.z - f.z * 1.4;
+        this.trail(a, sx, sz);
         a.faceToward(foe.x, foe.z);
         this.strike(a, foe, a.atk);
       }
@@ -484,6 +512,34 @@ export class Engine {
     } else if (kind === "iaido") {
       if (foe) this.strike(a, foe, a.atk * 2.1);
     }
+  }
+
+  /** Afterimages from where a fighter was to where they appeared, faint to strong. */
+  private trail(a: Fighter, sx: number, sz: number) {
+    const n = Math.max(0, Math.round(motion.dash.ghosts));
+    for (let i = 0; i < n; i++) {
+      const k = n === 1 ? 0 : i / (n - 1);
+      this.fx.afterimage(sx + (a.x - sx) * k * 0.85, a.y, sz + (a.z - sz) * k * 0.85, a.yaw, 0.35 + 0.65 * k);
+    }
+  }
+
+  /** Smooth shake from trauma², sum-of-sines noise (per-frame random reads as jitter). */
+  private shake(): THREE.Vector3 {
+    const amount = prefersReducedMotion() ? 0 : motion.shake.amount;
+    const s = this.trauma * this.trauma * amount;
+    if (s < 0.002) return this.shakeOff.set(0, 0, 0);
+    const w = this.rt * motion.shake.freq * Math.PI * 2;
+    const n = (o: number) => (Math.sin(w + o) * 0.6 + Math.sin(w * 1.71 + o * 2.3) * 0.3 + Math.sin(w * 2.93 + o * 4.1) * 0.1) * 0.5;
+    return this.shakeOff.set(n(0.0) * s * 0.55, n(11.3) * s * 0.28, n(23.7) * s * 0.35);
+  }
+
+  /** Ease the look point toward `lookWant`, snapping only on the first frame of a fight. */
+  private aim(dt: number) {
+    if (!this.lookReady) {
+      this.lookPos.copy(this.lookWant);
+      this.lookReady = true;
+    } else this.lookPos.lerp(this.lookWant, follow(motion.camera.look, dt));
+    this.camera.lookAt(this.lookPos);
   }
 
   private checkEnd() {
@@ -530,62 +586,48 @@ export class Engine {
       const sgn = nx * curX + nz * curZ >= 0 ? 1 : -1;
       const want = Math.atan2(nx * sgn, nz * sgn);
       const dyaw = ((want - this.camYaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
-      this.camYaw += dyaw * Math.min(1, 2.6 * dt);
+      this.camYaw += dyaw * follow(motion.camera.yaw, dt);
       const midX = (lead.x + foe.x) / 2;
       const midZ = (lead.z + foe.z) / 2;
       // fit both fighters plus a margin inside the horizontal field of view
       const halfW = Math.tan(((this.camera.fov / 2) * Math.PI) / 180) * Math.max(0.3, this.camera.aspect);
       const wantDist = Math.min(14, Math.max(4.8, (sep / 2 + 1.35) / halfW));
-      this.camDist += (wantDist - this.camDist) * Math.min(1, 2.2 * dt);
-      this.camPitch += (0.16 - this.camPitch) * Math.min(1, 2 * dt);
+      this.camDist += (wantDist - this.camDist) * follow(motion.camera.zoom, dt);
+      this.camPitch += (0.16 - this.camPitch) * follow(2, dt);
       this.frameSide(midX, midZ, dt);
       return;
     }
     if (p) {
       const dyaw = ((p.yaw - this.camYaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
-      this.camYaw += dyaw * Math.min(1, 3.4 * dt);
+      this.camYaw += dyaw * follow(3.4, dt);
     } else {
       this.camYaw = this.t * 0.16;
       this.camDist = 10.2 + Math.sin(this.t * 0.28) * 1.1;
       this.camPitch = 0.34 + Math.sin(this.t * 0.19) * 0.06;
     }
-    const dist = this.foldingWorld ? this.camDist + 1.1 : this.camDist;
+    const dist = this.camDist + 1.1 * this.foldEase;
     const fx = -Math.sin(this.camYaw);
     const fz = -Math.cos(this.camYaw);
-    const lookY = 1.28 + (this.foldingWorld ? 0.25 : 0);
+    const lookY = 1.28 + 0.25 * this.foldEase;
     const leadX = p ? p.vx * 0.12 : 0;
     const leadZ = p ? p.vz * 0.12 : 0;
-    let cx = target.x + leadX - fx * dist;
-    let cy = lookY + Math.sin(this.camPitch) * dist * 0.95;
-    let cz = target.z + leadZ - fz * dist;
-    const shake = this.trauma * this.trauma;
-    if (shake > 0.002) {
-      cx += (Math.random() - 0.5) * shake * 0.55;
-      cy += (Math.random() - 0.5) * shake * 0.28;
-      cz += (Math.random() - 0.5) * shake * 0.35;
-    }
-    this.camPos.set(cx, cy, cz);
-    this.camera.position.lerp(this.camPos, 1 - Math.exp(-4.8 * dt));
-    this.camera.lookAt(target.x + leadX, lookY, target.z + leadZ);
+    const sh = this.shake();
+    this.camPos.set(target.x + leadX - fx * dist + sh.x, lookY + Math.sin(this.camPitch) * dist * 0.95 + sh.y, target.z + leadZ - fz * dist + sh.z);
+    this.camera.position.lerp(this.camPos, follow(4.8, dt));
+    this.lookWant.set(target.x + leadX, lookY, target.z + leadZ);
+    this.aim(dt);
   }
 
   private frameSide(midX: number, midZ: number, dt: number) {
-    const dist = this.foldingWorld ? this.camDist + 1.1 : this.camDist;
+    const dist = this.camDist + 1.1 * this.foldEase;
     const fx = -Math.sin(this.camYaw);
     const fz = -Math.cos(this.camYaw);
-    const lookY = 1.15 + (this.foldingWorld ? 0.2 : 0);
-    let cx = midX - fx * dist;
-    let cy = lookY + Math.sin(this.camPitch) * dist * 0.95;
-    let cz = midZ - fz * dist;
-    const shake = this.trauma * this.trauma;
-    if (shake > 0.002) {
-      cx += (Math.random() - 0.5) * shake * 0.55;
-      cy += (Math.random() - 0.5) * shake * 0.28;
-      cz += (Math.random() - 0.5) * shake * 0.35;
-    }
-    this.camPos.set(cx, cy, cz);
-    this.camera.position.lerp(this.camPos, 1 - Math.exp(-5.5 * dt));
-    this.camera.lookAt(midX, lookY, midZ);
+    const lookY = 1.15 + 0.2 * this.foldEase;
+    const sh = this.shake();
+    this.camPos.set(midX - fx * dist + sh.x, lookY + Math.sin(this.camPitch) * dist * 0.95 + sh.y, midZ - fz * dist + sh.z);
+    this.camera.position.lerp(this.camPos, follow(motion.camera.follow, dt));
+    this.lookWant.set(midX, lookY, midZ);
+    this.aim(dt);
   }
 
   hud(): HudSnap {
@@ -638,9 +680,11 @@ export class Engine {
       ids: () => self.fighters.map((f) => f.def.id),
       state: () => ({
         cam: self.camera.position.toArray(),
+        look: self.camera.getWorldDirection(new THREE.Vector3()).toArray(),
+        fov: self.camera.fov,
         camYaw: self.camYaw,
         camDist: self.camDist,
-        fighters: self.fighters.map((f) => ({ id: f.def.id, x: f.x, z: f.z, dead: f.dead })),
+        fighters: self.fighters.map((f) => ({ id: f.def.id, x: f.x, z: f.z, dead: f.dead, anim: f.anim, animT: f.animT })),
       }),
       freeze: () => {
         for (const f of self.fighters) {
@@ -707,7 +751,14 @@ declare global {
       cam: (d: number, p?: number) => void;
       pose: (name: import("./types").AnimName) => void;
       ids: () => string[];
-      state: () => { cam: number[]; camYaw: number; camDist: number; fighters: { id: string; x: number; z: number; dead: boolean }[] };
+      state: () => {
+        cam: number[];
+        look: number[];
+        fov: number;
+        camYaw: number;
+        camDist: number;
+        fighters: { id: string; x: number; z: number; dead: boolean; anim: string; animT: number }[];
+      };
       freeze: () => void;
       foeAnim: (name: import("./types").AnimName) => void;
       lookAtFoe: (dist?: number) => void;

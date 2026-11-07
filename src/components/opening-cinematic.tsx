@@ -112,7 +112,7 @@ export function IntroController({ replayToken, muted, onToggleMute, onCoverChang
     <div
       data-intro-phase={phase}
       className={cn(
-        "absolute inset-0 z-40 bg-black transition-opacity duration-700",
+        "absolute inset-0 z-40 bg-black transition-opacity duration-(--dur-scene) ease-(--ease-enter)",
         covering ? "opacity-100" : "pointer-events-none opacity-0",
       )}
     >
@@ -157,7 +157,7 @@ function LoadingState({ progress, pending }: { progress: number; pending: string
         <p className="font-display text-3xl tracking-[0.18em] text-paper">GANRYŪ</p>
         <p className="mt-6 font-body text-[0.68rem] tracking-[0.32em] text-mist uppercase">Preparing the arena</p>
         <div className="mt-3 h-[3px] w-full overflow-hidden rounded-full bg-paper/10">
-          <div className="h-full bg-blood transition-[width] duration-300" style={{ width: `${Math.round(progress * 100)}%` }} />
+          <div className="h-full w-full origin-left bg-blood transition-transform duration-(--dur-base) ease-(--ease-enter)" style={{ transform: `scaleX(${Math.round(progress * 100) / 100})` }} />
         </div>
         <p className="mt-3 min-h-[1.25rem] font-body text-xs text-paper-dim">
           {pending.length ? `Loading: ${pending.join(", ")}` : "Ready"}
@@ -519,7 +519,7 @@ function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, o
         data-testid="intro-progress"
       >
         <div className="h-[2px] w-16 overflow-hidden rounded-full bg-paper/15">
-          <div className="h-full bg-paper/60 transition-[width] duration-300" style={{ width: `${Math.round(progress * 100)}%` }} />
+          <div className="h-full w-full origin-left bg-paper/60 transition-transform duration-(--dur-base) ease-(--ease-enter)" style={{ transform: `scaleX(${Math.round(progress * 100) / 100})` }} />
         </div>
         <span className="font-body text-[0.6rem] tracking-[0.2em] text-paper/50 uppercase">
           {ready ? "Ready" : `Loading ${Math.round(progress * 100)}%`}
@@ -563,7 +563,7 @@ function FilmButton({
       title={label}
       data-testid={testId}
       className={cn(
-        "inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-sm px-3 font-body text-[0.65rem] tracking-[0.18em] uppercase backdrop-blur-sm transition-colors",
+        "inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-sm px-3 font-body text-[0.65rem] tracking-[0.18em] uppercase backdrop-blur-sm transition-colors duration-(--dur-fast) ease-(--ease-enter)",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-paper/60",
         primary
           ? "border border-paper/40 bg-black/55 text-paper hover:bg-black/75"

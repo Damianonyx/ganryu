@@ -41,7 +41,7 @@ export function DuelOverlay({
       <header
         className={cn(
           "flex items-start justify-between px-5 pt-5 sm:px-8 sm:pt-7",
-          "transition-opacity duration-300",
+          "transition-opacity duration-(--dur-base) ease-(--ease-enter)",
           mode === "title" ? "opacity-0" : "opacity-100",
         )}
       >
