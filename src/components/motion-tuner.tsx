@@ -22,6 +22,10 @@ const KNOBS: Knob[] = [
   { group: "camera", key: "yaw", label: "Camera swing", min: 0.5, max: 8, step: 0.1 },
   { group: "fold", key: "blend", label: "Fold blend", min: 0, max: 0.8, step: 0.01, unit: "ms" },
   { group: "dash", key: "ghosts", label: "Dash afterimages", min: 0, max: 8, step: 1 },
+  { group: "gait", key: "strideRun", label: "Running stride (m)", min: 0.8, max: 2.4, step: 0.05 },
+  { group: "gait", key: "lift", label: "Foot lift (m)", min: 0, max: 0.4, step: 0.01 },
+  { group: "pose", key: "attack", label: "Blend into attacks", min: 0, max: 0.2, step: 0.005, unit: "ms" },
+  { group: "pose", key: "settle", label: "Blend back to stance", min: 0, max: 0.4, step: 0.01, unit: "ms" },
 ];
 
 const read = (k: Knob) => (motion[k.group] as Record<string, number>)[k.key];

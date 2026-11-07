@@ -63,6 +63,29 @@ export const MOTION_DEFAULTS = {
     /** Afterimages left along a Shadow Step or a teleport. */
     ghosts: 4,
   },
+  pose: {
+    /** Blend into an attack, Art, Parry, or leap: short, so actions feel instant. */
+    attack: 0.05,
+    /** Blend into a hit reaction or defeat: near-instant, it should read as an impact. */
+    react: 0.03,
+    /** Blend back to stance after an action. */
+    settle: 0.14,
+    /** Blend between standing and moving (bodies without a gait cycle). */
+    locomotion: 0.18,
+  },
+  gait: {
+    /** Stride (one full cycle, both feet) at a walk and at full speed, in meters. */
+    strideWalk: 0.8,
+    strideRun: 1.55,
+    /** Share of the cycle each foot is on the ground, at a walk and at full speed. */
+    dutyWalk: 0.62,
+    dutyRun: 0.42,
+    /** Foot lift at full speed, in meters. */
+    lift: 0.2,
+    /** Hip dip on landing, in meters, and how long it lasts. */
+    landDip: 0.11,
+    landTime: 0.24,
+  },
 };
 
 type Widen<T> = T extends number ? number : T extends readonly number[] ? number[] : { -readonly [K in keyof T]: Widen<T[K]> };

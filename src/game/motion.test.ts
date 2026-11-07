@@ -84,3 +84,49 @@ describe("motion tokens", () => {
     assert.equal(ms("slow") / 1000, MOTION_DEFAULTS.ui.slow);
   });
 });
+
+describe("leg IK", async () => {
+  const { legIK, blendTime, Spring } = await import("./rig-kit.ts");
+  // Forward kinematics for the same convention: rotation.x = θ turns the
+  // downward leg (0,-1,0) to (0, -cos θ, -sin θ).
+  const ankle = (thigh: number, shin: number, l1: number, l2: number) => ({
+    y: -Math.cos(thigh) * l1 - Math.cos(thigh + shin) * l2,
+    z: -Math.sin(thigh) * l1 - Math.sin(thigh + shin) * l2,
+  });
+
+  it("places the ankle on reachable targets, knee in front", () => {
+    for (const [dy, dz] of [
+      [-0.8, 0],
+      [-0.7, 0.3],
+      [-0.75, -0.3],
+      [-0.5, 0.1],
+    ]) {
+      const { thigh, shin } = legIK(dy, dz, 0.44, 0.42);
+      const a = ankle(thigh, shin, 0.44, 0.42);
+      assert.ok(Math.abs(a.y - dy) < 1e-6 && Math.abs(a.z - dz) < 1e-6, `target ${dy},${dz} → ${a.y},${a.z}`);
+      const knee = { y: -Math.cos(thigh) * 0.44, z: -Math.sin(thigh) * 0.44 };
+      // the knee sits forward of the hip→ankle line
+      assert.ok(knee.z >= (knee.y / dy) * dz - 1e-9);
+    }
+  });
+
+  it("straightens toward out-of-reach targets instead of failing", () => {
+    const { thigh, shin } = legIK(-2, 0.5, 0.44, 0.42);
+    assert.ok(Number.isFinite(thigh) && Number.isFinite(shin));
+    assert.ok(shin < 0.1);
+  });
+
+  it("blends quickly into actions and impacts, slower back to stance", () => {
+    const t = MOTION_DEFAULTS.pose;
+    assert.equal(blendTime("idle", "slash", t), t.attack);
+    assert.equal(blendTime("walk", "hurt", t), t.react);
+    assert.equal(blendTime("slash", "idle", t), t.settle);
+    assert.equal(blendTime("idle", "walk", t), t.locomotion);
+  });
+
+  it("springs settle on their target", () => {
+    const s = new Spring(60, 9);
+    for (let i = 0; i < 240; i++) s.step(1, 1 / 60);
+    assert.ok(Math.abs(s.x - 1) < 1e-3);
+  });
+});

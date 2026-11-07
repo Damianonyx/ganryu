@@ -48,8 +48,26 @@ In class names: `transition-opacity duration-(--dur-base) ease-(--ease-enter)`.
 | `camera.zoom` | 2.2 /s | Pulling in or out to fit both fighters |
 | `fold.blend` | 0.24 s | Field of view, fog, and exposure blending into or out of Fold |
 | `dash.ghosts` | 4 | Afterimages along a Shadow Step or teleport |
+| `pose.attack` / `react` | 0.05 / 0.03 s | Blend into an action, or into a hit reaction or defeat |
+| `pose.settle` / `locomotion` | 0.14 / 0.18 s | Blend back to stance; blend between standing and moving (bodies without a gait) |
+| `gait.strideWalk` / `strideRun` | 0.8 / 1.55 m | One full step cycle at a walk and at full speed |
+| `gait.dutyWalk` / `dutyRun` | 0.62 / 0.42 | Share of the cycle each foot is on the ground |
+| `gait.lift` | 0.2 m | Foot lift at full speed |
+| `gait.landDip` / `landTime` | 0.11 m / 0.24 s | How far the hips drop on landing, and for how long |
 
 Rates are exponential follow rates (`follow(rate, dt)` in `motion.ts`), so they behave the same at any frame rate.
+
+## How the fighters move
+
+The human fighters (`src/game/rig-samurai.ts`) are posed procedurally every frame:
+
+- **Gait.** Steps are driven by distance traveled, not by a timer. Each foot is pinned to a point on the ground while it is down and arcs to its next spot while it is up; two-bone leg IK (`legIK` in `rig-kit.ts`) bends the knee to reach it. At a full run in a circle, planted feet slip about 0.17 m/s against a body speed of 4.45 m/s (before: about 1 m/s, with feet sliding the whole time).
+- **Stance.** Fighters stand in kamae: knees bent, feet apart, sword side forward, the blade held at chest height in both hands.
+- **Actions** have anticipation, a fast strike, and follow-through: the slash winds the blade over the right shoulder, cuts diagonally while the front foot steps in, then follows through low.
+- **Blending.** Any change of animation blends from the pose on screen (`withBlend`), so nothing snaps.
+- **Secondary motion.** Scarves, hair, armor plates, and the hakama swing on damped springs driven by speed and acceleration.
+
+Every body faces the direction the game moves it. The human, titan, and thorn bodies used to be modeled facing backward.
 
 ## What never animates
 
@@ -103,6 +121,15 @@ Add `?tune=1` to the address (for example `https://ganryu.vercel.app/?tune=1`) t
 ### Shake uses smooth noise at 18 Hz
 - **Decision:** sum-of-sines noise instead of a new random offset every frame.
 - **Why:** per-frame random offsets read as jitter at 60 fps, not as a blow.
+
+### Planted feet are pinned in world space
+- **Decision:** a foot that touches down is pinned to that point on the ground; the leg reaches it with IK, rolling sideways when the body turns.
+- **Why:** placing feet relative to the body made them slide whenever the fighter turned or drifted (about 1 m/s of slip at a run).
+- **Rejected:** a timed walk cycle. It cannot match the ground speed, so feet always skate.
+
+### Fighters face where they go
+- **Decision:** every body is turned to face the game's forward direction.
+- **Why:** the human, titan, and thorn bodies were modeled facing +Z while the game moves fighters toward −Z, so they walked and parried with their backs.
 
 ### Touch Slash and Parry repeat while held
 - **Decision:** holding a touch button keeps the action pressed, as holding a key does.

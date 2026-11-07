@@ -11,7 +11,9 @@ Internal IDs are stable lowercase keys. Display names can change without breakin
 **In the game:**
 - The roster and the ten-battle campaign are implemented (`src/game/roster.ts`, `src/game/levels.ts`).
 - The warrior-select screen shows the four protagonists with their skills and stats.
-- In matches, each fighter currently uses a prototype 3D body restyled to their sheet, with one Art power plus Fold. The select screen badges the skill that works in battle now (Kairo: Shadow Step, Hakuren: Moonless Draw, Shion: Storm Circle, Akari: Ward Seal) and marks the rest "Soon". The skill kits below are the design target.
+- In matches, the nine human fighters (all four protagonists, Kurogane, Mumyō, Mokuren, Enjirō, and Nethrak) use a procedural armored-samurai body (`src/game/rig-samurai.ts`) built from their sheets: lacquer armor with laced plates, helmets, hats or masks, and each character's signature details. Sei, Rei, Vargash, Gorvane, and Kharzul still use the earlier prototype bodies, now facing forward and studio-lit; rebuilding them in the new style is planned.
+- Each fighter has one Art power plus Fold. The select screen badges the skill that works in battle now (Kairo: Shadow Step, Hakuren: Moonless Draw, Shion: Storm Circle, Akari: Ward Seal) and marks the rest "Soon". The skill kits below are the design target.
+- Kairo's armor lacing is ember orange (for The Last Ember); his sheet's accent was too dark to read on black lacquer.
 
 ## Protagonists
 
