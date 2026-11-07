@@ -111,7 +111,7 @@ export function WarriorSelect({ onBack, onEnter }: { onBack: () => void; onEnter
         key={hero.id}
         src={hero.portrait}
         alt={`${hero.name}, ${hero.title}`}
-        className="relative z-[1] h-[96%] max-h-full w-auto max-w-full animate-[warrior-in_420ms_ease-out] object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.65)]"
+        className="relative z-[1] h-[96%] max-h-full w-auto max-w-full animate-[warrior-in_var(--dur-slow)_var(--ease-enter)] object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.65)]"
         data-testid="warrior-art"
       />
     </div>
@@ -157,7 +157,7 @@ export function WarriorSelect({ onBack, onEnter }: { onBack: () => void; onEnter
       className="group relative mx-auto flex h-12 w-full max-w-[22rem] items-center justify-center sm:h-14"
     >
       <span
-        className="absolute inset-0 bg-gradient-to-b from-[#1b2633] to-[#0c121a] shadow-[0_0_24px_rgba(127,178,214,0.25)] transition-[filter] group-hover:brightness-125 group-active:brightness-90"
+        className="absolute inset-0 bg-gradient-to-b from-[#1b2633] to-[#0c121a] shadow-[0_0_24px_rgba(127,178,214,0.25)] transition-[filter] duration-(--dur-fast) ease-(--ease-enter) group-hover:brightness-125 group-active:brightness-90"
         style={{ clipPath: "polygon(6% 0, 94% 0, 100% 50%, 94% 100%, 6% 100%, 0 50%)" }}
       />
       <span
@@ -267,7 +267,7 @@ function Slot({
         {...(onClick ? { type: "button" as const, onClick, "aria-pressed": !!active } : {})}
         data-testid={testId}
         className={cn(
-          "relative grid place-items-center rounded-[6px] border bg-[linear-gradient(160deg,#151c25,#090c11)] text-[#e9f3fa] shadow-[inset_0_0_14px_rgba(0,0,0,0.7)] transition-colors",
+          "relative grid place-items-center rounded-[6px] border bg-[linear-gradient(160deg,#151c25,#090c11)] text-[#e9f3fa] shadow-[inset_0_0_14px_rgba(0,0,0,0.7)] transition-colors duration-(--dur-fast) ease-(--ease-enter)",
           active ? "border-[#e8a25a] shadow-[0_0_14px_rgba(232,162,90,0.45),inset_0_0_14px_rgba(0,0,0,0.7)]" : "border-[#7fb2d6]/30",
           onClick && "hover:border-[#cfe3f2]/70",
           glow && !active && "border-[#e8a25a]/50",
@@ -301,7 +301,7 @@ function PortraitTab({ c, active }: { c: CharacterDef; active: boolean }) {
       data-testid={`tab-${c.id}`}
       onClick={() => useGame.getState().setFighter(c.id)}
       className={cn(
-        "relative grid size-[clamp(2.6rem,min(12vw,11dvh),4.2rem)] place-items-center overflow-hidden rounded-full border-2 bg-[#0b1118] transition-transform",
+        "relative grid size-[clamp(2.6rem,min(12vw,11dvh),4.2rem)] place-items-center overflow-hidden rounded-full border-2 bg-[#0b1118] transition-transform duration-(--dur-fast) ease-(--ease-enter)",
         active ? "scale-110 border-[#e9f3fa] shadow-[0_0_18px_rgba(207,227,242,0.55)]" : "border-[#7fb2d6]/40 opacity-80 hover:opacity-100",
       )}
     >

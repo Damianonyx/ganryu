@@ -1,5 +1,7 @@
 import * as THREE from "three";
+import { InputBuffer, type Action } from "./input-buffer";
 import { buildRig, type Rig } from "./mesh";
+import { motion } from "./motion";
 import type { AnimName, CharacterDef, CharId, InputFrame, PowerKind } from "./types";
 
 let nid = 1;
@@ -49,6 +51,8 @@ export class Fighter {
   slashHits = 0;
   hitLanded = false;
   swingFx = false;
+  /** The player's remembered press (see input-buffer.ts and docs/MOTION.md). */
+  readonly buffer = new InputBuffer();
 
   constructor(def: CharacterDef, team: 0 | 1, x: number, z: number, yaw: number, mul?: { hp: number; atk: number; spd: number }) {
     this.id = `f${nid++}`;
@@ -90,8 +94,17 @@ export class Fighter {
   }
 
   applyInput(inp: InputFrame, camYaw: number, dt: number) {
+    // The player's presses are remembered briefly so none are lost while busy.
+    if (this.isPlayer && !this.buffer.push(inp, motion.input.buffer)) this.buffer.tick(dt);
     if (this.dead || this.stun > 0 || this.anim === "die") return;
-    if (this.anim === "slash" || this.anim === "parry" || this.anim === "special" || this.anim === "hurt") return;
+    if (this.anim === "slash" || this.anim === "parry" || this.anim === "special" || this.anim === "hurt") {
+      // After the blade's active part, Parry or the next Slash can cut the recovery short.
+      if (this.isPlayer && this.anim === "slash" && this.animT >= (this.beast ? motion.input.beastCancel : motion.input.slashCancel)) {
+        const a = this.buffer.action;
+        if ((a === "parry" || a === "slash") && this.act(a)) this.buffer.clear();
+      }
+      return;
+    }
     const s = Math.sin(camYaw);
     const c = Math.cos(camYaw);
     const wx = inp.mx * c + inp.mz * s;
@@ -112,11 +125,41 @@ export class Fighter {
       this.vz *= Math.exp(-10 * dt);
       if (this.anim === "walk") this.beginAnim("idle");
     }
+    if (this.isPlayer) {
+      const a = this.buffer.action;
+      if (a && this.act(a)) this.buffer.clear();
+      return;
+    }
     if (inp.slash && this.atkCd <= 0) this.startSlash();
     if (inp.parry) this.startParry();
     if (inp.leap && this.y <= 0.01) this.startLeap();
     if (inp.power && this.powerCd <= 0) this.startPower();
     if (inp.fold && this.foldCd <= 0 && this.foldT <= 0) this.startFold();
+  }
+
+  /** Start an action if it is available now. Returns false when it is not (cooldown, airborne). */
+  private act(a: Action): boolean {
+    switch (a) {
+      case "slash":
+        if (this.atkCd > 0) return false;
+        this.startSlash();
+        return true;
+      case "parry":
+        this.startParry();
+        return true;
+      case "leap":
+        if (this.y > 0.01) return false;
+        this.startLeap();
+        return true;
+      case "power":
+        if (this.powerCd > 0) return false;
+        this.startPower();
+        return true;
+      case "fold":
+        if (this.foldCd > 0 || this.foldT > 0) return false;
+        this.startFold();
+        return true;
+    }
   }
 
   private beginWalk() {

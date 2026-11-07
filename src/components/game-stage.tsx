@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ControlDock } from "@/components/controls";
+import { MotionTuner } from "@/components/motion-tuner";
 import { IntroController } from "@/components/opening-cinematic";
 import { Overlays } from "@/components/overlays";
 import { settleTask } from "@/cinematic/readiness";
@@ -245,6 +246,7 @@ export function GameStage() {
         }}
       />
       {mode === "play" && <ControlDock />}
+      {mode === "play" && <MotionTuner />}
       {mode === "lobby" && <LobbyNet />}
       <IntroController
         replayToken={replayToken}
