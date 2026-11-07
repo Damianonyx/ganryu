@@ -130,3 +130,47 @@ describe("leg IK", async () => {
     assert.ok(Math.abs(s.x - 1) < 1e-3);
   });
 });
+
+describe("ropes", async () => {
+  const THREE = await import("three");
+  const { Rope, rootLocal } = await import("./rig-rope.ts");
+  const down = new THREE.Vector3(0, -1, 0);
+  const free = { gravity: 9.8, damping: 0.97, stiff: 0 };
+
+  it("hang straight down under gravity and keep their length", () => {
+    const r = new Rope(8, 0.1);
+    const top = new THREE.Vector3(0, 2, 0);
+    r.reset(top, new THREE.Vector3(1, 0, 0)); // start sideways
+    for (let i = 0; i < 600; i++) r.step(1 / 60, top, down, free, i / 60);
+    const tip = r.p[r.n - 1];
+    assert.ok(Math.abs(tip.x) < 0.03 && Math.abs(tip.y - (2 - 0.7)) < 0.03, `tip ${tip.toArray()}`);
+    for (let i = 1; i < r.n; i++) assert.ok(Math.abs(r.p[i].distanceTo(r.p[i - 1]) - 0.1) < 1e-6);
+  });
+
+  it("hold a rest shape when stiff (a tail sticks out)", () => {
+    const r = new Rope(6, 0.1);
+    const base = new THREE.Vector3(0, 1, 0);
+    const back = new THREE.Vector3(0, 0, -1);
+    for (let i = 0; i < 300; i++) r.step(1 / 60, base, back, { gravity: 5, damping: 0.94, stiff: 0.22 }, i / 60);
+    const tip = r.p[r.n - 1];
+    assert.ok(tip.z < -0.35, `tip z ${tip.z}`);
+    assert.ok(tip.y > 0.6, `tip y ${tip.y}`);
+  });
+
+  it("carry an impulse to the tip more than the base", () => {
+    const r = new Rope(10, 0.1);
+    const top = new THREE.Vector3(0, 2, 0);
+    for (let i = 0; i < 300; i++) r.step(1 / 60, top, down, free, 0);
+    r.impulse(new THREE.Vector3(0, 0, 8), 1 / 60);
+    for (let i = 0; i < 6; i++) r.step(1 / 60, top, down, free, 0);
+    assert.ok(r.p[r.n - 1].z > r.p[2].z + 0.05, `tip ${r.p[r.n - 1].z} vs ${r.p[2].z}`);
+  });
+
+  it("maps world points into a turned root's frame", () => {
+    const toLocal = rootLocal(3, 0, 4, Math.PI / 2);
+    const out = toLocal(new THREE.Vector3(3, 1, 3), new THREE.Vector3());
+    // Turning the local point back by the root's yaw and adding its position recovers the world point.
+    const back = new THREE.Vector3(out.x, out.y, out.z).applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2).add(new THREE.Vector3(3, 0, 4));
+    assert.ok(back.distanceTo(new THREE.Vector3(3, 1, 3)) < 1e-9);
+  });
+});

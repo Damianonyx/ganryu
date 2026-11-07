@@ -43,6 +43,7 @@ export type MatSet = {
   metal: (color: string, rough?: number) => THREE.MeshStandardMaterial;
   cord: (color: string, glow?: number) => THREE.MeshStandardMaterial;
   skin: (color: string) => THREE.MeshStandardMaterial;
+  flesh: (color: string, rough?: number) => THREE.MeshStandardMaterial;
   /** One shared, vertex-colored material per batch class (see `bake`). */
   batch: (cls: string, sample: THREE.MeshStandardMaterial) => THREE.MeshStandardMaterial;
   all: THREE.MeshStandardMaterial[];
@@ -87,6 +88,9 @@ export function materials(): MatSet {
         return m;
       }),
     skin: (c) => make(`s${c}`, () => track(new THREE.MeshStandardMaterial({ color: c, roughness: 0.58, metalness: 0 }), 0.6), "cloth"),
+    // Living surfaces (smoke, bark, hide): matte with a soft sheen of reflection, never plastic.
+    flesh: (c, rough = 0.62) =>
+      make(`f${c}${rough}`, () => track(new THREE.MeshStandardMaterial({ color: c, roughness: rough, metalness: 0.05 }), 0.75), "cloth"),
     batch: (cls, sample) =>
       make(`batch:${cls}`, () => {
         const m = sample.clone();
@@ -98,16 +102,6 @@ export function materials(): MatSet {
       }),
     all,
   };
-}
-
-/**
- * Upgrade a legacy MeshStandardMaterial (the non-human bodies) to read under
- * the studio light. `gloss` gives matte shells a little shine so their form
- * shows; leave it off for fur.
- */
-export function studioUpgrade(m: THREE.MeshStandardMaterial, gloss = false) {
-  if (gloss && m.metalness < 0.5) m.roughness = Math.min(m.roughness, 0.5);
-  track(m, m.metalness > 0.5 ? 1.3 : 0.7);
 }
 
 // ── Geometry ─────────────────────────────────────────────────────────────────
@@ -158,6 +152,69 @@ export const G = {
         p.setXYZ(i, Math.cos(a) * r, y, Math.sin(a) * r);
       }
       g.computeVertexNormals();
+      return g;
+    }),
+  /**
+   * A muscled limb segment hanging down from its joint: one smooth lathed
+   * profile from r0 at the top to r1 at the bottom, bulging near the top, with
+   * rounded ends that tuck into the neighboring joints.
+   */
+  limb: (len: number, r0: number, r1: number, bulge = 0.2) =>
+    cached(`lb${len},${r0},${r1},${bulge}`, () => {
+      const pts: THREE.Vector2[] = [];
+      const cap = 5;
+      for (let i = 0; i <= cap; i++) {
+        const a = (i / cap) * (Math.PI / 2);
+        pts.push(new THREE.Vector2(Math.sin(a) * r1, -len - Math.cos(a) * r1 * 0.8));
+      }
+      const n = 10;
+      for (let i = 1; i < n; i++) {
+        const t = 1 - i / n; // 1 at the bottom → 0 at the top
+        const r = r0 + (r1 - r0) * t + Math.sin((1 - t) * Math.PI * 0.9) * bulge * (r0 + r1) * 0.5;
+        pts.push(new THREE.Vector2(r, -len * t));
+      }
+      for (let i = 0; i <= cap; i++) {
+        const a = (1 - i / cap) * (Math.PI / 2);
+        pts.push(new THREE.Vector2(Math.sin(a) * r0, Math.cos(a) * r0 * 0.8));
+      }
+      const g = new THREE.LatheGeometry(pts, 12);
+      g.computeVertexNormals();
+      return g;
+    }),
+  /**
+   * A torn robe or tabard: a flared tube whose hem is cut into ragged points.
+   * `arc` < 2π leaves it open at the front (a cape or open coat).
+   */
+  tatter: (rTop: number, rBot: number, h: number, depth: number, seed = 1, arc = Math.PI * 2) =>
+    cached(`tt${rTop},${rBot},${h},${depth},${seed},${arc}`, () => {
+      const cols = 36;
+      const g = new THREE.CylinderGeometry(rTop, rBot, h, cols, 4, true, arc < Math.PI * 2 ? Math.PI - arc / 2 : 0, arc);
+      const p = g.attributes.position;
+      const hash = (i: number) => {
+        const x = Math.sin(i * 127.1 + seed * 311.7) * 43758.5453;
+        return x - Math.floor(x);
+      };
+      for (let i = 0; i < p.count; i++) {
+        const y = p.getY(i);
+        const u = 0.5 - y / h; // 0 at the top, 1 at the hem
+        if (u < 0.5) continue;
+        const col = i % (cols + 1);
+        const tooth = (hash(col) * 0.7 + (col % 2 ? 0.3 : 0)) * depth * (u - 0.5) * 2;
+        const x = p.getX(i);
+        const z = p.getZ(i);
+        const a = Math.atan2(z, x);
+        const r = Math.hypot(x, z) + Math.sin(a * 7 + seed) * 0.012 * u;
+        p.setXYZ(i, Math.cos(a) * r, y - tooth, Math.sin(a) * r);
+      }
+      g.computeVertexNormals();
+      return g;
+    }),
+  /** A flat, four-sided spike along +Y (16 triangles): shards, feathers, scales. */
+  shard: (len: number, w: number) =>
+    cached(`sh${len},${w}`, () => {
+      const g = new THREE.ConeGeometry(w / 2, len, 4, 1);
+      g.scale(1, 1, 0.28);
+      g.translate(0, len / 2, 0);
       return g;
     }),
   /** A curved single-edged blade along +Y with its edge toward +Z. */
@@ -217,6 +274,16 @@ export function joint(parent: THREE.Object3D, pos: [number, number, number] = [0
 }
 
 /**
+ * A group used only to place parts (a claw, a shard, a branch), never animated.
+ * `bake` folds it into its nearest animated ancestor so its parts merge there.
+ */
+export function fixed(parent: THREE.Object3D, pos: [number, number, number] = [0, 0, 0]) {
+  const g = joint(parent, pos);
+  g.userData.fixed = true;
+  return g;
+}
+
+/**
  * Merge the static meshes directly inside each group of a hierarchy. Child
  * groups (joints) stay separate so they can still animate. Meshes whose
  * materials share a batch class (lacquer, cloth, metal) are merged into one
@@ -224,6 +291,19 @@ export function joint(parent: THREE.Object3D, pos: [number, number, number] = [0
  * per material. A fighter goes from ~150 draw calls to ~30.
  */
 export function bake(root: THREE.Object3D, mats?: MatSet) {
+  // Fold fixed placement groups into their nearest animated ancestor, keeping every part where it is.
+  root.updateMatrixWorld(true);
+  const fixedGroups: THREE.Object3D[] = [];
+  root.traverse((o) => {
+    if (o.userData.fixed) fixedGroups.push(o);
+  });
+  for (const f of fixedGroups.reverse()) {
+    let host = f.parent;
+    while (host && host.userData.fixed) host = host.parent;
+    if (!host) continue;
+    for (const c of [...f.children]) host.attach(c);
+    f.removeFromParent();
+  }
   const groups: THREE.Object3D[] = [];
   root.traverse((o) => {
     if (!(o as THREE.Mesh).isMesh) groups.push(o);
