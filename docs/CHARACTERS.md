@@ -11,7 +11,12 @@ Internal IDs are stable lowercase keys. Display names can change without breakin
 **In the game:**
 - The roster and the ten-battle campaign are implemented (`src/game/roster.ts`, `src/game/levels.ts`).
 - The warrior-select screen shows the four protagonists with their skills and stats.
-- In matches, the nine human fighters (all four protagonists, Kurogane, Mumyō, Mokuren, Enjirō, and Nethrak) use a procedural armored-samurai body (`src/game/rig-samurai.ts`) built from their sheets: lacquer armor with laced plates, helmets, hats or masks, and each character's signature details. Sei, Rei, Vargash, Gorvane, and Kharzul still use the earlier prototype bodies, now facing forward and studio-lit; rebuilding them in the new style is planned.
+- In matches, every fighter has a procedural 3D body built from their sheet. The nine human fighters (all four protagonists, Kurogane, Mumyō, Mokuren, Enjirō, and Nethrak) wear lacquer samurai armor with laced plates, helmets, hats or masks, and their signature details (`src/game/rig-samurai.ts`). The others (`src/game/rig-monsters.ts`):
+  - **Vargash:** grey-muscled bat-wolf with a fur mane, wolf head with a hinged jaw and orange eyes, bat wings with orange hooks, bone gauntlet on the left arm and straps on the right, belt chains, torn orange loincloth, wrapped digitigrade clawed feet, and a furred tail.
+  - **Sei:** matte black shadow traced with silver light lines, glowing white eyes, a jagged grin, and smoke tendrils streaming from the head and limbs.
+  - **Rei:** bark-black stalker with ridges and a violet crack, long hooked talons, thorns along the limbs, a beaked head with violet eyes, and a swept thorn crest.
+  - **Gorvane:** black-and-crimson knight with veined plates, a crimson scale-mail diamond, spiked pauldrons, couters, and helm crown, a glowing visor slit, a torn tabard, and trailing cape panels.
+  - **Kharzul:** grey shard armor over a layered red-and-grey tattered robe, a red beaked helm inside a sunburst crown of spines, red skeletal hands, and four thorn chains ending in glowing sickle talons.
 - Each fighter has one Art power plus Fold. The select screen badges the skill that works in battle now (Kairo: Shadow Step, Hakuren: Moonless Draw, Shion: Storm Circle, Akari: Ward Seal) and marks the rest "Soon". The skill kits below are the design target.
 - Kairo's armor lacing is ember orange (for The Last Ember); his sheet's accent was too dark to read on black lacquer.
 

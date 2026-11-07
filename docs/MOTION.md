@@ -59,7 +59,18 @@ Rates are exponential follow rates (`follow(rate, dt)` in `motion.ts`), so they 
 
 ## How the fighters move
 
-The human fighters (`src/game/rig-samurai.ts`) are posed procedurally every frame:
+All fourteen fighters share one two-legged body (`src/game/rig-humanoid.ts`), posed procedurally every frame. The human fighters wear the samurai dressing (`rig-samurai.ts`); the others are built from their sheets in `rig-monsters.ts`, each with its own proportions, posture, stance, and gait character:
+
+| Fighter | Stance | Gait character |
+| --- | --- | --- |
+| Human fighters | Sword (kamae) | Baseline |
+| Vargash | Claws, double rake | Hunched, long and bouncing, heavy landings; wings beat in the air, the jaw opens on attacks, the tail swings |
+| Sei | Claws, wide rake | Light and floating; smoke tendrils stream from the head and limbs |
+| Rei | Claws, long rake | Hunched stalker with a long stride; the thorn crest sways |
+| Gorvane | Fists, overhead hammer blow | Ponderous: short stride, deep bob, side-to-side roll, the cape trails |
+| Kharzul | Chains, two-handed whip | A glide under the robe; four chains swing, and a strike throws the sickles out |
+
+How they move:
 
 - **Gait.** Steps are driven by distance traveled, not by a timer. Each foot is pinned to a point on the ground while it is down and arcs to its next spot while it is up; two-bone leg IK (`legIK` in `rig-kit.ts`) bends the knee to reach it. At a full run in a circle, planted feet slip about 0.17 m/s against a body speed of 4.45 m/s (before: about 1 m/s, with feet sliding the whole time).
 - **Stance.** Fighters stand in kamae: knees bent, feet apart, sword side forward, the blade held at chest height in both hands.
@@ -126,6 +137,11 @@ Add `?tune=1` to the address (for example `https://ganryu.vercel.app/?tune=1`) t
 - **Decision:** a foot that touches down is pinned to that point on the ground; the leg reaches it with IK, rolling sideways when the body turns.
 - **Why:** placing feet relative to the body made them slide whenever the fighter turned or drifted (about 1 m/s of slip at a run).
 - **Rejected:** a timed walk cycle. It cannot match the ground speed, so feet always skate.
+
+### Chains, tendrils, and tails are ropes in world space
+- **Decision:** they are Verlet ropes simulated in world space and pinned to a joint (`rig-rope.ts`), drawn as one instanced mesh per set.
+- **Why:** springs on joint angles cannot hang, lag, or whip. In world space a chain lags when the body moves and carries a strike's momentum to its tip.
+- **Rejected:** simulating in the body's frame. Moving the body would drag the rope rigidly, with no inertia.
 
 ### Fighters face where they go
 - **Decision:** every body is turned to face the game's forward direction.

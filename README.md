@@ -34,7 +34,7 @@ Players choose one of the four protagonists and keep that warrior for the whole 
 | Opening cinematic | About 76 s painted film that plays while the game loads: voices, sound effects, music, subtitles, Skip/Continue, pause, Replay intro, reduced motion. Nethrak and five followers drawn from their sheets. | Recorded voice actors, a composed score, final art |
 | Warrior select | Full-screen select for the four protagonists, showing each warrior's skills, stats, story, and campaign progress. Fits phones (portrait and landscape) and desktop. | Unlockables and mastery |
 | Campaign | Ten battles in four chapters (The Outer Defenses, The Pursuit, The Inner Circle, The Reckoning), against local AI | Story scenes between chapters, distinct arena layouts |
-| Fighters | 14 fighters in 3D. The nine human fighters use a procedural armored-samurai body with studio lighting, planted-foot gait, fighting stance, and blended actions ([MOTION.md](docs/MOTION.md)); the five non-human bodies are earlier prototypes | New bodies for Sei, Rei, Vargash, Gorvane, and Kharzul; skill kits matched to `docs/CHARACTERS.md` |
+| Fighters | 14 fighters in 3D, built procedurally from their sheets with studio lighting, a planted-foot gait, fighting stances, and blended actions ([MOTION.md](docs/MOTION.md)). Human fighters wear lacquer samurai armor; Vargash, Sei, Rei, Gorvane, and Kharzul have their own bodies, with simulated chains, smoke tendrils, wings, and tails | Sculpted faces and hands; skill kits matched to `docs/CHARACTERS.md` |
 | Controls | Keyboard; touch joystick with Art meter; four-button pad (Slash, Parry, Leap, Art) with cooldown rings; Fold. Presses made while busy are buffered for 150 ms, Parry can cut a slash's recovery short, and touch Slash and Parry repeat while held | Remapping, controller support |
 | Camera and sound | Side-on fight camera that fits any screen; sword swings, clashes, parries, hits, footsteps, sword draw | Per-arena ambience |
 | Duel vs AI | One-off duel against a random follower from the title menu. Duels do not change campaign progress. | Online duels |
@@ -142,7 +142,7 @@ Production with real accounts needs `DATABASE_URL` and explicit authentication c
 
 - **Voices:** text-to-speech placeholders (Piper), to be replaced with recorded actors.
 - **Film:** procedural art and sound.
-- **3D fighters:** procedural bodies built in code, not sculpted models. The non-human bodies are still prototypes.
+- **3D fighters:** procedural bodies built in code from primitives, not sculpted models.
 - **Balance:** fighter stats and powers are first-pass values.
 
 ## Working on the project
