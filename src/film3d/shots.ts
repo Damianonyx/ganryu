@@ -3,6 +3,10 @@ import { ACT1 } from "./acts/act1";
 import { ACT2 } from "./acts/act2";
 import { ACT3 } from "./acts/act3";
 import { ACT4 } from "./acts/act4";
+import { ACT5 } from "./acts/act5";
+import { ACT6 } from "./acts/act6";
+import { ACT7 } from "./acts/act7";
+import { ACT8 } from "./acts/act8";
 import type { Shot } from "./lab";
 
 /**
@@ -11,7 +15,7 @@ import type { Shot } from "./lab";
  * painted film line up with it shot for shot.
  */
 
-const STAGED: Shot[] = [...ACT1, ...ACT2, ...ACT3, ...ACT4];
+const STAGED: Shot[] = [...ACT1, ...ACT2, ...ACT3, ...ACT4, ...ACT5, ...ACT6, ...ACT7, ...ACT8];
 
 export const SHOTS: Shot[] = STAGED.map((shot) => {
   const s = SCRIPT.find((x) => x.id === shot.id);

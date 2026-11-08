@@ -84,10 +84,12 @@ export type Interior = {
  * Builds the room and the cellar. `burning` (0–1) sets how strongly the
  * village fire glows through the paper walls and the door.
  */
-export function interior(s: FilmStage, o: { burning?: number; doorOpen?: boolean; doorBroken?: boolean; lamp?: boolean; hearth?: boolean; haze?: number } = {}): Interior {
+export function interior(s: FilmStage, o: { burning?: number; doorOpen?: boolean; doorBroken?: boolean; lamp?: boolean; hearth?: boolean; haze?: number; cellarOnly?: boolean } = {}): Interior {
   const burning = o.burning ?? 1;
-  s.scene.fog = new THREE.FogExp2(0x140a06, 0.05);
-  s.scene.background = new THREE.Color(0x0a0604);
+  if (!o.cellarOnly) {
+    s.scene.fog = new THREE.FogExp2(0x140a06, 0.05);
+    s.scene.background = new THREE.Color(0x0a0604);
+  }
   const r = rng(31);
   const boards = boardTex();
   const wood = std("#ffffff", 0.8, 0, { map: boards });
@@ -111,7 +113,7 @@ export function interior(s: FilmStage, o: { burning?: number; doorOpen?: boolean
   const hx1 = HATCH.x + HATCH.size / 2;
   const hz0 = HATCH.z - HATCH.size / 2;
   const hz1 = HATCH.z + HATCH.size / 2;
-  for (let i = -10; i <= 10; i++) {
+  for (let i = -10; i <= 10 && !o.cellarOnly; i++) {
     const x = i * bw;
     const m = i % 2 ? wood : woodDark;
     const z0 = ROOM.z0;
@@ -177,6 +179,10 @@ export function interior(s: FilmStage, o: { burning?: number; doorOpen?: boolean
   for (let i = 0; i < 3; i++) {
     const jar = add(new THREE.LatheGeometry([new THREE.Vector2(0, 0), new THREE.Vector2(0.12, 0.02), new THREE.Vector2(0.16, 0.18), new THREE.Vector2(0.1, 0.34), new THREE.Vector2(0.07, 0.36)], 14), std("#4a3a2a", 0.6), V(C.x0 + 0.25 + i * 0.3, -C.depth, C.z0 + 0.22));
     jar.scale.setScalar(0.9 + i * 0.1);
+  }
+
+  if (o.cellarOnly) {
+    return { lid, door: [], doorPlanks: [], beams: [], shoji: std("#000"), outside: [], cellarLight: new THREE.PointLight(0, 0), tick: () => {} };
   }
 
   // ── Walls: shoji on the sides, plaster and timber at the back, the door in front ──

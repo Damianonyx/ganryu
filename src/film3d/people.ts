@@ -32,6 +32,8 @@ export type Look = {
   scale: number;
   temper?: Partial<Temper>;
   prop?: Partial<Proportions>;
+  /** bare feet (training in the snow) instead of straw sandals */
+  barefoot?: boolean;
   /** what the hand can hold (each hidden until shown) */
   props?: ("bokken" | "katana" | "charm")[];
 };
@@ -136,8 +138,13 @@ function dress(b: Body, o: Look, props: Record<string, THREE.Object3D>, face: Fa
     }
     part(leg.knee, G.limb(P.shin, 0.052, 0.036, 0.3), skin);
     part(leg.ankle, G.rbox(0.08, 0.05, 0.2, 0.4), skin, [0, -0.035, 0.045]);
-    part(leg.ankle, G.rbox(0.09, 0.018, 0.23, 0.3), straw, [0, -0.062, 0.045]); // waraji
-    part(leg.ankle, G.rbox(0.07, 0.012, 0.012), M.cloth("#e8e0cc"), [0, -0.025, 0.08], [0, 0, 0]);
+    if (o.barefoot) {
+      part(leg.ankle, G.rbox(0.085, 0.03, 0.12, 0.5), skin, [0, -0.05, 0.1]); // the ball of the foot and toes
+      for (let i = 0; i < 4; i++) part(leg.ankle, G.sphere(0.012, 8, 6), skin, [(i - 1.5) * 0.018 * -leg.side * R, -0.055, 0.165 - Math.abs(i - 1) * 0.008]);
+    } else {
+      part(leg.ankle, G.rbox(0.09, 0.018, 0.23, 0.3), straw, [0, -0.062, 0.045]); // waraji
+      part(leg.ankle, G.rbox(0.07, 0.012, 0.012), M.cloth("#e8e0cc"), [0, -0.025, 0.08], [0, 0, 0]);
+    }
   }
   if (hakama) {
     part(pelvis, G.cyl(0.17, 0.2, 0.2, 18), hakama, [0, -0.06, 0], [0, 0, 0], [1, 1, 0.8]);
@@ -209,6 +216,8 @@ function dress(b: Body, o: Look, props: Record<string, THREE.Object3D>, face: Fa
     }
   };
 
+  // hair over the back of the head, below the crown
+  if (o.style !== "scarf") part(H, G.sphere(1, 14, 10), hair, [0, 0.1, -0.035], [0, 0, 0], [0.112, 0.1, 0.098]);
   if (o.style === "topknot" || o.style === "band") {
     part(H, G.dome(0.121, 0.86), hair, [0, 0.135, -0.014]);
     part(H, G.rbox(0.2, 0.04, 0.05, 0.5), hair, [0, 0.19, 0.075], [0.5, 0, 0]); // hairline
@@ -295,17 +304,18 @@ export const PEOPLE = {
     props: ["bokken", "charm"],
   }),
   /** Kairo at about fifteen, training alone */
-  youth: (season: "rain" | "autumn" | "snow" | "spring"): Look => ({
+  youth: (season: "rain" | "autumn" | "snow" | "summer" | "spring"): Look => ({
     skin: SKIN,
     hair: "#141010",
-    kimono: season === "snow" ? "#3a3a44" : "#3a4a62",
+    kimono: season === "snow" ? "#3a3a44" : season === "spring" ? "#2e3442" : "#3a4a62",
     collar: "#d8d0bc",
     obi: "#5a2a22",
     hakama: "#3a342e",
     sleeves: "tied",
-    style: "boy",
-    headScale: 1.1,
-    scale: 0.88,
+    style: season === "spring" ? "topknot" : "boy",
+    headScale: season === "spring" ? 1.02 : 1.12,
+    scale: season === "spring" ? 0.97 : season === "summer" ? 0.88 : 0.82,
+    barefoot: season === "snow",
     props: ["bokken", "charm"],
   }),
   father: (): Look => ({

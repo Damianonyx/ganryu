@@ -1000,9 +1000,9 @@ export function crows(s: FilmStage, n: number, from: THREE.Vector3, vel: THREE.V
 }
 
 /** Falling particles (rain, snow, petals, ash) in a box around a point. */
-export function precipitation(s: FilmStage, kind: "rain" | "snow" | "petals" | "ash", n: number, center: THREE.Vector3, size: [number, number, number], seed = 5) {
+export function precipitation(s: FilmStage, kind: "rain" | "snow" | "petals" | "ash", n: number, center: THREE.Vector3, size: [number, number, number], seed = 5, tint?: number) {
   const r = rng(seed);
-  const color = kind === "rain" ? 0xaab4c8 : kind === "snow" ? 0xf0f4ff : kind === "petals" ? 0xf2c0cc : 0x8a8a8a;
+  const color = tint ?? (kind === "rain" ? 0xaab4c8 : kind === "snow" ? 0xf0f4ff : kind === "petals" ? 0xf2c0cc : 0x8a8a8a);
   const ps: { m: THREE.Mesh | THREE.Sprite; v: THREE.Vector3; ph: number }[] = [];
   const geo = kind === "rain" ? new THREE.CylinderGeometry(0.004, 0.004, 0.35, 3) : kind === "petals" ? new THREE.CircleGeometry(0.025, 5) : null;
   const mat =
