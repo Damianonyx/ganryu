@@ -9,9 +9,11 @@ import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { BokehPass } from "three/examples/jsm/postprocessing/BokehPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { buildRig, type Rig } from "@/game/mesh";
+import type { Direction } from "@/game/rig-humanoid";
 import { setFighterEnvironment } from "@/game/rig-kit";
 import { getChar } from "@/game/roster";
 import type { AnimName, CharacterDef } from "@/game/types";
+import { buildPerson, type Look, type Person } from "./people";
 
 /**
  * The 3D film lab: stages the opening film's shots with the game's own
@@ -86,6 +88,8 @@ export class Fire {
   private r: () => number;
   private acc = 0;
   private t = 0;
+  /** scales the flame rate and light (a fire catching, growing, dying) */
+  power = 1;
   constructor(
     private at: THREE.Vector3,
     private o: { size: number; rate: number; light?: number; smoke?: number; embers?: number; spread?: number; seed?: number },
@@ -118,7 +122,7 @@ export class Fire {
   step(dt: number) {
     const { size, spread = 0.35 } = this.o;
     this.t += dt;
-    this.acc += dt * 60 * this.o.rate;
+    this.acc += dt * 60 * this.o.rate * this.power;
     const r = this.r;
     while (this.acc >= 1) {
       this.acc -= 1;
@@ -183,16 +187,19 @@ export class Fire {
       if (p.life <= 0) p.s.visible = false;
     }
     const f = 0.75 + 0.25 * Math.sin(this.t * 17) * Math.sin(this.t * 7.3 + 1) + (this.r() - 0.5) * 0.15;
-    this.light.intensity = (this.o.light ?? 3) * f;
+    this.light.intensity = (this.o.light ?? 3) * f * Math.min(1, this.power);
   }
 }
 
 // ── Actors: game fighters driven along scripted paths ─────────────────────
 
-export type Pose = { x: number; z: number; y?: number; yaw?: number; anim?: AnimName };
+/** Where an actor is and what it does at a moment. `floor` raises the ground it stands on (a veranda); `y` is a jump above it. */
+export type Pose = { x: number; z: number; y?: number; floor?: number; yaw?: number; anim?: AnimName; act?: Direction; animT?: number; visible?: boolean };
 
 export class Actor {
   readonly rig: Rig;
+  /** acting applied every frame under the path's own (civilians: arms relaxed) */
+  base: Direction | null = null;
   x = 0;
   z = 0;
   y = 0;
@@ -200,10 +207,10 @@ export class Actor {
   anim: AnimName = "idle";
   animT = 0;
   constructor(
-    def: CharacterDef,
+    def: CharacterDef | Rig,
     public path: (t: number) => Pose,
   ) {
-    this.rig = buildRig(def);
+    this.rig = "setAnim" in def ? def : buildRig(def);
     const p = path(0);
     this.x = p.x;
     this.z = p.z;
@@ -227,11 +234,14 @@ export class Actor {
       this.anim = anim;
       this.animT = 0;
     }
-    this.animT += dt;
+    this.animT = p.animT ?? this.animT + dt;
+    this.rig.direct?.(p.act ? { ...this.base, ...p.act } : this.base);
     this.rig.drive?.(dt, vx, vz, this.yaw, this.y, this.x, this.z);
-    this.rig.setAnim(this.anim, this.animT, 1, 1);
-    this.rig.root.position.set(this.x, this.y, this.z);
+    // place the root before posing, so reaching hands solve against where the body really is
+    this.rig.root.position.set(this.x, this.y + (p.floor ?? 0), this.z);
     this.rig.root.rotation.y = this.yaw;
+    this.rig.setAnim(this.anim, this.animT, 1, 1);
+    if (p.visible !== undefined) this.rig.root.visible = p.visible;
   }
 }
 
@@ -244,10 +254,10 @@ export function variant(id: string, kit: Partial<CharacterDef["kit"]>, name = id
 // ── Stage ─────────────────────────────────────────────────────────────────
 
 const GradeShader = {
-  uniforms: { tDiffuse: { value: null }, vignette: { value: 0.42 }, grain: { value: 0.035 }, time: { value: 0 }, lift: { value: new THREE.Vector3(0.012, 0.01, 0.022) } },
+  uniforms: { tDiffuse: { value: null }, vignette: { value: 0.42 }, grain: { value: 0.035 }, time: { value: 0 }, fade: { value: 1 }, lift: { value: new THREE.Vector3(0.012, 0.01, 0.022) } },
   vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }",
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float vignette; uniform float grain; uniform float time; uniform vec3 lift; varying vec2 vUv;
+    uniform sampler2D tDiffuse; uniform float vignette; uniform float grain; uniform float time; uniform float fade; uniform vec3 lift; varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)) + time) * 43758.5453); }
     void main(){
       vec4 c = texture2D(tDiffuse, vUv);
@@ -256,6 +266,7 @@ const GradeShader = {
       c.rgb *= mix(1.0 - vignette, 1.0, v);
       c.rgb = c.rgb + lift * (1.0 - c.rgb);           // lifted, cool shadows
       c.rgb += (h(vUv * 1000.0) - 0.5) * grain;        // film grain
+      c.rgb *= fade;                                   // fades to and from black
       gl_FragColor = c;
     }`,
 };
@@ -265,10 +276,14 @@ export type Shot = {
   id: string;
   title: string;
   dur: number;
+  fadeIn?: number;
+  fadeOut?: number;
   build: (s: FilmStage) => {
     update: (c: ShotCtx) => void;
     /** Shallow depth of field: focus distance from the camera (m), aperture, and blur cap. */
     dof?: { focus: number; aperture: number; maxblur: number };
+    /** Ambient occlusion (GTAO). Only for interiors and close-ups: over deep outdoor views it streaks and darkens the sky. */
+    ao?: boolean;
   };
 };
 
@@ -279,6 +294,11 @@ export class FilmStage {
   composer!: EffectComposer;
   actors: Actor[] = [];
   fires: Fire[] = [];
+  /** per-frame updates registered by set pieces (lanterns, smoke, birds, rain) */
+  ticks: ((c: ShotCtx) => void)[] = [];
+  /** extra grade control for a shot: vignette strength and grain */
+  grading = { vignette: 0.42, grain: 0.035 };
+  private current: Shot | null = null;
   private grade!: ShaderPass;
   private env: THREE.Texture;
   private sceneEnv: THREE.Texture | null = null;
@@ -312,7 +332,14 @@ export class FilmStage {
     this.camera.clear(); // shot-specific lens dressing (e.g. the floor gap)
     this.actors = [];
     this.fires = [];
+    this.ticks = [];
+    this.grading = { vignette: 0.42, grain: 0.035 };
+    this.renderer.toneMappingExposure = 1.0;
+    this.camera.fov = 35;
+    this.camera.near = 0.05;
+    this.camera.updateProjectionMatrix();
     this.t = 0;
+    this.current = shot;
     this.shot = shot.build(this);
     // settle ropes, springs, and fire before the first frame
     for (let i = 0; i < 45; i++) this.advance(1 / 60, true);
@@ -326,10 +353,14 @@ export class FilmStage {
     this.composer = new EffectComposer(this.renderer);
     this.composer.setSize(this.w, this.h);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
-    const ao = new GTAOPass(this.scene, this.camera, this.w, this.h);
-    ao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 1.2, thickness: 1.2, scale: 1.1, samples: 16 });
-    ao.blendIntensity = 0.85;
-    this.composer.addPass(ao);
+    const dbg = (globalThis as { __filmDebug?: { noAO?: boolean; noShadow?: boolean } }).__filmDebug ?? {};
+    if (this.shot.ao && !dbg.noAO) {
+      const ao = new GTAOPass(this.scene, this.camera, this.w, this.h);
+      ao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 1.2, thickness: 1.2, scale: 1.1, samples: 16 });
+      ao.blendIntensity = 0.85;
+      this.composer.addPass(ao);
+    }
+    this.renderer.shadowMap.enabled = !dbg.noShadow;
     // bloom only the real light sources (fire, glowing eyes, embers), not shiny highlights
     this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(this.w, this.h), 0.62, 0.5, 0.86));
     const dof = this.shot.dof;
@@ -339,6 +370,8 @@ export class FilmStage {
     this.grade = new ShaderPass(GradeShader);
     this.composer.addPass(this.grade);
     this.composer.addPass(new SMAAPass());
+    this.grade.uniforms.vignette.value = this.grading.vignette;
+    this.grade.uniforms.grain.value = this.grading.grain;
     this.t = 0;
   }
 
@@ -346,11 +379,18 @@ export class FilmStage {
     this.scene.add(o, ...more);
     return o;
   }
-  actor(def: CharacterDef, path: (t: number) => Pose) {
+  actor(def: CharacterDef | Rig, path: (t: number) => Pose) {
     const a = new Actor(def, path);
     this.scene.add(a.rig.root);
     this.actors.push(a);
     return a;
+  }
+  /** One of the villagers (people.ts), arms hanging naturally unless a pose says otherwise. */
+  person(look: Look, path: (t: number) => Pose) {
+    const rig = buildPerson(look);
+    const a = this.actor(rig, path);
+    a.base = { relax: 1 };
+    return a as Actor & { rig: Person };
   }
   fire(at: THREE.Vector3, o: ConstructorParameters<typeof Fire>[1]) {
     const f = new Fire(at.clone(), o);
@@ -363,13 +403,20 @@ export class FilmStage {
     const t = warm ? 0 : this.t;
     for (const a of this.actors) a.step(t, dt);
     for (const f of this.fires) f.step(dt);
+    for (const k of this.ticks) k({ stage: this, t, dt });
     this.shot?.update({ stage: this, t, dt });
   }
 
-  /** Advance the shot by dt and render one frame. */
-  step(dt: number) {
+  /** Advance the shot by dt and render one frame (or only advance, to skip ahead). */
+  step(dt: number, render = true) {
     this.t += dt;
     this.advance(dt);
+    if (!render) return;
+    const sh = this.current;
+    let fade = 1;
+    if (sh?.fadeIn) fade = Math.min(fade, this.t / sh.fadeIn);
+    if (sh?.fadeOut) fade = Math.min(fade, (sh.dur - this.t) / sh.fadeOut);
+    this.grade.uniforms.fade.value = Math.max(0, Math.min(1, fade)) ** 1.6;
     this.grade.uniforms.time.value = this.t;
     this.composer.render();
   }

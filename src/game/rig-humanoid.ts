@@ -121,7 +121,75 @@ export type HumanoidSpec = {
   dress: (b: Body) => Extras;
 };
 
-type ArmPose = { x: number; y: number; z: number; elbow: number; wx: number };
+export type ArmPose = { x: number; y: number; z: number; elbow: number; wx: number };
+
+/**
+ * Acting for the 3D film (src/film3d): poses a director sets on top of the
+ * procedural motion. The game never sets one. Angles are radians, lengths are
+ * meters; feet are targets in the body's frame (x toward its left, z forward).
+ */
+export type Direction = {
+  /** 0–1: arms hang and swing with the walk instead of holding the fighting stance */
+  relax?: number;
+  ra?: Partial<ArmPose>;
+  la?: Partial<ArmPose>;
+  lean?: number;
+  twist?: number;
+  tilt?: number;
+  headPitch?: number;
+  headYaw?: number;
+  /** extra hip drop; the legs bend to keep the feet on their targets */
+  drop?: number;
+  hipZ?: number;
+  feet?: (Partial<{ x: number; y: number; z: number }> | null)[];
+  /** whole-body pitch (forward fall) and roll */
+  pitch?: number;
+  roll?: number;
+  /** hands reaching world-space points (arm IK), blended in by `w` (default 1) */
+  reach?: { r?: [number, number, number] | null; l?: [number, number, number] | null; w?: number };
+};
+
+const _v = new THREE.Vector3();
+const _w = new THREE.Vector3();
+const _e = new THREE.Vector3();
+const _p = new THREE.Vector3();
+const _q = new THREE.Quaternion();
+const _q2 = new THREE.Quaternion();
+const _fk = new THREE.Quaternion();
+
+/** Two-bone arm IK: turn the shoulder and bend the elbow so the hand reaches a world point. */
+function reachArm(a: Arm, P: Proportions, target: [number, number, number], w: number) {
+  const parent = a.shoulder.parent!;
+  parent.updateWorldMatrix(true, false);
+  _v.set(...target);
+  parent.worldToLocal(_v).sub(a.shoulder.position);
+  const l1 = P.upperArm;
+  const l2 = P.foreArm + 0.06;
+  const D = Math.min(Math.max(_v.length(), Math.abs(l1 - l2) + 0.01), (l1 + l2) * 0.999);
+  const bend = Math.PI - Math.acos(Math.min(1, Math.max(-1, (l1 * l1 + l2 * l2 - D * D) / (2 * l1 * l2))));
+  // the hand's position with the elbow bent, before the shoulder turns
+  _w.set(0, -l1 - l2 * Math.cos(bend), l2 * Math.sin(bend)).normalize();
+  _v.normalize();
+  _q.setFromUnitVectors(_w, _v);
+  // swivel about the reach so the elbow points down and out
+  _e.set(0, -1, 0).applyQuaternion(_q);
+  _p.set(0.45 * a.side, -1, -0.25).normalize();
+  const proj = (u: THREE.Vector3) => u.sub(_v.clone().multiplyScalar(u.dot(_v)));
+  proj(_e);
+  proj(_p);
+  // reaching straight along the pole leaves no swivel to choose
+  if (_e.lengthSq() > 1e-8 && _p.lengthSq() > 1e-8) {
+    _e.normalize();
+    _p.normalize();
+    const ang = Math.atan2(_v.dot(_e.clone().cross(_p)), _e.dot(_p));
+    _q2.setFromAxisAngle(_v, ang);
+    _q.premultiply(_q2);
+  }
+  if (!Number.isFinite(_q.x + _q.y + _q.z + _q.w)) return;
+  _fk.copy(a.shoulder.quaternion);
+  a.shoulder.quaternion.copy(_fk).slerp(_q, w);
+  a.elbow.rotation.x = lerp(a.elbow.rotation.x, -bend, w);
+}
 
 /** Stance arm poses. z > 0 spreads an arm outward; wx tilts the hand. */
 const STANCE: Record<Stance, { ra: ArmPose; la: ArmPose; twist: number; runR: ArmPose; runL?: ArmPose }> = {
@@ -248,6 +316,7 @@ export function buildHumanoid(def: CharacterDef, spec: HumanoidSpec): Rig {
 
   const base = STANCE[spec.stance];
   const beast = k.body === "beast";
+  let direction: Direction | null = null;
 
   const setAnim: Rig["setAnim"] = (name, t) => {
     const dt = st.dt;
@@ -417,14 +486,46 @@ export function buildHumanoid(def: CharacterDef, spec: HumanoidSpec): Rig {
       lean += Math.sin(u * Math.PI) * 0.12;
     }
 
+    // ---- film direction ----
+    const d = direction;
+    let headYaw = 0;
+    if (d) {
+      if (d.relax) {
+        // arms hang; each swings forward with the opposite foot
+        let fR = 0;
+        if (gaitOn) {
+          const s0 = st.phase % 1;
+          fR = (s0 < duty ? Math.cos((Math.PI * s0) / duty) : -Math.cos((Math.PI * (s0 - duty)) / (1 - duty))) * run;
+        }
+        mix(ra, { x: 0.05 + fR * 0.42, y: 0, z: 0.12, elbow: -0.18 - run * 0.55, wx: 0.1 }, d.relax);
+        mix(la, { x: 0.05 - fR * 0.42, y: 0, z: 0.12, elbow: -0.18 - run * 0.55, wx: 0.1 }, d.relax);
+        twist = lerp(twist, -fR * 0.12, d.relax);
+      }
+      if (d.ra) mix(ra, d.ra, 1);
+      if (d.la) mix(la, d.la, 1);
+      if (d.lean !== undefined) lean = d.lean;
+      if (d.twist !== undefined) twist = d.twist;
+      if (d.tilt !== undefined) tilt = d.tilt;
+      if (d.headPitch !== undefined) headPitch = d.headPitch;
+      headYaw = d.headYaw ?? 0;
+      hipDrop += d.drop ?? 0;
+      if (d.hipZ !== undefined) hipZ = d.hipZ;
+      d.feet?.forEach((f, i) => {
+        if (!f || !feet[i]) return;
+        if (f.x !== undefined) feet[i].x = f.x;
+        if (f.y !== undefined) feet[i].y = f.y;
+        if (f.z !== undefined) feet[i].z = f.z;
+      });
+    }
+
     // ---- apply ----
     body.position.set(0, -hipDrop, hipZ);
-    body.rotation.set(0, 0, 0);
+    body.rotation.set(d?.pitch ?? 0, 0, d?.roll ?? 0);
     pelvis.rotation.set(0, twist * 0.3, tilt * 0.5);
     spine.rotation.set(lean * 0.6, twist * 0.45, tilt);
     chest.rotation.set(lean * 0.4, twist * 0.25, tilt * 0.4);
-    neck.rotation.set(headPitch * 0.5, -twist * 0.7, -tilt * 0.6);
-    head.rotation.set(headPitch * 0.5, -twist * 0.3, 0);
+    neck.rotation.set(headPitch * 0.5, -twist * 0.7 + headYaw * 0.6, -tilt * 0.6);
+    head.rotation.set(headPitch * 0.5, -twist * 0.3 + headYaw * 0.4, 0);
 
     legs.forEach((leg, i) => {
       const f = feet[i];
@@ -448,6 +549,13 @@ export function buildHumanoid(def: CharacterDef, spec: HumanoidSpec): Rig {
     };
     arm(b.right, ra);
     arm(b.left, la);
+    if (d?.reach) {
+      const rw = d.reach.w ?? 1;
+      if (rw > 0.001) {
+        if (d.reach.r) reachArm(b.right, P, d.reach.r, rw);
+        if (d.reach.l) reachArm(b.left, P, d.reach.l, rw);
+      }
+    }
 
     if (name === "die") {
       const u = ease.out(clamp01(t / (0.7 + T.heavy * 0.3)));
@@ -481,6 +589,9 @@ export function buildHumanoid(def: CharacterDef, spec: HumanoidSpec): Rig {
 
   const rig = finishRig(root, body, head, chest, b.left.shoulder, b.right.shoulder, legs[1].hip, legs[0].hip, weapon, M.all, setAnim);
   rig.drive = drive;
+  rig.direct = (d) => {
+    direction = d;
+  };
   const baseDispose = rig.dispose;
   rig.dispose = () => {
     baseDispose();

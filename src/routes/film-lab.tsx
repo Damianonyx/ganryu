@@ -27,7 +27,8 @@ function FilmLab() {
           if (!s) throw new Error(`no shot ${id}`);
           stage.load(s);
         },
-        step: (dt: number) => stage.step(dt),
+        step: (dt: number, render = true) => stage.step(dt, render),
+        stage,
       };
     })();
     return () => {
@@ -39,6 +40,6 @@ function FilmLab() {
 
 declare global {
   interface Window {
-    __film?: { shots: { id: string; title: string; dur: number }[]; load: (id: string) => void; step: (dt: number) => void };
+    __film?: { shots: { id: string; title: string; dur: number }[]; load: (id: string) => void; step: (dt: number, render?: boolean) => void; stage?: unknown };
   }
 }
