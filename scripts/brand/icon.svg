@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- GANRYŪ game icon: Kairo's horned helmet against a crimson sun, his eyes burning under the visor. -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="44%" r="70%">
+      <stop offset="0" stop-color="#2a0c10"/>
+      <stop offset="0.55" stop-color="#12080b"/>
+      <stop offset="1" stop-color="#060507"/>
+    </radialGradient>
+    <radialGradient id="sun" cx="46%" cy="40%" r="62%">
+      <stop offset="0" stop-color="#f0533a"/>
+      <stop offset="0.6" stop-color="#c8262a"/>
+      <stop offset="1" stop-color="#8e1218"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0.62" stop-color="#ff5a36" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ff5a36" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="horn" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#d6a64a"/>
+      <stop offset="1" stop-color="#f6dc8e"/>
+    </linearGradient>
+    <radialGradient id="eye" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fff2c0"/>
+      <stop offset="0.45" stop-color="#ff9a3a"/>
+      <stop offset="1" stop-color="#ff5a1a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- the sun -->
+  <circle cx="256" cy="246" r="214" fill="url(#halo)"/>
+  <circle cx="256" cy="246" r="168" fill="url(#sun)"/>
+
+  <!-- maedate: two crescent horns sweeping up from the brow, edged in gold -->
+  <g fill="#0a0709" stroke="url(#horn)" stroke-width="5" stroke-linejoin="round">
+    <path d="M246 214 C 222 196, 186 168, 162 126 C 150 104, 146 82, 150 54 C 138 86, 134 118, 146 150 C 160 186, 196 214, 236 232 Z"/>
+    <path d="M266 214 C 290 196, 326 168, 350 126 C 362 104, 366 82, 362 54 C 374 86, 378 118, 366 150 C 352 186, 316 214, 276 232 Z"/>
+  </g>
+
+  <!-- the helmet: bowl, crest plate, visor, side wings, and the flaring neck guard -->
+  <g fill="#0a0709">
+    <!-- neck guard (shikoro), three flaring tiers -->
+    <path d="M150 300 C 150 300, 362 300, 362 300 L 392 340 C 330 352, 182 352, 120 340 Z"/>
+    <path d="M128 344 C 190 356, 322 356, 384 344 L 408 382 C 336 396, 176 396, 104 382 Z"/>
+    <path d="M110 386 C 180 400, 332 400, 402 386 L 418 414 C 340 430, 172 430, 94 414 Z"/>
+    <!-- bowl -->
+    <path d="M168 304 C 166 238, 204 196, 256 196 C 308 196, 346 238, 344 304 Z"/>
+    <!-- side wings (fukigaeshi), turned back -->
+    <path d="M176 288 L 132 262 C 126 286, 132 306, 150 318 L 182 314 Z"/>
+    <path d="M336 288 L 380 262 C 386 286, 380 306, 362 318 L 330 314 Z"/>
+    <!-- visor (mabizashi), dipping at the front -->
+    <path d="M160 292 C 200 304, 312 304, 352 292 L 348 314 C 308 330, 204 330, 164 314 Z"/>
+  </g>
+  <!-- face mask (mempo) under the visor, a shade lighter than the iron, with a snarling mouth -->
+  <path d="M198 318 C 226 330, 286 330, 314 318 L 304 372 C 288 392, 224 392, 208 372 Z" fill="#1c1013"/>
+  <path d="M232 370 L 244 364 L 256 370 L 268 364 L 280 370" fill="none" stroke="#5a1418" stroke-width="3" stroke-linejoin="round"/>
+  <!-- firelight along the rim of the bowl, and a gold edge on the visor -->
+  <path d="M174 290 C 174 236, 210 202, 256 202 C 302 202, 338 236, 338 290" fill="none" stroke="#ff6a48" stroke-width="3" opacity="0.4"/>
+  <path d="M164 314 C 204 330, 308 330, 348 314" fill="none" stroke="url(#horn)" stroke-width="3.5" opacity="0.9"/>
+
+  <!-- lacing between the tiers of the neck guard -->
+  <g fill="none" stroke="#7a1418" stroke-width="3" opacity="0.9">
+    <path d="M140 342 C 200 354, 312 354, 372 342"/>
+    <path d="M120 384 C 186 398, 326 398, 392 384"/>
+  </g>
+  <!-- ridges on the bowl -->
+  <g fill="none" stroke="#2a1c1e" stroke-width="3">
+    <path d="M256 200 L 256 296"/>
+    <path d="M226 206 C 216 236, 214 268, 216 296"/>
+    <path d="M286 206 C 296 236, 298 268, 296 296"/>
+  </g>
+
+  <!-- crest plate on the brow -->
+  <path d="M236 240 L 256 226 L 276 240 L 270 262 L 242 262 Z" fill="#0a0709" stroke="url(#horn)" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- the eyes: two slits burning in the shadow under the visor -->
+  <circle cx="230" cy="336" r="22" fill="url(#eye)" opacity="0.75"/>
+  <circle cx="282" cy="336" r="22" fill="url(#eye)" opacity="0.75"/>
+  <path d="M212 330 L 246 338 L 242 344 L 214 338 Z" fill="#ffd27a"/>
+  <path d="M300 330 L 266 338 L 270 344 L 298 338 Z" fill="#ffd27a"/>
+</svg>
