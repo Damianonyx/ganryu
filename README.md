@@ -79,7 +79,7 @@ Keyboard: `WASD` move · `J` slash · `L` parry · `K` leap · `Q` Art · `F` Fo
 | `docs/` | Storyline, characters, cinematic notes, motion language, rebuild plan |
 | `server/`, `src/lib/` | Auth, database, saves, multiplayer signaling |
 
-The opening film's shots, dialogue, subtitles, and timing are edited in `src/cinematic/script.ts`. See [docs/OPENING_CINEMATIC.md](docs/OPENING_CINEMATIC.md).
+The opening film's shots, dialogue, subtitles, and timing are edited in `src/cinematic/script.ts`. See [docs/OPENING_CINEMATIC.md](docs/OPENING_CINEMATIC.md). A 3D version of the same film, staged in code with the game's fighters and rendered offline, is in progress: [docs/FILM3D.md](docs/FILM3D.md).
 
 How the game moves (interface timing, input buffering, hit-stop, camera, Fold, reduced motion) is defined once in [docs/MOTION.md](docs/MOTION.md), with tokens in `src/styles.css` and `src/game/motion.ts`.
 

@@ -169,7 +169,19 @@ function dressSamurai(b: Body): Extras {
   part(head, G.sphere(0.112), skin, [0, 0.11, 0.005], [0, 0, 0], [1, 1.12, 1.06]);
   const eyeGlow = id === "nethrak" ? "#ff2a2a" : id === "kairo" ? "#ff7a3a" : null;
   const eyeMat = eyeGlow ? M.cord(eyeGlow, 1.6) : M.metal("#0c0c0e", 0.4);
-  for (const x of [-0.04, 0.04]) part(head, G.rbox(0.032, 0.014, 0.012, 0.4), eyeMat, [x, 0.13, 0.108]);
+  if (id === "nethrak") {
+    // a skull: hollow sockets with red embers, a nasal cavity, cheekbones, bared teeth
+    const hollow = M.flesh("#0e0a0a", 0.9);
+    for (const x of [-0.042, 0.042]) {
+      part(head, G.sphere(1, 12, 10), hollow, [x, 0.13, 0.085], [0, 0, 0], [0.034, 0.03, 0.03]);
+      part(head, G.sphere(0.011, 8, 6), eyeMat, [x, 0.128, 0.104]);
+      part(head, G.sphere(1, 10, 8), skin, [x * 1.45, 0.095, 0.075], [0, 0, 0], [0.026, 0.018, 0.022]); // cheekbone
+    }
+    part(head, G.cone(0.014, 0.03, 3), hollow, [0, 0.1, 0.112], [Math.PI, 0, 0]);
+    const tooth = M.lacquer("#ece4d2");
+    for (let i = 0; i < 6; i++) part(head, G.rbox(0.011, 0.018, 0.01), tooth, [(i - 2.5) * 0.013, 0.058, 0.108 - Math.abs(i - 2.5) * 0.003]);
+    part(head, G.rbox(0.085, 0.012, 0.02), hollow, [0, 0.045, 0.1]);
+  } else for (const x of [-0.04, 0.04]) part(head, G.rbox(0.032, 0.014, 0.012, 0.4), eyeMat, [x, 0.13, 0.108]);
 
   const hairChain: { g: THREE.Group; s: Spring }[] = [];
   const chainOf = (parent: THREE.Object3D, at: [number, number, number], n: number, seg: number, w: number, m: THREE.Material, base: number) => {

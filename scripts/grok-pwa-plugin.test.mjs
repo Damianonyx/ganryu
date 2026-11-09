@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -308,6 +308,40 @@ test("self-hosted Vercel production domain is used for og:image", () => {
   }
 });
 
+test("a production domain baked at build carries og:image when the runtime lacks it", () => {
+  const prev = process.env.VITE_PUBLIC_HOSTNAME;
+  const prevProd = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  delete process.env.VITE_PUBLIC_HOSTNAME;
+  delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  try {
+    const out = injectGrokPwaHead("<html><head><title>GANRYU</title></head></html>", {
+      host: "ganryu.vercel.app",
+      site: { title: "GANRYU", card: "custom", publicHost: "ganryu.vercel.app", imageAlt: "Kairo and Nethrak" },
+    });
+    assert.match(out, /property="og:image" content="https:\/\/ganryu\.vercel\.app\/og\.jpg"/);
+    assert.match(out, /name="twitter:image" content="https:\/\/ganryu\.vercel\.app\/og\.jpg"/);
+    assert.match(out, /property="og:url" content="https:\/\/ganryu\.vercel\.app\/"/);
+    assert.match(out, /property="og:image:alt" content="Kairo and Nethrak"/);
+  } finally {
+    if (prev === undefined) delete process.env.VITE_PUBLIC_HOSTNAME;
+    else process.env.VITE_PUBLIC_HOSTNAME = prev;
+    if (prevProd !== undefined) process.env.VERCEL_PROJECT_PRODUCTION_URL = prevProd;
+  }
+});
+
+test("snapshotOgIdentity bakes the Vercel production domain when the build has it", () => {
+  const prevProd = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  process.env.VERCEL_PROJECT_PRODUCTION_URL = "ganryu.vercel.app";
+  try {
+    assert.equal(snapshotOgIdentity(TEMPLATE_ROOT).site.publicHost, "ganryu.vercel.app");
+    delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
+    assert.equal(snapshotOgIdentity(TEMPLATE_ROOT).site.publicHost, undefined);
+  } finally {
+    if (prevProd === undefined) delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
+    else process.env.VERCEL_PROJECT_PRODUCTION_URL = prevProd;
+  }
+});
+
 test("vercel Host without a public hostname emits no og:image", () => {
   const prev = process.env.VITE_PUBLIC_HOSTNAME;
   const prevProd = process.env.VERCEL_PROJECT_PRODUCTION_URL;
@@ -506,6 +540,9 @@ test("renders the manifest with the per-app name", () => {
   assert.equal(manifest.name, "Wild Race");
   assert.equal(manifest.short_name, "Wild Race");
   assert.equal(manifest.icons[0].src, "/__grok/icon-180.png");
+  // the game's own icon at the sizes Android and desktop installs ask for
+  assert.ok(manifest.icons.some((i) => i.sizes === "512x512" && i.purpose === "maskable"));
+  for (const i of manifest.icons) assert.ok(existsSync(join(TEMPLATE_ROOT, "public", i.src)), i.src);
 });
 
 // Tripwires: the deployed-app path only works if Nitro scans server/ — an

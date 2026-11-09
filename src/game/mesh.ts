@@ -4,6 +4,7 @@ import { withBlend } from "./rig-kit";
 import { buildMonster } from "./rig-monsters";
 import { buildSamurai } from "./rig-samurai";
 import { buildWanderer } from "./rig-wanderers";
+import type { Direction } from "./rig-humanoid";
 import type { AnimName, CharacterDef } from "./types";
 
 /**
@@ -28,6 +29,8 @@ export type Rig = {
   setAnim: (name: AnimName, t: number, speed: number, facing: 1 | -1) => void;
   /** Per-frame motion input: velocity (world), facing yaw, and height above the floor. */
   drive?: (dt: number, vx: number, vz: number, yaw: number, y: number, x?: number, z?: number) => void;
+  /** Film acting on top of the procedural motion (src/film3d only; the game never calls it). */
+  direct?: (d: Direction | null) => void;
   setFolding: (on: boolean) => void;
   flash: (c: number) => void;
   dispose: () => void;

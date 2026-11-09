@@ -4,5 +4,6 @@
   "type": "x:game",
   "card": "custom",
   "banner": "/x-banner.jpg",
-  "color": "0b0b0c"
+  "color": "0b0b0c",
+  "imageAlt": "GANRYŪ: Kairo in black armor and Nethrak in a white robe with a red blade, either side of the title and \"Nine stand between you and revenge.\""
 }

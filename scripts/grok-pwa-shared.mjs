@@ -23,6 +23,8 @@ const SHARE_META_KEYS = new Set([
   "twitter:title",
   "twitter:image",
   "twitter:description",
+  "og:image:alt",
+  "og:image:type",
   "x:game:image",
   "x:game:image:width",
   "x:game:image:height",
@@ -186,14 +188,18 @@ export function renderWebManifest(hostHeader) {
       start_url: "/",
       scope: "/",
       display: "standalone",
-      background_color: "#000000",
-      theme_color: "#000000",
+      background_color: "#060507",
+      theme_color: "#0a090c",
+      // The game's icon (scripts/brand/icon.svg, rendered by scripts/brand/render-icons.mjs).
       icons: [
         {
           src: "/__grok/icon-180.png",
           sizes: "180x180",
           type: "image/png",
         },
+        { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+        { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+        { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
       ],
     },
     null,
@@ -282,6 +288,10 @@ export function snapshotOgIdentity(cwd = process.cwd()) {
   if (existsSync(join(cwd, "public/x-banner.jpg"))) {
     site.banner = site.banner || "/x-banner.jpg";
   }
+  // Vercel sets the production domain during the build too. Baking it means a
+  // shared link still carries og:image if the function does not see it at runtime.
+  const prod = vercelProductionHost(process.env?.VERCEL_PROJECT_PRODUCTION_URL);
+  if (prod) site.publicHost = prod;
   return { site };
 }
 
@@ -343,7 +353,7 @@ export function grokOgHeadTags({
   cwd = process.cwd(),
 } = {}) {
   const title = resolveOgTitle(site, appName, host, documentTitle);
-  const publicHost = resolvePublicHost(host);
+  const publicHost = resolvePublicHost(host) || vercelProductionHost(site.publicHost);
   const tags = [
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta property="og:title" content="${escapeHtml(title)}">`,
@@ -366,6 +376,12 @@ export function grokOgHeadTags({
     tags.push(`<meta property="og:image" content="${escapeHtml(image)}">`);
     tags.push(`<meta property="og:image:width" content="1200">`);
     tags.push(`<meta property="og:image:height" content="630">`);
+    if (custom && /\.jpe?g$/i.test(asset)) tags.push(`<meta property="og:image:type" content="image/jpeg">`);
+    const alt = String(site.imageAlt ?? "").trim();
+    if (alt) tags.push(`<meta property="og:image:alt" content="${escapeHtml(alt)}">`);
+    tags.push(`<meta name="twitter:image" content="${escapeHtml(image)}">`);
+    tags.push(`<meta property="og:url" content="https://${escapeHtml(publicHost)}/">`);
+    tags.push(`<meta property="og:site_name" content="${escapeHtml(title)}">`);
     const banner = String(site.banner ?? "").trim();
     if (banner) {
       const bannerUrl = `https://${publicHost}${banner.startsWith("/") ? banner : `/${banner}`}`;
