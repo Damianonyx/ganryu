@@ -1,6 +1,6 @@
 # Opening cinematic and preloader
 
-The opening film plays while the game loads. It is a painted 2D film, about 76 seconds long, chosen by the owner as the loading screen. It has voices, sound effects, music, and subtitles. It follows the screenplay in `src/cinematic/script.ts` and the events in [STORYLINE.md](STORYLINE.md).
+The opening film plays while the game loads. It is about 76 seconds long. The owner chose the 3D film ([FILM3D.md](FILM3D.md)) as the loading screen; the painted 2D film described below is the fallback (reduced motion, a video that cannot load, or `?film=painted`), and both share one screenplay. It has voices, sound effects, music, and subtitles. It follows the screenplay in `src/cinematic/script.ts` and the events in [STORYLINE.md](STORYLINE.md).
 
 The village survivor is **Kairo** (shown as the child, then the adult). The killer is **Nethrak**: a skull face with red eyes beneath a wide conical steel hat, a white robe with crimson brushstroke flames, and an oversized red blade.
 
@@ -12,7 +12,7 @@ Five of his followers took part in the attack, as the owner approved:
 
 There is no armor emblem, by the owner's decision. The other three protagonists do not appear; the film is Kairo's childhood only.
 
-The wooden charm, cellar, dialogue, and exact staging are screenplay details, not fixed canon. An optional Blender 3D version of the same film exists (`?film=3d`, see [blender/README.md](../blender/README.md)). It is not the default.
+The wooden charm, cellar, dialogue, and exact staging are screenplay details, not fixed canon. The default 3D film is staged in `src/film3d` ([FILM3D.md](FILM3D.md)). An earlier Blender version ([blender/README.md](../blender/README.md)) is no longer shipped.
 
 ## Viewing the preview
 
@@ -30,7 +30,7 @@ npm run dev
 | `/?intro=1&paused=1` | Start paused (Space to play) |
 | `/?intro=1&motion=reduced` | Force the reduced-motion version |
 | `/?intro=1&clean=1` | Hide controls (stills for review) |
-| `/?intro=1&film=3d` | Play the optional Blender 3D film instead (picture and sound from `public/cinematic/opening.mp4`) |
+| `/?intro=1&film=painted` | Play the painted canvas film instead of the default 3D film (`public/cinematic/opening.mp4`) |
 
 From the title menu, **Replay intro** plays it again.
 

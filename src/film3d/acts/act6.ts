@@ -57,7 +57,12 @@ export const ACT6: Shot[] = [
     title: "Gray dawn; the boy crawls up out of the cellar through the cooled wreckage",
     dur: 3.0,
     build: (s) => {
-      lightVillage(s, "dawn", { shadowCenter: V(0, 0, 0.5), shadowSize: 16, exposure: 1.35 });
+      lightVillage(s, "dawn", { shadowCenter: V(0, 0, 0.5), shadowSize: 16, exposure: 1.75 });
+      // a soft key on the hatch, so he reads as he climbs out
+      const key = new THREE.SpotLight(0xffe8d0, 14, 9, 0.5, 0.7, 1.4);
+      key.position.set(HATCH.x + 2.2, 2.6, HATCH.z + 3.2);
+      key.target.position.set(HATCH.x, 0.1, HATCH.z + 0.4);
+      s.add(key, key.target);
       ground(s, "#3a3634", 80, 6, { grass: "#3a3e2e", roadColor: "#3e3a38", res: 80 });
       // the ruin of the house, its floor open over the cellar
       ruinedHouse(s, 0, 0.6, 0, { w: 7.2, d: 6.8, seed: 99, hole: { x: HATCH.x, z: HATCH.z - 0.6, size: HATCH.size }, embers: 0.4 });
@@ -104,8 +109,8 @@ export const ACT6: Shot[] = [
           cel.lid.rotation.x = keys(t, [[0.2, 0], [0.9, -1.35], [1.3, -Math.PI + 0.25]]);
           boy.rig.face.mood("flat", -0.6);
           camera(stage, t, [
-            [0, { pos: [HATCH.x + 0.7, 0.45, HATCH.z + 2.2], look: [HATCH.x, 0.15, HATCH.z], fov: 40 }],
-            [3.0, { pos: [HATCH.x + 0.6, 0.5, HATCH.z + 2.5], look: [HATCH.x, 0.3, HATCH.z + 0.6], fov: 40 }],
+            [0, { pos: [HATCH.x + 0.55, 0.4, HATCH.z + 1.75], look: [HATCH.x, 0.12, HATCH.z + 0.1], fov: 38 }],
+            [3.0, { pos: [HATCH.x + 0.5, 0.45, HATCH.z + 2.1], look: [HATCH.x, 0.28, HATCH.z + 0.7], fov: 38 }],
           ], { hand: 0.008 });
         },
       };
@@ -116,10 +121,11 @@ export const ACT6: Shot[] = [
     title: "He searches the silent ruins, calling softly",
     dur: 3.0,
     build: (s) => {
-      lightVillage(s, "dawn", { shadowCenter: V(0, 0, -16), shadowSize: 50, exposure: 1.05 });
+      lightVillage(s, "dawn", { shadowCenter: V(0, 0, -16), shadowSize: 50, exposure: 1.45 });
       const tick = ruinedVillage(s);
       const boy = s.person(PEOPLE.boy(0.8), (t) => ({
         ...route([[0.6, -12.5], [0.2, -14.2], [-0.4, -15.4]], 0, 3.0)(t),
+        floor: height(0, route([[0.6, -12.5], [0.2, -14.2], [-0.4, -15.4]], 0, 3.0)(t).z),
         act: { relax: 1, headYaw: Math.sin(t * 1.6) * 0.7, headPitch: -0.05 },
       }));
       boy.rig.props.charm.visible = true;
@@ -129,8 +135,8 @@ export const ACT6: Shot[] = [
           // "Mother?" (0.6–2.2 s)
           boy.rig.face.mood(t > 0.6 && t < 2.2 && Math.sin(t * 12) > -0.3 ? "open" : "flat", -0.8);
           camera(stage, t, [
-            [0, { pos: [4.2, 2.6, -6.2], look: [-0.5, 1.0, -16], fov: 40 }],
-            [3.0, { pos: [3.6, 2.4, -7.0], look: [-0.8, 0.9, -17], fov: 38 }],
+            [0, { pos: [1.9, 1.45, -9.6], look: [0.3, 1.2, -13.5], fov: 38 }],
+            [3.0, { pos: [1.5, 1.5, -11.2], look: [-0.5, 1.3, -16], fov: 36 }],
           ], { hand: 0.01 });
         },
       };
@@ -141,7 +147,7 @@ export const ACT6: Shot[] = [
     title: "He kneels where his home once stood, the charm in his fist",
     dur: 3.0,
     build: (s) => {
-      lightVillage(s, "dawn", { shadowCenter: V(HOME.x, 0, HOME.z), shadowSize: 20, exposure: 1.0 });
+      lightVillage(s, "dawn", { shadowCenter: V(HOME.x, 0, HOME.z), shadowSize: 20, exposure: 1.4 });
       const tick = ruinedVillage(s);
       // the morning light breaks through the smoke behind him
       shafts(s, V(HOME.x + 18, 14, HOME.z - 8), [V(HOME.x + 1, 0, HOME.z + 2), V(HOME.x - 1.5, 0, HOME.z + 3), V(HOME.x + 2.5, 0, HOME.z + 4)], 0xe8d8c0, 0.018, 1.6);

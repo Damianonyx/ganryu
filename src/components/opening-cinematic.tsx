@@ -182,10 +182,11 @@ type FilmProps = {
 type AudioUi = "locked" | "running" | "suspended";
 
 /**
- * The loading-screen film is the painted canvas film (owner's choice), with
- * its synthesized score plus a recorded-voice track kept in sync with the
- * film clock. The rendered 3D film (blender/film) remains available with
- * `?film=3d`. Subtitles and controls are shared.
+ * The loading-screen film is the rendered 3D film (owner's choice; staged in
+ * src/film3d, see docs/FILM3D.md), a video with its own sound. The painted
+ * canvas film, with its synthesized score and voice track, plays instead for
+ * reduced motion, when the video cannot load, or with `?film=painted`.
+ * Subtitles and controls are shared.
  */
 export const FILM_VIDEO = "/cinematic/opening.mp4";
 export const FILM_VOICES = "/cinematic/voices.mp3";
@@ -220,7 +221,7 @@ function Film({ startAt, ready, progress, muted, replay, active, onToggleMute, o
   const [mode, setMode] = useState<FilmMode>(() => {
     if (typeof window === "undefined") return "video";
     const q = new URLSearchParams(window.location.search).get("film");
-    return q === "3d" ? "video" : "canvas";
+    return q === "painted" ? "canvas" : "video";
   });
   const modeRef = useRef(mode);
   modeRef.current = mode;

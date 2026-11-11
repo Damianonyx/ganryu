@@ -11,7 +11,7 @@ This is a **look-development test**, not final production. It shows lighting, at
 
 A full 3D version of the opening film, with rigged characters (`rig.py`, `cast.py`), sets (`sets.py`), 36 shot builders (`shots.py`), a runner and assembler (`film.py`), and a soundtrack builder (`audio.py`: Piper voices, synthesized effects, and score).
 
-The owner chose the painted film as the loading screen. The rendered 3D film is kept as an option (`?film=3d`, `public/cinematic/opening.mp4`). `audio.py` also produces the voice track the painted film uses, and `sfx_export.py` produces the in-game combat sounds in `public/sfx/`.
+The loading screen now plays the code-built 3D film from `src/film3d` (docs/FILM3D.md), which replaced this Blender render at `public/cinematic/opening.mp4`. The painted film is the fallback. `audio.py` also produces the voice track the painted film uses, and `sfx_export.py` produces the in-game combat sounds in `public/sfx/`.
 
 ```bash
 .venv-blender/bin/python blender/film/film.py stills --draft      # one still per shot → artifacts/film/stills-sheet.jpg

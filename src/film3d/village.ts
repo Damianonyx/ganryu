@@ -33,7 +33,7 @@ export function lightVillage(s: FilmStage, when: Light, o: { shadowCenter?: THRE
     dusk: { fog: 0x7a6670, dens: 0.0085, top: "#1a2248", hor: "#d88a5c", glow: "#ffb070", cloud: "#8a5a6a", sun: 0xffa060, sunI: 1.7, hemi: [0x7a7aa8, 0x2a1e14, 0.75], exp: 1.05, ridge: ["#4a3e56", "#6a5468", "#8a6a74"], haze: "#b07a6a" },
     night: { fog: 0x141c30, dens: 0.02, top: "#05070f", hor: "#1a2236", glow: "#3a2a3a", cloud: "#1a1e2e", sun: 0xb8c4ff, sunI: 0.95, hemi: [0x4a5a8a, 0x0a0806, 0.5], exp: 1.25, ridge: ["#0e121e", "#141a2a", "#1a2236"], haze: "#1e2638" },
     fire: { fog: 0x2a1418, dens: 0.022, top: "#07060c", hor: "#3a1a18", glow: "#8a3418", cloud: "#2a1414", sun: 0x9aa8ff, sunI: 0.7, hemi: [0x4a3a5a, 0x0a0806, 0.45], exp: 1.15, ridge: ["#120a0e", "#1a0e12", "#2a1416"], haze: "#3a1a18" },
-    dawn: { fog: 0x8a9098, dens: 0.018, top: "#5a6a80", hor: "#c8bcb0", glow: "#e8d0b0", cloud: "#9aa0a8", sun: 0xd8d4d0, sunI: 1.1, hemi: [0xa0a8b8, 0x3a3634, 0.9], exp: 1.0, ridge: ["#6a707c", "#80868e", "#9aa0a6"], haze: "#b0b0b0" },
+    dawn: { fog: 0x8a9098, dens: 0.018, top: "#5a6a80", hor: "#c8bcb0", glow: "#e8d0b0", cloud: "#9aa0a8", sun: 0xffe2c0, sunI: 2.2, hemi: [0xb8c0d0, 0x5a5450, 1.25], exp: 1.0, ridge: ["#6a707c", "#80868e", "#9aa0a6"], haze: "#b0b0b0" },
   }[when];
   s.scene.fog = new THREE.FogExp2(P.fog, P.dens);
   s.scene.background = new THREE.Color(P.fog);
