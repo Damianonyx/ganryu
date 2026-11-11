@@ -52,7 +52,7 @@ async function contact(browser) {
   const dir = path.join(OUT, "frames");
   await mkdir(dir, { recursive: true });
   const { ctx, page } = await newPage(browser, { deviceScaleFactor: 1 });
-  await page.goto(`${BASE}/?intro=1&paused=1&clean=1`);
+  await page.goto(`${BASE}/?intro=1&film=painted&paused=1&clean=1`);
   await waitFilm(page);
   const shots = await shotList(page);
   const rows = [];
@@ -80,7 +80,7 @@ async function video(browser) {
   await mkdir(OUT, { recursive: true });
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, recordVideo: { dir: OUT, size: { width: 1280, height: 720 } } });
   const page = await ctx.newPage();
-  await page.goto(`${BASE}/?intro=1`);
+  await page.goto(`${BASE}/?intro=1&film=painted`);
   await waitFilm(page);
   await page.waitForFunction(() => window.__cinematic && window.__cinematic.time() >= window.__cinematic.duration - 0.05, null, { timeout: 120000, polling: 500 });
   await page.waitForTimeout(1500);
@@ -175,7 +175,7 @@ async function verify(browser) {
       await gate;
       await route.continue();
     });
-    await page.goto(`${BASE}/?intro=1`);
+    await page.goto(`${BASE}/?intro=1&film=painted`);
     await waitFilm(page);
     const label = await page.getByTestId("intro-skip").innerText();
     check("Skip label while loading", /skip/i.test(label), label);
@@ -202,7 +202,7 @@ async function verify(browser) {
       await gate;
       await route.continue();
     });
-    await page.goto(`${BASE}/?intro=1`);
+    await page.goto(`${BASE}/?intro=1&film=painted`);
     await waitFilm(page);
     await page.evaluate(() => window.__cinematic.seek(window.__cinematic.duration - 0.3));
     await page.waitForSelector("[data-testid=intro-loading]", { timeout: 5000 }).catch(() => undefined);
@@ -219,7 +219,7 @@ async function verify(browser) {
     ["reduced-motion", { viewport: { width: 1280, height: 720 }, reducedMotion: "reduce" }],
   ]) {
     const { ctx, page } = await newPage(browser, opts);
-    await page.goto(`${BASE}/?intro=1&paused=1`);
+    await page.goto(`${BASE}/?intro=1&film=painted&paused=1`);
     await waitFilm(page);
     await page.evaluate(() => window.__cinematic.seek(24.6));
     await page.waitForTimeout(400);

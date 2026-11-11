@@ -2,7 +2,7 @@
 
 A 3D version of the opening film, staged in code with the game's own fighters and rendered offline. It follows the screenplay in [`src/cinematic/script.ts`](../src/cinematic/script.ts) shot for shot: each shot's length and fades come from there. The film's sound mix, voices, and subtitles therefore line up with it unchanged.
 
-It is not shown to players yet. The intro plays the painted film by default. `?film=3d` plays `public/cinematic/opening.mp4`, an earlier Blender render, which this film could replace once it is approved.
+It is the default intro: `public/cinematic/opening.mp4` is this film, rendered at 1280×720 with its sound mix. The painted film plays instead for reduced motion, if the video cannot load, or with `?film=painted`.
 
 ## Where things are
 

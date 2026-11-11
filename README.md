@@ -60,7 +60,7 @@ Open `http://127.0.0.1:8080`.
 | `/?intro=1` | Always play the film (`&t=28` starts at 28 s, `&paused=1` starts paused) |
 | `/?intro=0` | Skip straight to the menu |
 | `/?intro=1&motion=reduced` | The reduced-motion version of the film |
-| `/?intro=1&film=3d` | The optional Blender 3D version of the film |
+| `/?intro=1&film=painted` | The painted version of the film (the default is the 3D film) |
 | `/?tune=1` | Shows a motion tuning panel during battles (input buffer, hit-stop, shake, camera) |
 
 Keyboard: `WASD` move · `J` slash · `L` parry · `K` leap · `Q` Art · `F` Fold. In the film: `Esc` skip, `Space` pause, `M` sound, `C` subtitles.
