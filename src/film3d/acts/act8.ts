@@ -176,9 +176,9 @@ function cliff(s: FilmStage) {
   cloudSea(s, -12, "#3a2a3e", "#e88a5a", dir);
   // his outcrop, and the far crag the fortress stands on
   crag(s, V(0, -40, 0.5), 5, 40.2, 3, "#2a2224");
-  crag(s, V(-14, -40, -128), 16, 52, 7, "#1a1418");
+  crag(s, V(-9, -40, -72), 45, 62, 7, "#1a1418");
   crag(s, V(18, -40, -150), 12, 38, 11, "#1a1418");
-  fortress(s, V(-14, 12.2, -128), 1.15);
+  fortress(s, V(-9, 10.2, -72), 1.15);
   s.add(new THREE.HemisphereLight(0x6a5a8a, 0x1a1012, 0.55));
   const sun = new THREE.DirectionalLight(0xff8a50, 2.4);
   sun.position.set(-6, 8, -30);
@@ -225,27 +225,30 @@ export const ACT8: Shot[] = [
       let man: Actor | null = null;
       man = kairo(s, (t): Pose => {
         if (man) man.rig.torso.getWorldPosition(chest);
-        const tuck = span(t, 0.25, 1.0);
-        const at: [number, number, number] = [chest.x - 0.04, chest.y + lerp(-0.02, 0.06, tuck), chest.z + lerp(0.32, 0.17, tuck)];
+        const tuck = span(t, 0.6, 1.15);
+        const at: [number, number, number] = [chest.x - 0.04, chest.y + lerp(-0.02, 0.06, tuck), chest.z + lerp(0.36, 0.17, tuck)];
         return { x: 0, z: 0, yaw: face(0.25, 1), act: { relax: 1, headPitch: 0.45, reach: man ? { l: at, r: [at[0] - 0.08, at[1] - 0.06, at[2] + 0.02], w: 1 } : undefined } };
       });
       const m = man;
       m.rig.weapon.visible = false;
-      const c = charm(1.1);
+      const c = charm(2.0);
+      const glow = new THREE.PointLight(0xffd0a0, 0.12, 1.0, 1.5);
+      s.add(glow);
       s.add(c);
       const hand = handOf(m.rig.lArm);
       return {
-        dof: { focus: 1.45, aperture: 0.015, maxblur: 0.01 },
+        dof: { focus: 0.8, aperture: 0.012, maxblur: 0.008 },
         update: ({ stage, t }) => {
           hand.getWorldPosition(c.position);
           c.position.y += 0.01;
           c.rotation.set(0.2, 0.6 + Math.sin(t * 2) * 0.1, 0.1);
           // slipped under the plate
-          c.visible = t < 1.0;
+          c.visible = t < 1.12;
+          glow.position.copy(c.position).add(V(-0.1, 0.08, 0.2));
           m.rig.torso.getWorldPosition(chest);
           camera(stage, t, [
-            [0, { pos: [chest.x - 0.55, chest.y + 0.15, chest.z + 1.35], look: [chest.x, chest.y + 0.05, chest.z], fov: 34 }],
-            [1.3, { pos: [chest.x - 0.5, chest.y + 0.15, chest.z + 1.25], look: [chest.x, chest.y + 0.06, chest.z], fov: 33 }],
+            [0, { pos: [chest.x - 0.3, chest.y + 0.1, chest.z + 0.95], look: [chest.x - 0.03, chest.y + 0.02, chest.z + 0.2], fov: 32 }],
+            [1.3, { pos: [chest.x - 0.28, chest.y + 0.1, chest.z + 0.88], look: [chest.x - 0.03, chest.y + 0.04, chest.z + 0.15], fov: 31 }],
           ], { hand: 0.003 });
         },
       };
@@ -289,8 +292,8 @@ export const ACT8: Shot[] = [
           glint.scale.setScalar(0.05 + g * 0.6);
           glint.material.opacity = g;
           camera(stage, t, [
-            [0, { pos: [1.3, 1.2, 2.8], look: [-4, 2.8, -40], fov: 42 }],
-            [1.7, { pos: [1.15, 1.25, 2.4], look: [-4.5, 3.0, -40], fov: 40 }],
+            [0, { pos: [1.5, 1.15, 3.0], look: [-3.2, 5.5, -40], fov: 42 }],
+            [1.7, { pos: [1.3, 1.2, 2.6], look: [-3.6, 6.0, -40], fov: 40 }],
           ], { hand: 0.008, ease: (u) => u });
         },
       };

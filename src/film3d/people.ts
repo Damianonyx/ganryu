@@ -184,12 +184,21 @@ function dress(b: Body, o: Look, props: Record<string, THREE.Object3D>, face: Fa
   part(H, G.sphere(1, 18, 14), skin, [0, 0.11, 0.005], [0, 0, 0], child ? [0.11, 0.118, 0.112] : [0.106, 0.122, 0.114]);
   part(H, G.sphere(1, 12, 10), skin, [0, 0.05, 0.05], [0, 0, 0], child ? [0.07, 0.045, 0.06] : [0.07, 0.055, 0.065]); // jaw and chin
   for (const s of [-1, 1]) part(H, G.sphere(1, 8, 6), skin, [0.105 * s, 0.105, 0.0], [0, 0, 0], [0.018, 0.032, 0.024]); // ears
-  part(H, G.rbox(0.022, 0.04, 0.026, 0.5), skin, [0, 0.1, 0.118], [-0.25, 0, 0]); // nose
+  // nose: a soft bridge, a rounded tip, and nostril wings
+  part(H, G.sphere(1, 10, 8), skin, [0, 0.112, 0.112], [-0.3, 0, 0], [0.0095, 0.026, 0.012]);
+  part(H, G.sphere(1, 10, 8), skin, [0, 0.093, 0.124], [0, 0, 0], [0.0125, 0.011, 0.012]);
+  for (const s of [-1, 1]) part(H, G.sphere(1, 8, 6), skin, [0.0105 * s, 0.09, 0.117], [0, 0, 0], [0.007, 0.0065, 0.008]);
+  // cheeks, a little flushed
+  const blush = M.skin(new THREE.Color(o.skin).lerp(new THREE.Color("#c86a5a"), 0.07).getStyle());
+  for (const s of [-1, 1]) part(H, G.sphere(1, 10, 8), blush, [0.05 * s, 0.092, 0.08], [0, 0, 0], [0.032, 0.026, 0.024]);
   const eye = M.lacquer("#0a0808");
   const white = M.cloth("#e8e2d6");
   for (const s of [-1, 1]) {
-    part(H, G.sphere(1, 10, 8), white, [0.038 * s, 0.128, 0.103], [0, 0, 0], [0.017, 0.01, 0.008]);
-    part(H, G.sphere(1, 10, 8), eye, [0.037 * s, 0.128, 0.108], [0, 0, 0], [0.009, 0.009, 0.005]);
+    part(H, G.sphere(1, 12, 10), white, [0.039 * s, 0.128, 0.102], [0, 0, 0], [0.019, 0.0115, 0.009]);
+    part(H, G.sphere(1, 12, 10), M.lacquer("#3a2416"), [0.038 * s, 0.1275, 0.1075], [0, 0, 0], [0.0098, 0.0098, 0.0052]); // iris
+    part(H, G.sphere(1, 10, 8), eye, [0.038 * s, 0.1275, 0.1105], [0, 0, 0], [0.0052, 0.0052, 0.003]); // pupil
+    part(H, G.sphere(0.0018, 6, 4), white, [0.038 * s + 0.0035, 0.131, 0.1128]); // the light in the eye
+    part(H, G.rbox(0.04, 0.006, 0.01, 0.5), M.flesh("#1a1210", 0.6), [0.039 * s, 0.1385, 0.1065], [0.25, 0, -0.06 * s]); // upper lid and lashes
   }
   // brows and mouth stay separate meshes so a close-up can change the expression
   face.brows = [-1, 1].map((s) => {

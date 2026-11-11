@@ -106,13 +106,13 @@ export const ACT5: Shot[] = [
       const pivot = new THREE.Group();
       pivot.position.set(HATCH.x - 2.2, ROOM.h - 0.1, HATCH.z + 0.1);
       s.add(pivot);
-      const beam = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.24, 0.24), std("#1a120c", 0.95, 0, { emissive: "#ff3a0a", emissiveIntensity: 0.35 }));
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.32, 0.32), std("#2a1a10", 0.9, 0, { emissive: "#ff4a10", emissiveIntensity: 0.9 }));
       beam.position.x = 1.5;
       beam.castShadow = true;
       pivot.add(beam);
-      const flames = [0.6, 1.4, 2.2, 2.8].map((x, i) => s.fire(V(0, 0, 0), { size: 0.45, rate: 0.9, light: 2.5, smoke: 5, embers: 12, spread: 0.6, seed: 80 + i }));
-      const HIT = 0.25;
-      const burst = s.fire(V(HATCH.x, 0.05, HATCH.z), { size: 0.9, rate: 2, light: 9, smoke: 16, embers: 60, spread: 1.6, seed: 91 });
+      const flames = [0.6, 1.4, 2.2, 2.8].map((x, i) => s.fire(V(0, 0, 0), { size: 0.3, rate: 0.5, light: 2.5, smoke: 3, embers: 16, spread: 0.4, seed: 80 + i }));
+      const HIT = 0.55;
+      const burst = s.fire(V(HATCH.x, 0.05, HATCH.z), { size: 0.6, rate: 0.8, light: 9, smoke: 12, embers: 80, spread: 2.2, seed: 91 });
       burst.power = 0;
       return {
         ao: true,
@@ -124,12 +124,13 @@ export const ACT5: Shot[] = [
           pivot.rotation.z = t < HIT ? -lerp(0.5, land, (t / HIT) ** 2) : -land + Math.exp(-(t - HIT) * 18) * Math.sin((t - HIT) * 40) * 0.03;
           pivot.updateMatrixWorld(true);
           flames.forEach((f, i) => f.move(V([0.6, 1.4, 2.2, 2.8][i], 0.12, 0).applyMatrix4(pivot.matrixWorld)));
-          burst.power = t > HIT ? Math.max(0, 2.2 - (t - HIT) * 4) : 0;
+          burst.power = t > HIT ? Math.max(0, 1.4 - (t - HIT) * 5) : 0;
           // the light goes: darkness
-          stage.renderer.toneMappingExposure = 1.25 * keys(t, [[0.4, 1], [1.4, 0.04]]);
+          stage.renderer.toneMappingExposure = 1.25 * keys(t, [[0.85, 1], [1.4, 0.04]]);
           camera(stage, t, [
-            [0, { pos: [HATCH.x + 1.7, 0.42, HATCH.z + 1.9], look: [HATCH.x - 0.2, 0.35, HATCH.z], fov: 46 }],
-            [1.4, { pos: [HATCH.x + 1.6, 0.4, HATCH.z + 1.8], look: [HATCH.x - 0.2, 0.25, HATCH.z], fov: 44 }],
+            [0, { pos: [HATCH.x + 2.0, 0.5, HATCH.z + 2.5], look: [HATCH.x - 0.6, 1.2, HATCH.z], fov: 50 }],
+            [0.6, { pos: [HATCH.x + 1.9, 0.45, HATCH.z + 2.4], look: [HATCH.x - 0.4, 0.45, HATCH.z], fov: 48 }],
+            [1.4, { pos: [HATCH.x + 1.8, 0.42, HATCH.z + 2.3], look: [HATCH.x - 0.3, 0.3, HATCH.z], fov: 46 }],
           ], { hand: 0.004, shake: jolt(t, HIT, 0.05, 6) });
         },
       };
